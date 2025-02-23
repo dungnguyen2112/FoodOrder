@@ -1,0 +1,81 @@
+.popover-carts {
+    .pop-cart-body {
+        .pop-cart-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+
+            .book {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+
+                img {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 5px;
+                    object-fit: cover;
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                }
+
+                .price {
+                    color: #ee4d2d;
+                    font-weight: bold;
+                }
+            }
+        }
+
+        .pop-cart-footer {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+
+            button {
+                background-color: #ee4d2d;
+                color: #fff;
+                border: 1px solid #ee4d2d;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                cursor: pointer;
+                border-radius: 5px;
+                font-size: 16px;
+                font-weight: 500;
+                height: 40px;
+                padding: 0 20px;
+                transition: all 0.3s ease-in-out;
+
+                &:hover {
+                    background-color: darken(#ee4d2d, 10%);
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 767px) {
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-button {
+        width: 8px;
+        height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #fff;
+        border: thin solid #eee;
+        box-shadow: inset 0px 0px 3px #dfdfdf;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border: thin solid #ccc;
+        border-radius: 10px;
+        transition: background 0.3s;
+
+        &:hover {
+            background: #7d7d7d;
+        }
+    }
+}
