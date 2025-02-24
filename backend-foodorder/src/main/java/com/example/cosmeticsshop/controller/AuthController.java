@@ -270,8 +270,8 @@ public class AuthController {
         user.setAvatarUrl(userCreateRequestDTO.getAvatar());
         user.setBio(userCreateRequestDTO.getBio());
         user.setAge(userCreateRequestDTO.getAge());
-
-        User ericUser = this.userService.handleCreateUser(user);
+        UserCreateRequestDTO userCreateRequest = this.userService.convertToUserCreateRequestDTO(user);
+        User ericUser = this.userService.handleCreateUser(userCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(ericUser));
     }
 

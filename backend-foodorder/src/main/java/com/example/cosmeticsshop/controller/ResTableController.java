@@ -23,6 +23,7 @@ import com.example.cosmeticsshop.util.constant.TableEnum;
 import com.turkraft.springfilter.boot.Filter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -48,6 +49,18 @@ public class ResTableController {
         return ResponseEntity.ok(result);
 
     }
+
+    // @GetMapping("/tables")
+    // @ApiMessage("Get all available tables")
+    // public ResponseEntity<ResultPaginationDTO> getAllAvailableTables(@Filter
+    // Specification<ResTable> spec,
+    // @ParameterObject Pageable pageable) {
+
+    // ResultPaginationDTO result = this.tableService.fetchAllAvailableTable(spec,
+    // pageable);
+    // return ResponseEntity.ok(result);
+
+    // }
 
     // ✅ Lấy thông tin bàn theo ID
     @GetMapping("/tables/{id}")

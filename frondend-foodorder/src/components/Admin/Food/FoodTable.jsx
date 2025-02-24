@@ -3,15 +3,16 @@ import { Table, Row, Col, Popconfirm, Button, message, notification } from 'antd
 import InputSearch from './InputSearch';
 import { callDeleteFood, callFetchListFood } from '../../../services/api';
 import { DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
-import BookModalCreate from './BookModalCreate';
-import BookViewDetail from './BookViewDetail';
 import moment from 'moment/moment';
 import { FORMAT_DATE_DISPLAY } from '../../../utils/constant';
-import BookModalUpdate from './BookModalUpdate';
 import * as XLSX from 'xlsx';
 import queryString from 'query-string';
+import FoodViewDetail from './FoodViewDetail';
+import FoodModalCreate from './FoodModalCreate';
+import FoodModalUpdate from './FoodModalUpdate';
 
-const BookTable = () => {
+
+const FoodTable = () => {
     const [listBook, setListBook] = useState([]);
     const [current, setCurrent] = useState(1);
     const [pageSize, setPageSize] = useState(5);
@@ -259,20 +260,20 @@ const BookTable = () => {
                     />
                 </Col>
             </Row>
-            <BookModalCreate
+            <FoodModalCreate
                 openModalCreate={openModalCreate}
                 setOpenModalCreate={setOpenModalCreate}
                 fetchBook={fetchFood}
             />
 
-            <BookViewDetail
+            <FoodViewDetail
                 openViewDetail={openViewDetail}
                 setOpenViewDetail={setOpenViewDetail}
                 dataViewDetail={dataViewDetail}
                 setDataViewDetail={setDataViewDetail}
             />
 
-            <BookModalUpdate
+            <FoodModalUpdate
                 openModalUpdate={openModalUpdate}
                 setOpenModalUpdate={setOpenModalUpdate}
                 dataUpdate={dataUpdate}
@@ -285,4 +286,4 @@ const BookTable = () => {
 }
 
 
-export default BookTable;
+export default FoodTable;

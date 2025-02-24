@@ -10,7 +10,6 @@ import com.example.cosmeticsshop.util.annotation.ApiMessage;
 
 import jakarta.transaction.Transactional;
 
-
 @RestController
 @RequestMapping("/api/v1")
 public class EmailController {

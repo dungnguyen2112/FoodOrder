@@ -70,7 +70,7 @@ const MangeOrder = () => {
 
     const handleDeleteOrder = async (id) => {
         const res = await callDeleteOrder(id);
-        if (res.statusCode === 204) {
+        if (res.statusCode === 200) {
             message.success('Xóa book thành công');
             fetchOrder();
         } else {

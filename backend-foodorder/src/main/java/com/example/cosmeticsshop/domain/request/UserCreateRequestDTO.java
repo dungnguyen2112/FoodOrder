@@ -2,6 +2,7 @@ package com.example.cosmeticsshop.domain.request;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.cosmeticsshop.domain.Role;
 import com.example.cosmeticsshop.util.validator.StrongPassword;
 
 import jakarta.validation.constraints.Email;
@@ -36,5 +37,7 @@ public class UserCreateRequestDTO {
     private int age;
 
     private String bio;
+
+    private Role role;
 
 }

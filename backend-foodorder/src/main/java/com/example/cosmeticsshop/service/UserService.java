@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.cosmeticsshop.domain.Role;
 import com.example.cosmeticsshop.domain.User;
 import com.example.cosmeticsshop.domain.request.ReqUpdateUser;
+import com.example.cosmeticsshop.domain.request.UserCreateRequestDTO;
 import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUpdateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
@@ -35,13 +36,39 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-    public User handleCreateUser(User user) {
+    public User handleCreateUser(UserCreateRequestDTO user) {
         // check role
         Role userRole = this.roleRepository.findByName("USER");
         if (userRole != null && user.getRole() == null) {
             user.setRole(userRole); // Gán Role mặc định cho User nếu chưa có role
         }
-        return this.userRepository.save(user);
+        User newUser = new User();
+        newUser.setEmail(user.getEmail());
+        newUser.setName(user.getName());
+        newUser.setPasswordHash(user.getPassword());
+        newUser.setAddress(user.getAddress());
+        newUser.setPhone(user.getPhone());
+        newUser.setRole(user.getRole());
+        newUser.setAge(user.getAge());
+        newUser.setAvatarUrl(user.getAvatar());
+        newUser.setBio(user.getBio());
+        newUser.setUsername(user.getUsername());
+        return this.userRepository.save(newUser);
+    }
+
+    public UserCreateRequestDTO convertToUserCreateRequestDTO(User user) {
+        UserCreateRequestDTO res = new UserCreateRequestDTO();
+        res.setEmail(user.getEmail());
+        res.setName(user.getName());
+        res.setPassword(user.getPasswordHash());
+        res.setAddress(user.getAddress());
+        res.setPhone(user.getPhone());
+        res.setRole(user.getRole());
+        res.setAge(user.getAge());
+        res.setAvatar(user.getAvatarUrl());
+        res.setBio(user.getBio());
+        res.setUsername(user.getUsername());
+        return res;
     }
 
     public void handleDeleteUser(long id) {

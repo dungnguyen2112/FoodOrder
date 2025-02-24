@@ -25,8 +25,6 @@ import com.example.cosmeticsshop.service.FileService;
 import com.example.cosmeticsshop.util.annotation.ApiMessage;
 import com.example.cosmeticsshop.util.error.StorageException;
 
-
-
 @RestController
 @RequestMapping("/api/v1")
 public class FileController {

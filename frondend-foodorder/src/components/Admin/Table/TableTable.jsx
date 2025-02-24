@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Row, Col, Popconfirm, Button, message, notification, Select } from 'antd';
-import InputSearch from './InputSearch';
 import { callDeleteCategory, callDeleteFood, callDeleteTable, callFetchCategoryPage, callFetchListFood, callFetchTable, callUpdateStatusTable } from '../../../services/api';
 import { DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import moment from 'moment/moment';
@@ -8,6 +7,7 @@ import { FORMAT_DATE_DISPLAY } from '../../../utils/constant';
 import * as XLSX from 'xlsx';
 import TableModalCreate from './TableModalCreate';
 import queryString from 'query-string';
+import InputSearchTable from './InputSearchTable';
 
 const STATUS_ENUM = {
     AVAILABLE: "AVAILABLE",
@@ -181,7 +181,7 @@ const TableTable = () => {
 
     const handleDeleteTable = async (id) => {
         const res = await callDeleteTable(id);
-        if (res.statusCode === 204) {
+        if (res.statusCode === 200) {
             message.success('Xóa book thành công');
             fetchBook();
         } else {
@@ -223,7 +223,7 @@ const TableTable = () => {
         )
     }
 
-    const handleSearch = (query) => {
+    const handleSearchTable = (query) => {
         setFilter(query);
     }
 
@@ -240,8 +240,8 @@ const TableTable = () => {
         <>
             <Row gutter={[20, 20]}>
                 <Col span={24}>
-                    <InputSearch
-                        handleSearch={handleSearch}
+                    <InputSearchTable
+                        handleSearchTable={handleSearchTable}
                         setFilter={setFilter}
                     />
                 </Col>

@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Col, Divider, Form, Input, InputNumber, message, Modal, notification, Row, Select, Upload } from 'antd';
-import { callCreateAUser, callCreateFood, callFetchCategory, callUploadFoodImg } from '../../../services/api';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
+import { callFetchCategory, callUpdateFood, callUploadFoodImg } from '../../../services/api';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import { v4 as uuidv4 } from 'uuid';
-const BookModalCreate = (props) => {
-    const { openModalCreate, setOpenModalCreate } = props;
+
+const FoodModalUpdate = (props) => {
+    const { openModalUpdate, setOpenModalUpdate, dataUpdate, setDataUpdate } = props;
     const [isSubmit, setIsSubmit] = useState(false);
 
-    const [listCategory, setListCategory] = useState([]);
+    const [listCategory, setListCategory] = useState([])
     const [form] = Form.useForm();
 
-    // const [dataThumbnail, setdataThumbnail] = useState([]);
     const [loadingUpload, setLoadingUpload] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [loadingSlider, setLoadingSlider] = useState(false);
 
     const [imageUrl, setImageUrl] = useState("");
 
     const [dataThumbnail, setDataThumbnail] = useState([])
+    const [dataSlider, setDataSlider] = useState([])
 
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
     const [previewTitle, setPreviewTitle] = useState('');
+
+    const [initForm, setInitForm] = useState(null);
 
     useEffect(() => {
         const fetchCategory = async () => {
@@ -34,6 +38,38 @@ const BookModalCreate = (props) => {
         }
         fetchCategory();
     }, [])
+
+    useEffect(() => {
+        if (dataUpdate?.id) {
+            const arrThumbnail = [
+                {
+                    uid: uuidv4(),
+                    name: dataUpdate.image,
+                    status: 'done',
+                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${dataUpdate.image}`,
+                }
+            ]
+
+            const init = {
+                id: dataUpdate.id,
+                image: dataUpdate.image,
+                name: dataUpdate.name,
+                price: dataUpdate.price,
+                categoryName: dataUpdate.categoryName,
+                quantity: dataUpdate.quantity,
+                sold: dataUpdate.sold,
+                detailDesc: dataUpdate.detailDesc,
+                shortDesc: dataUpdate.shortDesc,
+                image: { fileList: arrThumbnail },
+            }
+            setInitForm(init);
+            setDataThumbnail(arrThumbnail);
+            form.setFieldsValue(init);
+        }
+        return () => {
+            form.resetFields();
+        }
+    }, [dataUpdate])
 
 
     const onFinish = async (values) => {
@@ -54,17 +90,18 @@ const BookModalCreate = (props) => {
         // }
 
 
-        const { name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc } = values;
+        const { id, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc } = values;
         const image = dataThumbnail[0].name;
 
         setIsSubmit(true)
-        const res = await callCreateFood(image, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc);
+        const res = await callUpdateFood(id, image, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc);
         if (res && res.data) {
-            message.success('Tạo mới food thành công');
+            message.success('Cập nhật book thành công');
             form.resetFields();
-            setDataThumbnail([])
-            setOpenModalCreate(false);
-            await props.fetchFood();
+            setDataThumbnail([]);
+            setInitForm(null);
+            setOpenModalUpdate(false);
+            await props.fetchBook()
         } else {
             notification.error({
                 message: 'Đã có lỗi xảy ra',
@@ -73,6 +110,7 @@ const BookModalCreate = (props) => {
         }
         setIsSubmit(false)
     };
+
 
     const getBase64 = (img, callback) => {
         const reader = new FileReader();
@@ -157,20 +195,21 @@ const BookModalCreate = (props) => {
 
     return (
         <>
-
             <Modal
-                title="Thêm mới food"
-                open={openModalCreate}
+                title="Cập nhật book"
+                open={openModalUpdate}
                 onOk={() => { form.submit() }}
                 onCancel={() => {
                     form.resetFields();
-                    setOpenModalCreate(false)
+                    setInitForm(null)
+                    setDataUpdate(null);
+                    setOpenModalUpdate(false)
                 }}
-                okText={"Tạo mới"}
+                okText={"Cập nhật"}
                 cancelText={"Hủy"}
                 confirmLoading={isSubmit}
                 width={"50vw"}
-                //do not close when click fetchBook
+                //do not close when click outside
                 maskClosable={false}
             >
                 <Divider />
@@ -182,6 +221,15 @@ const BookModalCreate = (props) => {
                     autoComplete="off"
                 >
                     <Row gutter={15}>
+                        <Form.Item
+                            hidden
+                            labelCol={{ span: 24 }}
+                            label="Id"
+                            name="id"
+                            rules={[{ required: true, message: 'Vui lòng nhập Id!' }]}
+                        >
+                            <Input />
+                        </Form.Item>
                         <Col span={12}>
                             <Form.Item
                                 labelCol={{ span: 24 }}
@@ -193,15 +241,15 @@ const BookModalCreate = (props) => {
                             </Form.Item>
                         </Col>
                         {/* <Col span={12}>
-                            <Form.Item
-                                labelCol={{ span: 24 }}
-                                label="Tác giả"
-                                name=""
-                                rules={[{ required: true, message: 'Vui lòng nhập tác giả!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                        </Col> */}
+                                                <Form.Item
+                                                    labelCol={{ span: 24 }}
+                                                    label="Tác giả"
+                                                    name=""
+                                                    rules={[{ required: true, message: 'Vui lòng nhập tác giả!' }]}
+                                                >
+                                                    <Input />
+                                                </Form.Item>
+                                            </Col> */}
                         <Col span={6}>
                             <Form.Item
                                 labelCol={{ span: 24 }}
@@ -300,6 +348,17 @@ const BookModalCreate = (props) => {
                                     onChange={handleChange}
                                     onRemove={(file) => handleRemoveFile(file)}
                                     onPreview={handlePreview}
+                                    defaultFileList={
+                                        dataUpdate?.id ?
+                                            [
+                                                {
+                                                    uid: uuidv4(),
+                                                    name: dataUpdate?.image ?? "",
+                                                    status: 'done',
+                                                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${dataUpdate?.image}`,
+                                                }
+                                            ] : []
+                                    }
                                 >
                                     <div>
                                         {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
@@ -310,32 +369,9 @@ const BookModalCreate = (props) => {
                             </Form.Item>
 
                         </Col>
-                        {/* <Col span={12}>
-                            <Form.Item
-                                labelCol={{ span: 24 }}
-                                label="Ảnh Slider"
-                                name="slider"
-                            >
-                                <Upload
-                                    multiple
-                                    name="slider"
-                                    listType="picture-card"
-                                    className="avatar-uploader"
-                                    customRequest={handleUploadFileSlider}
-                                    beforeUpload={beforeUpload}
-                                    onChange={(info) => handleChange(info, 'slider')}
-                                    onRemove={(file) => handleRemoveFile(file, "slider")}
-                                    onPreview={handlePreview}
-                                >
-                                    <div>
-                                        {loadingSlider ? <LoadingOutlined /> : <PlusOutlined />}
-                                        <div style={{ marginTop: 8 }}>Upload</div>
-                                    </div>
-                                </Upload>
-                            </Form.Item>
-                        </Col> */}
                     </Row>
                 </Form>
+
             </Modal>
             <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={() => setPreviewOpen(false)}>
                 <img alt="example" style={{ width: '100%' }} src={previewImage} />
@@ -344,4 +380,4 @@ const BookModalCreate = (props) => {
     );
 };
 
-export default BookModalCreate;
+export default FoodModalUpdate;

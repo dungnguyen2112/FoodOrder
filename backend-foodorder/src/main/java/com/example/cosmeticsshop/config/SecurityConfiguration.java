@@ -22,9 +22,9 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.example.cosmeticsshop.util.SecurityUtil;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
-import com.example.cosmeticsshop.util.SecurityUtil;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)

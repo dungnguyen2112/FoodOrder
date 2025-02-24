@@ -4,7 +4,16 @@ import { Select } from 'antd';
 import { useEffect } from "react";
 import { callFetchCategory } from '../../../services/api';
 
-const InputSearch = (props) => {
+const STATUS_ENUM = {
+    AVAILABLE: "AVAILABLE",
+    BUSY: "BUSY"
+};
+
+const STATUS_NUMBER = {
+    AVAILABLE: 0,
+    BUSY: 1
+}
+const InputSearchTable = (props) => {
     const { token } = theme.useToken();
     const [form] = Form.useForm();
 
@@ -17,28 +26,14 @@ const InputSearch = (props) => {
         padding: 24,
     };
 
-
-    useEffect(() => {
-        const fetchCategory = async () => {
-            const res = await callFetchCategory();
-            if (res && res.data) {
-                const d = res.data.map(item => {
-                    return { label: item, value: item }
-                })
-                setListCategory(d);
-            }
-        }
-        fetchCategory();
-    }, [])
-
     const onFinish = (values) => {
         let query = "";
         //build query
-        if (values.name) {
-            query += `filter=name ~ '${values.name}'`
+        if (values.status) {
+            query += `filter=status ~ '${STATUS_NUMBER[values.status]}'`
         }
         if (query) {
-            props.handleSearch(query);
+            props.handleSearchTable(query);
         }
 
         //remove undefined
@@ -62,15 +57,17 @@ const InputSearch = (props) => {
                 <Col span={12}>
                     <Form.Item
                         labelCol={{ span: 24 }}
-                        name={`name`}
-                        label={`Tên category`}
+                        name={`status`}
+                        label={`Status`}
                     >
                         <Select
                             defaultValue={null}
                             showSearch
                             allowClear
-                            //  onChange={handleChange}
-                            options={listCategory}
+                            options={[
+                                { value: STATUS_ENUM.AVAILABLE, label: "Available" },
+                                { value: STATUS_ENUM.BUSY, label: "Busy" },
+                            ]}
                         />
                     </Form.Item>
                 </Col>
@@ -104,4 +101,4 @@ const InputSearch = (props) => {
 };
 
 
-export default InputSearch;
+export default InputSearchTable;

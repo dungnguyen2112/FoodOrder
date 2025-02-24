@@ -157,7 +157,7 @@ const CategoryTable = () => {
 
     const handleDeleteBook = async (id) => {
         const res = await callDeleteCategory(id);
-        if (res.statusCode === 204) {
+        if (res.statusCode === 200) {
             message.success('Xóa book thành công');
             fetchCategory();
         } else {

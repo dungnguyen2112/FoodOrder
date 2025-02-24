@@ -8,14 +8,14 @@ import org.springframework.boot.autoconfigure.rsocket.RSocketProperties.Server.S
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-
 import com.example.cosmeticsshop.domain.ResTable;
 import com.example.cosmeticsshop.domain.request.TableRequest;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
 import com.example.cosmeticsshop.repository.ResTableRepository;
 import com.example.cosmeticsshop.util.constant.TableEnum;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,5 @@
 package com.example.cosmeticsshop.util.validator;
 
-
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.stereotype.Service;
@@ -20,11 +19,11 @@ public class RegisterValidator implements ConstraintValidator<RegisterChecked, U
     @Override
     public boolean isValid(UserCreateRequestDTO user, ConstraintValidatorContext context) {
         // if (!user.getPassword().equals(user.getConfirmPassword())) {
-        //     context.buildConstraintViolationWithTemplate("Mật khẩu không trùng khớp")
-        //             .addPropertyNode("confirmPassword")
-        //             .addConstraintViolation()
-        //             .disableDefaultConstraintViolation();
-        //     return false;
+        // context.buildConstraintViolationWithTemplate("Mật khẩu không trùng khớp")
+        // .addPropertyNode("confirmPassword")
+        // .addConstraintViolation()
+        // .disableDefaultConstraintViolation();
+        // return false;
         // }
 
         if (this.userRepository.existsByUsername(user.getUsername())) {

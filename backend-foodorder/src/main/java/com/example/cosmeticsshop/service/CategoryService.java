@@ -1,14 +1,16 @@
 package com.example.cosmeticsshop.service;
 
-import com.example.cosmeticsshop.domain.Category;
-import com.example.cosmeticsshop.domain.Order;
-import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
-import com.example.cosmeticsshop.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import com.example.cosmeticsshop.domain.Category;
+import com.example.cosmeticsshop.domain.Order;
+import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
+import com.example.cosmeticsshop.repository.CategoryRepository;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

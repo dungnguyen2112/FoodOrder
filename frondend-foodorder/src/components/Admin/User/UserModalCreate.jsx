@@ -11,9 +11,9 @@ const UserModalCreate = (props) => {
 
 
     const onFinish = async (values) => {
-        const { username, name, passwordHash, email, phone, age, bio, address } = values;
+        const { username, name, password, email, phone, age, bio, address } = values;
         setIsSubmit(true)
-        const res = await callCreateAUser(username, name, passwordHash, email, phone, age, bio, address);
+        const res = await callCreateAUser(username, name, password, email, phone, age, bio, address);
         if (res && res.data) {
             message.success('Tạo mới user thành công');
             form.resetFields();
@@ -60,7 +60,7 @@ const UserModalCreate = (props) => {
                     <Form.Item
                         labelCol={{ span: 24 }}
                         label="Password"
-                        name="passwordHash"
+                        name="password"
                         rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
                     >
                         <Input.Password />
@@ -103,7 +103,7 @@ const UserModalCreate = (props) => {
                         labelCol={{ span: 24 }}
                         label="Bio"
                         name="bio"
-                        rules={[{ required: true, message: 'Vui lòng nhập bio!' }]}
+                    // rules={[{ required: true, message: 'Vui lòng nhập bio!' }]}
                     >
                         <Input />
                     </Form.Item>

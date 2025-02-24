@@ -5,7 +5,7 @@ import { FORMAT_DATE_DISPLAY } from "../../../utils/constant";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
-const BookViewDetail = (props) => {
+const FoodViewDetail = (props) => {
     const { openViewDetail, setOpenViewDetail, dataViewDetail, setDataViewDetail } = props;
     const onClose = () => {
         setOpenViewDetail(false);
@@ -109,4 +109,4 @@ const BookViewDetail = (props) => {
         </>
     )
 }
-export default BookViewDetail;
+export default FoodViewDetail;

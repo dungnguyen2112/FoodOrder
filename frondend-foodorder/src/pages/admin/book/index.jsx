@@ -1,9 +1,10 @@
-import BookTable from "../../../components/Admin/Book/BookTable";
+import FoodTable from "../../../components/Admin/Food/FoodTable";
+
 
 const ManageBookPage = () => {
     return (
         <div className="manage-book-page">
-            <BookTable />
+            <FoodTable />
         </div>
     )
 }

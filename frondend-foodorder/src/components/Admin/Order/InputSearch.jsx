@@ -30,18 +30,18 @@ const InputSearch = (props) => {
         fetchCategory();
     }, [])
 
-    useEffect(() => {
-        const fetchCategory = async () => {
-            const res = await callFetchCategory();
-            if (res && res.data) {
-                const d = res.data.map(item => {
-                    return { label: item, value: item }
-                })
-                setListCategory(d);
-            }
-        }
-        fetchCategory();
-    }, [])
+    // useEffect(() => {
+    //     const fetchCategory = async () => {
+    //         const res = await callFetchCategory();
+    //         if (res && res.data) {
+    //             const d = res.data.map(item => {
+    //                 return { label: item, value: item }
+    //             })
+    //             setListCategory(d);
+    //         }
+    //     }
+    //     fetchCategory();
+    // }, [])
 
     const onFinish = (values) => {
         let query = "";

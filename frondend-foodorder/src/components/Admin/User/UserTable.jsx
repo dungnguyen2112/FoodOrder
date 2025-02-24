@@ -249,7 +249,7 @@ const UserTable = () => {
         if (userId) {
             const res = await callDeleteUser(userId);
             console.log("res", res);
-            if (res.statusCode === 204) {
+            if (res.statusCode === 200) {
                 message.success('Xóa user thành công');
                 fetchUser();
             } else {

@@ -32,8 +32,8 @@ export const callFetchListUser = (query) => {
     return axios.get(`/api/v1/users?${query}`)
 }
 
-export const callCreateAUser = (username, name, passwordHash, email, phone, age, bio, address) => {
-    return axios.post('/api/v1/users/create', { username, name, passwordHash, email, phone, age, bio, address })
+export const callCreateAUser = (username, name, password, email, phone, age, bio, address) => {
+    return axios.post('/api/v1/users/create', { username, name, password, email, phone, age, bio, address })
 }
 
 
@@ -170,8 +170,8 @@ export const callCreateTable = (tableNumber, status) => {
     return axios.post('/api/v1/tables', { tableNumber, status })
 }
 
-export const callFetchTable = () => {
-    return axios.get('/api/v1/tables')
+export const callFetchTable = (query) => {
+    return axios.get(`/api/v1/tables?${query}`)
 }
 
 export const callDeleteTable = (id) => {

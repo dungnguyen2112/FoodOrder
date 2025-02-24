@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.cosmeticsshop.domain.User;
 import com.example.cosmeticsshop.domain.request.ReqUpdateUser;
+import com.example.cosmeticsshop.domain.request.UserCreateRequestDTO;
 import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUpdateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
@@ -42,7 +43,7 @@ public class UserController {
 
     @PostMapping("/users/create")
     @ApiMessage("Create a new user")
-    public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody User postManUser)
+    public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody UserCreateRequestDTO postManUser)
             throws IdInvalidException {
         boolean isEmailExist = this.userService.isEmailExist(postManUser.getEmail());
         if (isEmailExist) {
@@ -50,8 +51,8 @@ public class UserController {
                     "Email " + postManUser.getEmail() + "đã tồn tại, vui lòng sử dụng email khác.");
         }
 
-        String hashPassword = this.passwordEncoder.encode(postManUser.getPasswordHash());
-        postManUser.setPasswordHash(hashPassword);
+        String hashPassword = this.passwordEncoder.encode(postManUser.getPassword());
+        postManUser.setPassword(hashPassword);
         User ericUser = this.userService.handleCreateUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(ericUser));
     }
