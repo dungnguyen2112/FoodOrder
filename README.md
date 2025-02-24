@@ -86,7 +86,7 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 
 ---
 
-## 📸 **Screenshots** *(Add your own screenshots here)*  
+## 📸 **Screenshots** 
 
 ![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_16_36 PM](https://github.com/user-attachments/assets/1fc1e888-1598-4d91-a024-b48bb4282acb)
 ![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_16_48 PM](https://github.com/user-attachments/assets/e3336e9c-26e1-48d2-b971-10400c48f55c)
