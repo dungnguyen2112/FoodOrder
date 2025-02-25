@@ -144,9 +144,7 @@ npm i --legacy-peer-deps
 npm run dev  
 ```
 
----
-
-## 📜 **API Endpoints**  
+### 📜 **API Endpoints**  
 
 <details>  
   <summary>🔹 Authentication</summary>  
