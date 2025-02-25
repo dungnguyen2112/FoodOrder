@@ -148,8 +148,7 @@ npm run dev
 ```sh
 username: admin
 password: 123456
-
----
+```
 
 ## 📜 **API Endpoints**  
 
