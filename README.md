@@ -144,6 +144,11 @@ npm i --legacy-peer-deps
 npm run dev  
 ```
 
+### **Login**
+```sh
+username: admin
+password: 123456
+
 ---
 
 ## 📜 **API Endpoints**  
