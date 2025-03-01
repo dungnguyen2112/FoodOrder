@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Xác nhận đơn hàng</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2 style="color: #3498db;">Cảm ơn bạn đã đặt hàng!</h2>
+    <p>Xin chào <span th:text="${name}"></span>,</p>
+    <p>Chúng tôi đã nhận được đơn hàng của bạn với chi tiết như sau:</p>
+
+    <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="background: #f4f4f4;">Tên sản phẩm</th>
+                <th style="background: #f4f4f4;">Số lượng</th>
+                <th style="background: #f4f4f4;">Giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${orderItems}">
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${#numbers.formatDecimal(item.price, 0, 2)} + ' VND'"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(totalPrice, 0, 2)} + ' VND'"></span></p>
+    
+    <p>Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận đơn hàng.</p>
+
+    <p style="font-size: 12px; color: gray;">Đây là email tự động, vui lòng không trả lời.</p>
+</body>
+</html>
