@@ -181,3 +181,15 @@ export const callDeleteTable = (id) => {
 export const callUpdateStatusTable = (id, status) => {
     return axios.put(`/api/v1/tables/${id}`, status, { headers: { "Content-Type": "application/json" } })
 }
+
+export const callLoginGoogle = (tokenId) => {
+    return axios.post('/api/v1/auth/google', { tokenId })
+}
+
+export const callForgotPassword = (email) => {
+    return axios.post('/api/v1/auth/forgot-password', null, { params: { email } })
+}
+
+export const callResetPassword = (token, newPassword) => {
+    return axios.post('/api/v1/auth/reset-password', { token, newPassword })
+}

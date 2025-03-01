@@ -55,6 +55,29 @@ public class EmailService {
     }
 
     @Async
+    public void sendResetPasswordEmail(String to, String name, String resetPasswordLink) {
+        try {
+            // Tạo nội dung email từ template Thymeleaf
+            Context context = new Context();
+            context.setVariable("name", name);
+            context.setVariable("resetPasswordLink", resetPasswordLink);
+            String htmlContent = templateEngine.process("reset-password", context);
+
+            // Tạo email
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setTo(to);
+            helper.setSubject("Đặt lại mật khẩu");
+            helper.setText(htmlContent, true); // Gửi HTML email
+
+            // Gửi email
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Gửi email thất bại!", e);
+        }
+    }
+
+    @Async
     public void sendEmailFromTemplateSync(
             String to,
             String subject,

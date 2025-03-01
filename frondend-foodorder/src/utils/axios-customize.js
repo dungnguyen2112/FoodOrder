@@ -24,6 +24,8 @@ const handleRefreshToken = async () => {
 };
 
 instance.interceptors.request.use(function (config) {
+    const isResetPassword = config.url.includes('/api/v1/auth/reset-password');
+    if (isResetPassword) return config;
     if (typeof window !== "undefined" && window && window.localStorage && window.localStorage.getItem('access_token')) {
         config.headers.Authorization = 'Bearer ' + window.localStorage.getItem('access_token');
     }
