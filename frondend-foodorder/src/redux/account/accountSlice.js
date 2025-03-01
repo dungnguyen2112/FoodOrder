@@ -5,7 +5,7 @@ import { callFetchAccount } from '../../services/api';
 export const fetchAccount = createAsyncThunk(
     'account/fetchAccount',
     async () => {
-        const response = await callFetchAccountAccount();
+        const response = await callFetchAccount();
         return response.data;
     }
 )

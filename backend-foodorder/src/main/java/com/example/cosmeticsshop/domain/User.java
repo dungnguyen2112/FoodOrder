@@ -45,6 +45,7 @@ public class User {
     private String createdBy;
     private String updatedBy;
 
+    private String googleId;
     private double totalMoneySpent;
     private int totalOrder;
 

@@ -28,6 +28,7 @@ import HistoryPage from './pages/history';
 import AdminOrderPage from './pages/admin/order';
 import ManageCategoryPage from './pages/admin/category';
 import AdminTablePage from './pages/admin/table';
+import ResetPassword from './pages/reset-password/ResetPassword';
 
 const Layout = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -158,6 +159,11 @@ export default function App() {
       path: "/register",
       element: <RegisterPage />,
     },
+
+    {
+      path: "/reset-password",
+      element: <ResetPassword />,
+    }
   ]);
 
   return (

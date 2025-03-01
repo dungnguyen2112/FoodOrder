@@ -1,5 +1,6 @@
 package com.example.cosmeticsshop.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.cosmeticsshop.domain.PasswordResetToken;
 import com.example.cosmeticsshop.domain.Role;
 import com.example.cosmeticsshop.domain.User;
 import com.example.cosmeticsshop.domain.request.ReqUpdateUser;
@@ -17,9 +19,11 @@ import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUpdateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
+import com.example.cosmeticsshop.repository.PasswordResetTokenRepository;
 import com.example.cosmeticsshop.repository.RoleRepository;
 import com.example.cosmeticsshop.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -29,11 +33,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final RoleRepository roleRepository;
+    private final PasswordResetTokenRepository tokenRepository;
 
-    public UserService(UserRepository userRepository, RoleService roleService, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, RoleService roleService, RoleRepository roleRepository,
+            PasswordResetTokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     public User handleCreateUser(UserCreateRequestDTO user) {
@@ -128,6 +135,26 @@ public class UserService {
             user = this.userRepository.findByUsername(username);
         }
         return user;
+    }
+
+    @Transactional
+    public void savePasswordResetToken(User user, String token) {
+        // Kiểm tra xem user đã có token trước đó chưa
+        Optional<PasswordResetToken> existingToken = tokenRepository.findByUser(user);
+        if (existingToken.isPresent()) {
+            // Cập nhật token và thời gian hết hạn mới
+            PasswordResetToken resetToken = existingToken.get();
+            resetToken.setToken(token);
+            resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+            tokenRepository.save(resetToken);
+        } else {
+            // Tạo token mới
+            PasswordResetToken newToken = new PasswordResetToken();
+            newToken.setUser(user);
+            newToken.setToken(token);
+            newToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+            tokenRepository.save(newToken);
+        }
     }
 
     public boolean isEmailExist(String email) {

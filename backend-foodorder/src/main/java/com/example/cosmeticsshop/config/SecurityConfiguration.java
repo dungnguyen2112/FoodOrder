@@ -1,5 +1,7 @@
 package com.example.cosmeticsshop.config;
 
+import java.util.Collections;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -21,8 +23,11 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
-
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.example.cosmeticsshop.util.SecurityUtil;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 
@@ -30,12 +35,23 @@ import com.nimbusds.jose.util.Base64;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
+
     @Value("${btljava.jwt.base64-secret}")
     private String jwtKey;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public GoogleIdTokenVerifier googleIdTokenVerifier() {
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance(); // Sử dụng Gson thay Jackson
+        return new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), jsonFactory)
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
     }
 
     @Bean
@@ -47,11 +63,14 @@ public class SecurityConfiguration {
                 "/",
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/storage/**",
                 "/api/v1/auth/register", "/api/v1/auth/forgot-password",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html", "/api/v1/auth/logout",
+                "/api/v1/auth/logout",
+                "/api/v1/auth/google-login",
                 "/api/v1/products/**",
                 "/api/v1/categories/**",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/api/v1/auth/**"
         };
 
         http

@@ -1,5 +1,8 @@
 package com.example.cosmeticsshop.controller;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,40 +20,62 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.cosmeticsshop.domain.PasswordResetToken;
 import com.example.cosmeticsshop.domain.User;
 import com.example.cosmeticsshop.domain.request.AccountUpdateRequestDTO;
 import com.example.cosmeticsshop.domain.request.ChangePasswordDTO;
 import com.example.cosmeticsshop.domain.request.ReqLoginDTO;
+import com.example.cosmeticsshop.domain.request.ResetPasswordRequest;
 import com.example.cosmeticsshop.domain.request.UserCreateRequestDTO;
 import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResLoginDTO;
+import com.example.cosmeticsshop.repository.PasswordResetTokenRepository;
+import com.example.cosmeticsshop.repository.UserRepository;
+import com.example.cosmeticsshop.service.EmailService;
 import com.example.cosmeticsshop.service.UserService;
 import com.example.cosmeticsshop.util.SecurityUtil;
 import com.example.cosmeticsshop.util.annotation.ApiMessage;
 import com.example.cosmeticsshop.util.error.IdInvalidException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
+    // Thêm các field và constructor
+    private final GoogleIdTokenVerifier googleIdTokenVerifier;
 
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final UserRepository userRepository;
 
     @Value("${btljava.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
-            SecurityUtil securityUtil, UserService userService, PasswordEncoder passwordEncoder) {
+            SecurityUtil securityUtil, UserService userService, PasswordEncoder passwordEncoder,
+            GoogleIdTokenVerifier googleIdTokenVerifier, EmailService emailService,
+            PasswordResetTokenRepository tokenRepository, UserRepository userRepository) {
+        this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.googleIdTokenVerifier = googleIdTokenVerifier;
+        this.emailService = emailService;
     }
 
     @PostMapping("/auth/login")
@@ -275,6 +300,100 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(ericUser));
     }
 
+    // Thêm endpoint Google Login
+    @PostMapping("/auth/google-login")
+    @ApiMessage("Login with Google")
+    public ResponseEntity<ResLoginDTO> googleLogin(@RequestBody GoogleLoginRequest googleLoginRequest)
+            throws IdInvalidException {
+        try {
+            // Xác thực Google token
+            GoogleIdToken idToken = googleIdTokenVerifier.verify(googleLoginRequest.getToken());
+            if (idToken == null) {
+                throw new IdInvalidException("Invalid Google token");
+            }
+
+            // Lấy thông tin từ Google payload
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String googleId = payload.getSubject();
+
+            // Tìm hoặc tạo mới user
+            User user = userService.handleGetUserByUsernameOrEmail(email);
+            if (user == null) {
+                user = new User();
+                user.setEmail(email);
+                user.setName(name);
+                user.setGoogleId(googleId);
+                // Có thể set các giá trị mặc định khác
+                user = userService.handleCreateUser(this.convertToUserCreateRequestDTO(user));
+            }
+
+            // Tạo response DTO
+            ResLoginDTO res = new ResLoginDTO();
+            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getAvatarUrl(),
+                    user.getRole().getId(),
+                    user.getRoyalty(),
+                    user.getTotalMoneySpent(),
+                    user.getTotalOrder(),
+                    user.getPhone());
+            res.setUser(userLogin);
+
+            // Tạo access token sử dụng SecurityUtil
+            String accessToken = securityUtil.createAccessToken(email, userLogin);
+            res.setAccessToken(accessToken);
+
+            // Tạo refresh token
+            String refreshToken = securityUtil.createRefreshToken(email, res);
+            userService.updateUserToken(refreshToken, email);
+
+            // Set refresh token cookie
+            ResponseCookie resCookies = ResponseCookie
+                    .from("refresh_token", refreshToken)
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/")
+                    .maxAge(refreshTokenExpiration)
+                    .build();
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, resCookies.toString())
+                    .body(res);
+
+        } catch (Exception e) {
+            throw new IdInvalidException("Invalid Google token");
+        }
+    }
+
+    // Thêm request DTO
+    public static class GoogleLoginRequest {
+        private String token;
+
+        public String getToken() {
+            return token;
+        }
+
+        public void setToken(String token) {
+            this.token = token;
+        }
+    }
+
+    // Phương thức helper để convert User sang UserCreateRequestDTO
+    private UserCreateRequestDTO convertToUserCreateRequestDTO(User user) {
+        UserCreateRequestDTO dto = new UserCreateRequestDTO();
+        dto.setEmail(user.getEmail());
+        dto.setName(user.getName());
+        // Set các giá trị mặc định cần thiết
+        dto.setUsername(user.getEmail()); // Có thể lấy email làm username
+        String hashPassword = this.passwordEncoder.encode("123456"); //
+        dto.setPassword(hashPassword); // Mật khẩu mặc định
+        return dto;
+    }
+
     @PostMapping("/auth/change-password")
     @ApiMessage("Change password")
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordDTO changePasswordDTO)
@@ -295,8 +414,36 @@ public class AuthController {
 
     @PostMapping("/auth/forgot-password")
     @ApiMessage("Forgot password")
-    public ResponseEntity<Void> forgotPassword() {
-        return ResponseEntity.ok().body(null);
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        User user = userService.handleGetUserByUsernameOrEmail(email);
+        if (user != null) {
+            String token = UUID.randomUUID().toString();
+            userService.savePasswordResetToken(user, token);
+
+            // Tạo link đặt lại mật khẩu
+            String resetLink = "http://localhost:3000/reset-password?token=" + token;
+
+            // Gửi email
+            emailService.sendResetPasswordEmail(email, user.getName(), resetLink);
+            return ResponseEntity.ok("Vui lòng kiểm tra email để đặt lại mật khẩu.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email không tồn tại.");
+    }
+
+    @PostMapping("/auth/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+        Optional<PasswordResetToken> tokenOpt = tokenRepository.findByToken(request.getToken());
+
+        if (tokenOpt.isEmpty() || tokenOpt.get().isExpired()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ hoặc đã hết hạn!");
+        }
+
+        User user = tokenOpt.get().getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        tokenRepository.delete(tokenOpt.get()); // Xóa token sau khi sử dụng
+
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
     }
 
 }
