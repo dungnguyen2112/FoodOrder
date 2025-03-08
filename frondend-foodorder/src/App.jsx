@@ -29,6 +29,16 @@ import AdminOrderPage from './pages/admin/order';
 import ManageCategoryPage from './pages/admin/category';
 import AdminTablePage from './pages/admin/table';
 import ResetPassword from './pages/reset-password/ResetPassword';
+import FooterLandingPage from './landingpage/Footerlandingpage/Footerlandingpage';
+import Contact from './landingpage/Contactlandingpage/Contactlandingpage';
+import About from './landingpage/Aboutlandingpage/Aboutlandingpage';
+import HeaderLandingPage from './landingpage/Headerlandingpage/Headerlandingpage';
+import Testimonials from './landingpage/Testimonialslandingpage/Testimoniallandingpage';
+import { FaArrowAltCircleUp } from 'react-icons/fa';
+import Menu from './landingpage/Menulandingpage/Menulandingpage';
+import HomeLandingPage from './landingpage/Homelandingpage/Homelandingpage';
+import './landingpage/App.scss';
+
 
 const Layout = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -42,22 +52,75 @@ const Layout = () => {
   )
 }
 
+const LandingPageLayout = () => {
+  const topOfThePagehander = () => {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  };
+  return (
+    <div>
+      <FaArrowAltCircleUp
+        className="Top-of-the-page"
+        onClick={topOfThePagehander}
+      />
+      <HeaderLandingPage />
+      <HomeLandingPage />
+      <About />
+      <Menu />
+      <Testimonials />
+      <Contact />
+      <FooterLandingPage />
+    </div>
+  );
+};
+
+
 export default function App() {
   const dispatch = useDispatch();
-  const isLoading = useSelector(state => state.account.isLoading)
+  const isLoading = useSelector((state) => state.account.isLoading);
+
+  const cleanGoogleStorage = () => {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("g_") || key.includes("google")) {
+        localStorage.removeItem(key);
+      }
+    });
+  };
 
   const getAccount = async () => {
-    if (
-      window.location.pathname === '/login'
-      || window.location.pathname === '/register'
-    )
+    if (window.location.pathname === "/login" || window.location.pathname === "/register") {
       return;
-
-    const res = await callFetchAccount();
-    if (res && res.data) {
-      dispatch(doGetAccountAction(res.data))
     }
-  }
+
+    const token = localStorage.getItem("access_token");
+    console.log("Token on load:", token);
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      const res = await callFetchAccount();
+      console.log("getAccount response:", res);
+      if (res && res.data) {
+        dispatch(doGetAccountAction(res.data));
+      } else if (res && res.status === 403) {
+        dispatch(doGetAccountAction({ roleId: null, permissions: [] }));
+      } else if (res && res.status === 401) {
+        localStorage.removeItem("access_token");
+        cleanGoogleStorage(); // Xóa dữ liệu Google
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      console.error("Error fetching account:", error);
+      if (error?.response?.status === 401 || error?.response?.request?.responseURL?.includes("accounts.google.com")) {
+        localStorage.removeItem("access_token");
+        cleanGoogleStorage();
+        window.location.href = "/login";
+      }
+    }
+  };
+
 
   useEffect(() => {
     getAccount();
@@ -95,6 +158,12 @@ export default function App() {
           ,
         },
       ],
+    },
+
+    {
+      path: "/landingpage",
+      element: <LandingPageLayout />,
+      errorElement: <NotFound />,
     },
 
     {
@@ -172,7 +241,8 @@ export default function App() {
         isLoading === false
           || window.location.pathname === '/login'
           || window.location.pathname === '/register'
-          || window.location.pathname === '/'
+          || window.location.pathname === '/landingpage'
+          || window.location.pathname.startsWith('/')
           || window.location.pathname.startsWith('/book')
           ?
           <RouterProvider router={router} />

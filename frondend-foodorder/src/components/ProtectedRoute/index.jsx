@@ -4,36 +4,46 @@ import NotPermitted from "./NotPermitted";
 
 const RoleBaseRoute = (props) => {
     const isAdminRoute = window.location.pathname.startsWith('/admin');
-    const user = useSelector(state => state.account.user);
+
+    // Lấy user từ Redux trước, nếu không có thì lấy từ localStorage
+    const user = useSelector(state => state.account.user) || JSON.parse(localStorage.getItem("userInfo"));
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
     const userRole = user.roleId;
+    console.log("User Role:", userRole);
 
-    console.log(userRole)
-
-    if (isAdminRoute && userRole === 1 ||
-        !isAdminRoute && (userRole === 2 || userRole === 1)
+    if (
+        (isAdminRoute && userRole === 1) ||
+        (!isAdminRoute && (userRole === 2 || userRole === 1))
     ) {
-        return (<>{props.children}</>)
+        return <>{props.children}</>;
     } else {
-        return (<NotPermitted />)
+        return <NotPermitted />;
     }
 }
 
 const ProtectedRoute = (props) => {
-    const isAuthenticated = useSelector(state => state.account.isAuthenticated)
+    // Kiểm tra từ Redux
+    const reduxAuth = useSelector(state => state.account.isAuthenticated);
 
-    return (
-        <>
-            {isAuthenticated === true ?
-                <>
-                    <RoleBaseRoute>
-                        {props.children}
-                    </RoleBaseRoute>
-                </>
-                :
-                <Navigate to='/login' replace />
-            }
-        </>
-    )
+    // Kiểm tra từ localStorage
+    const localAuth = localStorage.getItem("isAuthenticated") === "true";
+
+    // Ưu tiên Redux, nếu không có thì lấy từ localStorage
+    const isAuthenticated = reduxAuth || localAuth;
+
+    console.log("Is Authenticated:", isAuthenticated);
+
+    return isAuthenticated ? (
+        <RoleBaseRoute>
+            {props.children}
+        </RoleBaseRoute>
+    ) : (
+        <Navigate to="/login" replace />
+    );
 }
 
 export default ProtectedRoute;

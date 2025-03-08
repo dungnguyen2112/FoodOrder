@@ -21,6 +21,8 @@ const LoginPage = () => {
             localStorage.setItem('access_token', res.data.access_token);
             dispatch(doLoginAction(res.data.user));
             message.success('Đăng nhập tài khoản thành công!');
+            localStorage.setItem("isAuthenticated", "true");
+            localStorage.setItem("user", JSON.stringify(res.data.user));
             navigate('/');
         } else {
             notification.error({
@@ -61,6 +63,8 @@ const LoginPage = () => {
                 localStorage.setItem('access_token', data.data.access_token);
                 dispatch(doLoginAction(data.data.user));
                 message.success('Đăng nhập bằng Google thành công!');
+                localStorage.setItem("isAuthenticated", "true");
+                localStorage.setItem("user", JSON.stringify(data.data.user));
                 navigate('/');
             } else {
                 throw new Error(data.message || 'Đăng nhập thất bại');

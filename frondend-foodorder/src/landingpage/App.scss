@@ -1,0 +1,67 @@
+@import "./index.scss";
+
+:root {
+  --primary-color: #59ccca;
+  --background-color: #f3eaea;
+  --secon-color: #9da2ad;
+  --grey: #7a7a7b;
+  --white: #ffffff;
+}
+
+/* re usable class */
+
+.container {
+  margin: auto;
+  max-width: 105rem;
+
+  @include respond(phone) {
+    width: 100%;
+  }
+
+  @include respond(port) {
+    width: 100%;
+  }
+
+  @include respond(land) {
+    width: 100%;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.colorGrey {
+  color: var(--grey);
+}
+
+.bgImg {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.bgImgFixed {
+  background-attachment: fixed;
+}
+
+.Top-of-the-page {
+  position: fixed;
+  bottom: 4rem;
+  right: 4rem;
+  width: 4rem;
+  height: 4rem;
+  cursor: pointer;
+  color: var(--primary-color);
+  z-index: 10;
+
+  @include respond(phone) {
+    bottom: 8rem;
+  }
+
+  @include respond(port) {
+    bottom: 8rem;
+  }
+}

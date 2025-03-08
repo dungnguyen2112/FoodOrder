@@ -1,0 +1,81 @@
+@import "../index.scss";
+
+/* home */
+.home {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 15;
+
+  .homeVideoIntro {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+  }
+
+  .homeDetails {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    .slogan {
+      width: 100%;
+      margin: auto;
+      padding-top: 20vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      & h1 {
+        font-size: 10rem;
+        letter-spacing: 2rem;
+        color: var(--primary-color);
+        text-transform: uppercase;
+
+        @include respond(phone) {
+          font-size: 6rem;
+          letter-spacing: normal;
+        }
+
+        @include respond(port) {
+          font-size: 10rem;
+        }
+      }
+
+      & p {
+        font-size: 4rem;
+        color: var(--white);
+        margin-bottom: 4rem;
+
+        @include respond(phone) {
+          font-size: 1.5rem;
+        }
+      }
+
+      & button {
+        font-size: 4rem;
+        color: var(--white);
+        background-color: transparent;
+        outline: none;
+        border: none;
+        border: 0.3rem solid var(--primary-color);
+        border-radius: 3rem;
+        padding: 0.8rem 2rem;
+        cursor: pointer;
+        transition: 0.3s ease-in-out;
+
+        @include respond(phone) {
+          font-size: 3rem;
+          border-radius: 3rem;
+          padding: 0.6rem 1.5rem;
+        }
+
+        &:hover {
+          background-color: var(--primary-color);
+        }
+      }
+    }
+  }
+}

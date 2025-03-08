@@ -41,6 +41,8 @@ const Header = (props) => {
         if (res && res && +res.statusCode === 200) {
             dispatch(doLogoutAction());
             message.success('Đăng xuất thành công');
+            localStorage.setItem("isAuthenticated", "false");
+            localStorage.removeItem("user", JSON.stringify(res.data.user));
             navigate('/')
         }
         console.log(user)
@@ -116,7 +118,7 @@ const Header = (props) => {
                         }}>☰</div>
                         <div className='page-header__logo'>
                             <span className='logo'>
-                                <span onClick={() => navigate('/')}> <FaReact className='rotate icon-react' />Food Order</span>
+                                <span onClick={() => navigate('/landingpage')}> <FaReact className='rotate icon-react' />Food Order</span>
 
                                 <VscSearchFuzzy className='icon-search' />
                             </span>
