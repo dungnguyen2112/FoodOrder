@@ -1,4 +1,4 @@
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_30_10 PM](https://github.com/user-attachments/assets/33b7d187-ee31-4c39-b0a7-ff969e781e60)
+
 # 🍽️ **Food Ordering System** 🚀  
 
 > **A powerful, modern, and scalable system for managing restaurant orders, customers, and payments.**  
