@@ -15,13 +15,14 @@ const About = () => {
 
             <div className="aboutContainerDetails">
               <h1>
-                <span className="colorGrey">We</span> create delicious memories
-                for<span className="colorGrey"> us</span>
+                About <span>Us</span>
               </h1>
               <p>
-                We cook the best food in the entire city, with excellent
-                customer service, the best meals and at the best price, visit
-                us.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
+                tincidunt, nisl non fringilla aliquet, urna est lacinia eros, id
+                varius libero odio sit amet mi. Nullam euismod, nisl nec
+                scelerisque tincidunt, nunc felis ultricies sapien, nec
+                accumsan.
               </p>
             </div>
           </div>

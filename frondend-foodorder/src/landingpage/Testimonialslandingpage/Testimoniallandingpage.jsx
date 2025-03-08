@@ -1,43 +1,37 @@
 import React from "react";
-
 import "./testimonial.scss";
 
 const Testimonial = () => {
+  const testimonials = [
+    {
+      img: "/user/a.jpg",
+      name: "Linh",
+      text: "The service was outstanding, and the atmosphere was very welcoming. I really enjoyed my time here and would love to come back!"
+    },
+    {
+      img: "/user/b.jpg",
+      name: "Nam",
+      text: "Great food and excellent service! The staff was very friendly and attentive. Highly recommended for a wonderful dining experience."
+    },
+    {
+      img: "/user/c.jpg",
+      name: "Hoa",
+      text: "A perfect place for a family gathering. The ambiance was cozy, and the food was simply delicious. Definitely a five-star experience!"
+    }
+  ];
+
   return (
     <section id="testimonials" className="testimonials">
       <div className="container">
         <h1 className="testimonialsHeader">Testimonials</h1>
         <div className="testimonialsAll">
-          <div className="testimonialsDetails">
-            <img className="bgImg" src="/user/a.jpg" alt="" />
-            <h1>Rakib</h1>
-            <p>
-              The Food we had enjoyed at the time of dinner. It was really
-              delicious taste with great quality, everything had unique taste
-              which we had ordered, nice arrangement and services from the staff
-              while eating.
-            </p>
-          </div>
-
-          <div className="testimonialsDetails">
-            <img className="bgImg" src="/user/b.jpg" alt="" />
-            <h1>Santo</h1>
-            <p>
-              Although we didn't go into the onsite restaurant, we ordered some
-              food a few times and it was delicious. The lobby were nice and
-              open, good place to relax and meet friends.
-            </p>
-          </div>
-
-          <div className="testimonialsDetails">
-            <img className="bgImg" src="/user/c.jpg" alt="" />
-            <h1>Khalid</h1>
-            <p>
-              The food was fresh, properly prepared and a great value for the
-              price. We highly recommend it. The breakfast buffet on Sunday was
-              equally as good.
-            </p>
-          </div>
+          {testimonials.map((testimonial, index) => (
+            <div key={index} className="testimonialsDetails">
+              <img className="bgImg" src={testimonial.img} alt={testimonial.name} />
+              <h1>{testimonial.name}</h1>
+              <p>{testimonial.text}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

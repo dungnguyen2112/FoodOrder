@@ -8,7 +8,7 @@ const FooterLandingPage = () => {
   return (
     <footer
       className="footer bgImg bgImgFixed"
-      style={{ backgroundImage: `url('/l.jpg')` }}
+      style={{ backgroundImage: `url('/d.jpg')` }}
     >
       <div className="container">
         <div className="footerInfo">

@@ -19,7 +19,7 @@ const HomeLandingPage = () => {
           <div className="row">
             <div className="slogan">
               <h1>FoodOrder</h1>
-              <p>Try the best food of the week.</p>
+              <p>Order your favorite food from your favorite restaurant</p>
               <div>
                 <a href="https://localhost:3000/"><button>Order Now</button></a>
               </div>
