@@ -110,7 +110,7 @@ const LoginPage = () => {
 
                                 <p className="text text-normal">
                                     Chưa có tài khoản?
-                                    <span>
+                                    <span style={{ color: 'blue', cursor: 'pointer' }}>
                                         <Link to="/register"> Đăng Ký </Link>
                                     </span>
                                 </p>
