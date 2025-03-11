@@ -37,19 +37,32 @@ const UserInfo = (props) => {
 
 
     const handleUploadAvatar = async ({ file, onSuccess, onError }) => {
-        const res = await callUpdateAvatar(file, "avatar"); // Thêm folder ở đây
-        if (res && res.data) {
-            setDataThumbnail([{ name: res.data.fileName, uid: uuidv4() }]);
-            setUserAvatar(res.data.fileName);
-            dispatch(doUploadAvatarAction(res.data.fileName));
-            console.log(res.data.fileName);
-            if (onSuccess) onSuccess('ok');
-        } else {
-            setDataThumbnail([]);
-            const error = new Error(res.message);
+        console.log('file object:', file);
+
+        const realFile = file.originFileObj || file;
+
+        try {
+            const res = await callUpdateAvatar(realFile, "avatar");
+            console.log('res:', res); // 👈 Xem có gì trả về?
+
+            if (res && res.data) {
+                setDataThumbnail([{ name: res.data.fileName, uid: uuidv4() }]);
+                setUserAvatar(res.data.fileName);
+                dispatch(doUploadAvatarAction(res.data.fileName));
+                console.log(res.data.fileName);
+                if (onSuccess) onSuccess('ok');
+            } else {
+                setDataThumbnail([]);
+                const error = new Error(res?.message || "Lỗi không xác định");
+                if (onError) onError({ event: error });
+            }
+        } catch (error) {
+            console.error('Lỗi API:', error);
             if (onError) onError({ event: error });
         }
     };
+
+
 
     const handleBeforeUpload = (file) => {
         const allowedExtensions = ["image/jpeg", "image/png", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];

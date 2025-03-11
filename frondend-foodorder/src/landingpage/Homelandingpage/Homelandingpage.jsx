@@ -21,7 +21,7 @@ const HomeLandingPage = () => {
               <h1>FoodOrder</h1>
               <p>Order your favorite food from your favorite restaurant</p>
               <div>
-                <a href="https://localhost:3000/"><button>Order Now</button></a>
+                <a href="http://localhost:3000/"><button>Order Now</button></a>
               </div>
             </div>
           </div>

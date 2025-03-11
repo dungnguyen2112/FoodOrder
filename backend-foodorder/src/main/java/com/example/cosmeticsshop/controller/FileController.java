@@ -1,5 +1,6 @@
 package com.example.cosmeticsshop.controller;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,27 +43,47 @@ public class FileController {
     @ApiMessage("Upload single file")
     public ResponseEntity<ResUploadFileDTO> upload(
             @RequestParam(name = "file", required = false) MultipartFile file,
-            @RequestParam("folder") String folder
+            @RequestParam("folder") String folder)
+            throws URISyntaxException, IOException, StorageException {
 
-    ) throws URISyntaxException, IOException, StorageException {
-        // skip validate
+        // DEBUG: log tham số folder gửi vào
+        System.out.println(">>> ORIGINAL FOLDER PARAM: [" + folder + "]");
+
+        // Nếu có dấu "," thì chỉ lấy phần folder thôi, loại bỏ phần file name (nếu có)
+        if (folder.contains(",")) {
+            String[] parts = folder.split(",");
+            folder = parts[0].trim(); // Lấy phần folder sạch
+            System.out.println(">>> CLEANED FOLDER: [" + folder + "]");
+        }
+
+        // Validate file
         if (file == null || file.isEmpty()) {
             throw new StorageException("File is empty. Please upload a file.");
         }
+
         String fileName = file.getOriginalFilename();
+
         List<String> allowedExtensions = Arrays.asList("pdf", "jpg", "jpeg", "png", "doc", "docx");
-        boolean isValid = allowedExtensions.stream().anyMatch(item -> fileName.toLowerCase().endsWith(item));
+        boolean isValid = allowedExtensions.stream()
+                .anyMatch(item -> fileName.toLowerCase().endsWith(item));
 
         if (!isValid) {
-            throw new StorageException("Invalid file extension. only allows " + allowedExtensions.toString());
+            throw new StorageException("Invalid file extension. Only allows " + allowedExtensions);
         }
-        // create a directory if not exist
-        this.fileService.createDirectory(baseURI + folder);
 
-        // store file
-        String uploadFile = this.fileService.store(file, folder);
+        // Tạo thư mục nếu chưa có
+        String directoryPath = baseURI + folder;
 
-        ResUploadFileDTO res = new ResUploadFileDTO(uploadFile, Instant.now());
+        System.out.println(">>> WILL CREATE DIRECTORY AT: " + directoryPath);
+
+        this.fileService.createDirectory(directoryPath);
+
+        // Lưu file vào thư mục đã tạo
+        String uploadFilePath = this.fileService.store(file, folder);
+
+        System.out.println(">>> FILE STORED AT: " + uploadFilePath);
+
+        ResUploadFileDTO res = new ResUploadFileDTO(uploadFilePath, Instant.now());
 
         return ResponseEntity.ok().body(res);
     }

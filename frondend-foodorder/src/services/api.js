@@ -68,19 +68,28 @@ export const callUpdateFood = (id, image, name, price, sold, quantity, categoryN
     })
 }
 
-export const callUploadFoodImg = (file, folderType) => {
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
-    bodyFormData.append('folder', folderType);
+export const callUploadFoodImg = async (file, folder) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", folder);
 
-    return axios({
-        method: 'post',
-        url: '/api/v1/files',
-        data: bodyFormData,
+    const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
+
+    const response = await fetch("http://localhost:8080/api/v1/files", {
+        method: "POST",
         headers: {
-            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}` // Add JWT token
         },
+        body: formData,
     });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Server response:", data);
+    return data;
 }
 
 export const callDeleteFood = (id) => {
@@ -119,20 +128,29 @@ export const callOrderHistory = () => {
     return axios.get('/api/v1/history/user');
 }
 
-export const callUpdateAvatar = (file, folderType) => {
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
-    bodyFormData.append('folder', folderType);
+export const callUpdateAvatar = async (file, folder) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", folder);
 
-    return axios({
-        method: 'post',
-        url: '/api/v1/files',
-        data: bodyFormData,
+    const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
+
+    const response = await fetch("http://localhost:8080/api/v1/files", {
+        method: "POST",
         headers: {
-            "Content-Type": "multipart/form-data",
+            "Authorization": `Bearer ${token}` // Add JWT token
         },
+        body: formData,
     });
-}
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Server response:", data);
+    return data;
+};
 
 export const callUpdateUserInfo = (id, name, phone, avatar) => {
     return axios.put(`/api/v1/users/update/account`, {

@@ -24,13 +24,18 @@ public class FileService {
     private String baseURI;
 
     public void createDirectory(String folder) throws URISyntaxException {
+        System.out.println(">>> FOLDER INPUT = [" + folder + "]");
+        folder = folder.trim();
+        if (folder.endsWith(",")) {
+            folder = folder.substring(0, folder.length() - 1);
+        }
         URI uri = new URI(folder);
         Path path = Paths.get(uri);
         File tmpDir = new File(path.toString());
         if (!tmpDir.isDirectory()) {
             try {
                 Files.createDirectory(tmpDir.toPath());
-                System.out.println(">>> CREATE NEW DIRECTORY SUCCESSFUL, PATH = " + tmpDir.toPath());
+                System.out.println(">>> CREATE NEW DIRECTORY SUCCESSFUL, PATH = [" + tmpDir.toPath() + "]");
             } catch (IOException e) {
                 e.printStackTrace();
             }
