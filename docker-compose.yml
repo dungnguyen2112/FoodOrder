@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frondend-foodorder
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_BACKEND_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend-foodorder
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DBMS_CONNECTION=jdbc:mysql://foodorder-mysql-1:3306/foodorder
+      - DBMS_USERNAME=root
+      - DBMS_PASSWORD=root
+      - upload-file.base-uri=file:///uploads/
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+    volumes:
+      - ./upload-docker/:/uploads/
+
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: foodorder
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
