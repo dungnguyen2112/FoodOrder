@@ -88,29 +88,30 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 
 ## 📸 **Screenshots** 
 
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_29_32 PM](https://github.com/user-attachments/assets/5524ddde-cb12-45b6-b42c-c5518ddc7771)
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_29_41 PM](https://github.com/user-attachments/assets/ba6a7493-b698-4aa0-82ac-974ec8fb8216)
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_29_48 PM](https://github.com/user-attachments/assets/0dcdde93-59dc-4a06-89d5-e0df70d0243d)
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_29_53 PM](https://github.com/user-attachments/assets/f291cc44-d741-49a7-ac32-1d6516210aae)
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_30_07 PM](https://github.com/user-attachments/assets/8ffe1c4a-df2c-48ea-bc0c-330d95f3e447)
-![React Test Fresher FoodOrder - Google Chrome 3_8_2025 9_30_10 PM](https://github.com/user-attachments/assets/e03c1bd3-9389-4eb2-80a8-da6a91c15193)
-![React Test Fresher FoodOrder - Google Chrome 3_1_2025 8_09_19 PM](https://github.com/user-attachments/assets/08c1b0da-aced-4462-8469-780f4d9d3e7d)
-![React Test Fresher FoodOrder - Google Chrome 3_1_2025 8_09_26 PM](https://github.com/user-attachments/assets/78adf583-1eda-416f-92d2-b7c7d8942a9b)
-![xcxcxc](https://github.com/user-attachments/assets/1884aa6f-d8c6-4a92-ad7a-8ba8a2f5679c)
-![React Test Fresher FoodOrder - Google Chrome 3_1_2025 8_36_04 PM](https://github.com/user-attachments/assets/fb28fe17-90f9-4049-affb-d3255483524e)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_16_36 PM](https://github.com/user-attachments/assets/1fc1e888-1598-4d91-a024-b48bb4282acb)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_16_48 PM](https://github.com/user-attachments/assets/e3336e9c-26e1-48d2-b971-10400c48f55c)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 9_01_52 PM](https://github.com/user-attachments/assets/0911d286-52d8-4de1-99dd-96629235e500)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_17_24 PM](https://github.com/user-attachments/assets/437062bd-c602-4c08-b4a7-910588ec8fe7)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_17_54 PM](https://github.com/user-attachments/assets/f879a38b-4b43-405f-98b0-7bb6b3c93001)
-![React Test Fresher FoodOrder - Google Chrome 2_23_2025 11_10_00 PM](https://github.com/user-attachments/assets/50068f12-f0b4-4ee9-b710-8bac7f3226f9)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_27 PM](https://github.com/user-attachments/assets/39184bcf-d792-4e45-90d8-b53f94c32f2d)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_34 PM](https://github.com/user-attachments/assets/62e0d340-9ed5-495a-a6d8-1f64e38e497d)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_40 PM](https://github.com/user-attachments/assets/25ebdff0-4053-46a6-8af5-55ddbc104fea)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_44 PM](https://github.com/user-attachments/assets/846c8484-e2d5-43d8-bf65-155877bd5466)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_48 PM](https://github.com/user-attachments/assets/f0dcc44d-d3c7-4de1-8eb8-8cfb3ab712aa)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_52 PM](https://github.com/user-attachments/assets/03632b29-252a-40bd-96bb-5e6943c6990a)
-![React Test Fresher FoodOrder - Google Chrome 2_24_2025 3_18_59 PM](https://github.com/user-attachments/assets/551c323b-cd9c-4951-9f0b-6fd25275a85c)
+![FoodOrder - Google Chrome 3_22_2025 9_42_46 PM](https://github.com/user-attachments/assets/e526188a-44af-4b65-a658-125ed0776286)
+![FoodOrder - Google Chrome 3_22_2025 9_42_50 PM](https://github.com/user-attachments/assets/8e692a79-e2b8-4444-97b3-c8b259cd2444)
+![FoodOrder - Google Chrome 3_22_2025 9_42_55 PM](https://github.com/user-attachments/assets/6340d9f8-4265-40d6-94ea-25549b574216)
+![FoodOrder - Google Chrome 3_22_2025 9_43_02 PM](https://github.com/user-attachments/assets/74c4cb4a-3fc4-4dab-ba69-9f9d1ba0cdf8)
+![FoodOrder - Google Chrome 3_22_2025 9_43_07 PM](https://github.com/user-attachments/assets/c3f27e6a-b266-4dd2-8bde-c4ec3ff0f5c6)
+![FoodOrder - Google Chrome 3_22_2025 9_43_10 PM](https://github.com/user-attachments/assets/de78bd3d-1be1-429d-acb8-580a0b1a226a)
+![FoodOrder - Google Chrome 3_22_2025 9_47_50 PM](https://github.com/user-attachments/assets/b8ecd816-9153-4e5c-a3d9-d3c8180f8b57)
+![FoodOrder - Google Chrome 3_22_2025 9_47_55 PM](https://github.com/user-attachments/assets/93412af8-bc78-4c04-a26e-61bf8c6cd332)
+![FoodOrder - Google Chrome 3_22_2025 9_41_52 PM](https://github.com/user-attachments/assets/d11ec980-2e4c-41e1-9892-5233a7a00cf0)
+![FoodOrder - Google Chrome 3_22_2025 9_41_59 PM](https://github.com/user-attachments/assets/1e3bf526-d951-43d8-9214-70134317d9fe)
+![FoodOrder - Google Chrome 3_22_2025 9_42_07 PM](https://github.com/user-attachments/assets/999e0c35-d018-44f4-9498-d021ad4d482b)
+![FoodOrder - Google Chrome 3_22_2025 9_42_10 PM](https://github.com/user-attachments/assets/195d848b-5de4-448e-a4b0-0d414027cad1)
+![FoodOrder - Google Chrome 3_22_2025 9_42_22 PM](https://github.com/user-attachments/assets/490eaa1a-d845-4af7-8baf-f02027bd9f55)
+![FoodOrder - Google Chrome 3_22_2025 9_42_31 PM](https://github.com/user-attachments/assets/e5c01476-a6c9-4efd-be85-483c6ad72446)
+![FoodOrder - Google Chrome 3_22_2025 9_43_55 PM](https://github.com/user-attachments/assets/b1202d86-ccc7-4c7e-a24a-af946ead1a06)
+![FoodOrder - Google Chrome 3_22_2025 9_44_01 PM](https://github.com/user-attachments/assets/88dae16d-1773-4e76-a2c9-838b01b63e61)
+![FoodOrder - Google Chrome 3_22_2025 9_42_37 PM](https://github.com/user-attachments/assets/f8784725-8517-48c0-ad28-f8d76a574573)
+![FoodOrder - Google Chrome 3_22_2025 9_43_18 PM](https://github.com/user-attachments/assets/7d7e82ed-a098-4f94-b4b3-2045f2afaca0)
+![FoodOrder - Google Chrome 3_22_2025 9_43_29 PM](https://github.com/user-attachments/assets/65f010d9-704e-4c83-8234-7e15595bd663)
+![FoodOrder - Google Chrome 3_22_2025 9_43_35 PM](https://github.com/user-attachments/assets/6d2ab2ed-d5ce-4dc9-b4fb-a9ef8c8ba941)
+![FoodOrder - Google Chrome 3_22_2025 9_43_41 PM](https://github.com/user-attachments/assets/33589d32-3968-41be-9a82-8f60392d31ec)
+![FoodOrder - Google Chrome 3_22_2025 9_43_44 PM](https://github.com/user-attachments/assets/7c787038-3c29-4603-8e19-6d1511ba9698)
+![FoodOrder - Google Chrome 3_22_2025 9_43_48 PM](https://github.com/user-attachments/assets/c2f07c68-ffb6-406b-8d0b-43740344dab0)
+![csacas](https://github.com/user-attachments/assets/ae0ed74a-e08e-4ac4-b55f-f863c72b15c8)
 ![sdfsdfdsfsdf](https://github.com/user-attachments/assets/74a51e5a-88a8-4879-a96d-8d631f9b1d09)
 ![dsfdsffsdfdsfsd](https://github.com/user-attachments/assets/88c37ebd-2694-457d-90c3-153e2fa309bc)
 
@@ -159,6 +160,127 @@ npm run dev
 username: admin
 password: 123456
 ```
+
+<h1>🐳 Docker Compose Setup</h1>
+
+<h2>1️⃣ Yêu cầu hệ thống</h2>
+<ul>
+  <li><a href="https://docs.docker.com/get-docker/" target="_blank">Docker</a></li>
+  <li><a href="https://docs.docker.com/compose/install/" target="_blank">Docker Compose</a></li>
+</ul>
+
+<h2>2️⃣ Cấu trúc thư mục dự án</h2>
+
+<pre>
+foodorder-project/
+├── backend-foodorder/
+├── frondend-foodorder/
+├── upload-docker/
+└── docker-compose.yml
+</pre>
+
+<h2>3️⃣ Chạy project</h2>
+
+<pre>
+docker-compose up --build
+</pre>
+
+<ul>
+  <li>Frontend: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+  <li>Backend API: <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></li>
+  <li>MySQL: localhost:3306 (user: <b>root</b> / pass: <b>root</b>)</li>
+</ul>
+
+<h2>4️⃣ Dừng toàn bộ services</h2>
+
+<pre>
+docker-compose down
+</pre>
+
+<h2>5️⃣ Thông tin chi tiết</h2>
+<ul>
+  <li>Thư mục upload được mount: <code>upload-docker</code> ➜ <code>/uploads/</code> trong backend</li>
+  <li>Frontend sử dụng biến môi trường: <code>VITE_BACKEND_URL=http://backend:8080</code></li>
+</ul>
+
+<h2>6️⃣ Docker Compose File</h2>
+
+<pre>
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frondend-foodorder
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_BACKEND_URL=http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend-foodorder
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/foodorder
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+      - upload-file.base-uri=file:///uploads/
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+    volumes:
+      - ./upload-docker/:/uploads/
+
+  mysql:
+    image: mysql:8.0.41 # Specify exact version to avoid mismatches
+    restart: always
+    environment:
+      - MYSQL_DATABASE=foodorder # No colon, consistent with list format
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+</pre>
+
+<h2>7️⃣ Lệnh hữu ích khác</h2>
+<ul>
+  <li><b>Xem logs realtime</b>:
+    <pre>docker-compose logs -f</pre>
+  </li>
+  <li><b>Xem danh sách container đang chạy</b>:
+    <pre>docker ps</pre>
+  </li>
+  <li><b>Truy cập vào bên trong mysql container</b>:
+    <pre>docker exec -it foodorder-mysql bash</pre>
+  </li>
+</ul>
+
+<hr />
+
+<p>✨ Chúc bạn deploy thành công! ✨</p>
+
 
 ## 📜 **API Endpoints**  
 
