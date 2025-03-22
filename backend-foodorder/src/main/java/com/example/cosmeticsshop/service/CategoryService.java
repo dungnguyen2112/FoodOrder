@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.cosmeticsshop.domain.Category;
 import com.example.cosmeticsshop.domain.Order;
+import com.example.cosmeticsshop.domain.Product;
+import com.example.cosmeticsshop.domain.response.ResCategoryDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
 import com.example.cosmeticsshop.repository.CategoryRepository;
 
@@ -20,6 +22,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ProductService productService;
 
     public ResultPaginationDTO fetchAllCategory(Specification<Category> spec, Pageable pageable) {
         Page<Category> pageCategory = this.categoryRepository.findAll(spec, pageable);
@@ -41,6 +46,7 @@ public class CategoryService {
                     c.setId(category.getId());
                     c.setName(category.getName());
                     c.setDescription(category.getDescription());
+                    c.setImage(category.getImage());
                     return c;
                 })
                 .collect(Collectors.toList());
@@ -55,8 +61,18 @@ public class CategoryService {
         return categories.stream().map(Category::getName).collect(Collectors.toList());
     }
 
-    public Optional<Category> getCategoryById(Long id) {
-        return categoryRepository.findById(id);
+    public ResCategoryDTO getCategoryById(Long id) {
+        return categoryRepository.findById(id).map(this::convertCategoryToResCategoryDTO)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    }
+
+    public ResCategoryDTO convertCategoryToResCategoryDTO(Category category) {
+        ResCategoryDTO resCategoryDTO = new ResCategoryDTO();
+        resCategoryDTO.setId(category.getId());
+        resCategoryDTO.setName(category.getName());
+        resCategoryDTO.setDescription(category.getDescription());
+        resCategoryDTO.setImage(category.getImage());
+        return resCategoryDTO;
     }
 
     public Category createCategory(Category category) {
@@ -67,6 +83,7 @@ public class CategoryService {
         return categoryRepository.findById(id).map(category -> {
             category.setName(categoryDetails.getName());
             category.setDescription(categoryDetails.getDescription());
+            category.setImage(categoryDetails.getImage());
             return categoryRepository.save(category);
         }).orElseThrow(() -> new RuntimeException("Category not found"));
     }
@@ -78,4 +95,5 @@ public class CategoryService {
     public Long getTotalCategories() {
         return categoryRepository.count();
     }
+
 }

@@ -102,6 +102,28 @@ public class ProductService {
         return rs;
     }
 
+    public ResultPaginationDTO fetchAllProductByCategoryId(Long id, Pageable pageable) {
+        Page<Product> pageProduct = this.productRepository.findByCategoryId(id, pageable);
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+
+        mt.setPages(pageProduct.getTotalPages());
+        mt.setTotal(pageProduct.getTotalElements());
+
+        rs.setMeta(mt);
+
+        // remove sensitive data
+        List<ResProductDTO> listProduct = pageProduct.getContent()
+                .stream().map(item -> this.convertToResProductDTO(item))
+                .collect(Collectors.toList());
+        rs.setResult(listProduct);
+
+        return rs;
+    }
+
     public ResProductDTO convertToResProductDTO(Product product) {
         ResProductDTO resProductDTO = new ResProductDTO();
         resProductDTO.setId(product.getId());

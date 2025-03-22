@@ -21,9 +21,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DBMS_CONNECTION=jdbc:mysql://foodorder-mysql-1:3306/foodorder
-      - DBMS_USERNAME=root
-      - DBMS_PASSWORD=root
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/foodorder
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
       - upload-file.base-uri=file:///uploads/
     depends_on:
       - mysql
@@ -33,11 +36,11 @@ services:
       - ./upload-docker/:/uploads/
 
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.41 # Specify exact version to avoid mismatches
     restart: always
     environment:
-      MYSQL_DATABASE: foodorder
-      MYSQL_ROOT_PASSWORD: root
+      - MYSQL_DATABASE=foodorder # No colon, consistent with list format
+      - MYSQL_ROOT_PASSWORD=root
     ports:
       - "3306:3306"
     networks:

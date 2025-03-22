@@ -3,6 +3,7 @@ package com.example.cosmeticsshop.controller;
 import com.example.cosmeticsshop.domain.Category;
 import com.example.cosmeticsshop.domain.Product;
 import com.example.cosmeticsshop.domain.request.ReqProductDTO;
+import com.example.cosmeticsshop.domain.response.ResCategoryDTO;
 import com.example.cosmeticsshop.domain.response.ResProductDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
 import com.example.cosmeticsshop.service.CategoryService;
@@ -33,9 +34,9 @@ public class CategoryController {
     // Lấy thông tin Category theo ID
     @GetMapping("/categories/{id}")
     @ApiMessage("Get a category by ID")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
-        Optional<Category> category = categoryService.getCategoryById(id);
-        return category.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<ResCategoryDTO> getCategoryById(@PathVariable Long id) {
+        ResCategoryDTO category = categoryService.getCategoryById(id);
+        return ResponseEntity.ok(category);
     }
 
     @GetMapping("/categories")
