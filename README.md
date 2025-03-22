@@ -200,7 +200,7 @@ docker-compose down
 <h2>5️⃣ Thông tin chi tiết</h2>
 <ul>
   <li>Thư mục upload được mount: <code>upload-docker</code> ➜ <code>/uploads/</code> trong backend</li>
-  <li>Frontend sử dụng biến môi trường: <code>VITE_BACKEND_URL=http://backend:8080</code></li>
+  <li>Frontend sử dụng biến môi trường: <code>VITE_BACKEND_URL=http://localhost:8080</code></li>
 </ul>
 
 <h2>6️⃣ Docker Compose File</h2>
