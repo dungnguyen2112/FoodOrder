@@ -183,4 +183,12 @@ public class ProductController {
 
     }
 
+    @GetMapping("/products/category/{id}")
+    @ApiMessage("Get all products of a category")
+    public ResponseEntity<ResultPaginationDTO> getProductsByCategoryId(@PathVariable Long id,
+            @ParameterObject Pageable pageable) {
+        ResultPaginationDTO result = this.productService.fetchAllProductByCategoryId(id, pageable);
+        return ResponseEntity.ok(result);
+    }
+
 }

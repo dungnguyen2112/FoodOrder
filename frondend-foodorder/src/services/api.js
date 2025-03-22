@@ -106,16 +106,48 @@ export const callFetchCategoryPage = (query) => {
     return axios.get(`/api/v1/categories/pagination?${query}`)
 }
 
-export const callCreateCategory = (name, description) => {
-    return axios.post('/api/v1/categories', { name, description })
+export const callCreateCategory = (name, description, image) => {
+    return axios.post('/api/v1/categories', { name, description, image })
 }
 
-export const callUpdateCategory = (id, name, description) => {
-    return axios.put(`/api/v1/categories/${id}`, { name, description })
+export const callFetchCategoryById = (id) => {
+    return axios.get(`/api/v1/categories/${id}`)
+}
+
+export const callFetchProductsByCategory = (id, query) => {
+    return axios.get(`/api/v1/products/category/${id}?${query}`);
+}
+
+export const callUpdateCategory = (id, name, description, image) => {
+    return axios.put(`/api/v1/categories/${id}`, { name, description, image })
 }
 
 export const callDeleteCategory = (id) => {
     return axios.delete(`/api/v1/categories/${id}`)
+}
+
+export const callUploadCategoryImg = async (file, folder) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", folder);
+
+    const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
+
+    const response = await fetch("http://localhost:8080/api/v1/files", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}` // Add JWT token
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Server response:", data);
+    return data;
 }
 
 export const callPlaceOrder = (data) => {
@@ -211,3 +243,22 @@ export const callForgotPassword = (email) => {
 export const callResetPassword = (token, newPassword) => {
     return axios.post('/api/v1/auth/reset-password', { token, newPassword })
 }
+
+export const getWishlist = () => {
+    return axios.get('/api/v1/wishlist')
+}
+
+export const addToWishlist = (productId) => {
+    return axios.post('/api/v1/wishlist/add', null, {
+        params: { productId }
+    });
+};
+
+
+export const removeFromWishlist = (productId) => {
+    return axios.delete('/api/v1/wishlist/remove', {
+        params: { productId }
+    });
+};
+
+

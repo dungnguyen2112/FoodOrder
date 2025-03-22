@@ -1,0 +1,70 @@
+package com.example.cosmeticsshop.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.cosmeticsshop.domain.Product;
+import com.example.cosmeticsshop.domain.User;
+import com.example.cosmeticsshop.domain.response.ResWithListDTO;
+import com.example.cosmeticsshop.service.UserService;
+import com.example.cosmeticsshop.service.WishListService;
+import com.example.cosmeticsshop.util.SecurityUtil;
+
+@RestController
+@RequestMapping("/api/v1/wishlist")
+public class WishListController {
+
+    @Autowired
+    private WishListService WishListService;
+
+    @Autowired
+    private UserService userService;
+
+    // Lấy danh sách WishList của user
+    @GetMapping
+    public ResponseEntity<ResWithListDTO> getWishList() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(email);
+        Long userId = currentUserDB.getId();
+        List<Product> WishList = WishListService.getWishList(userId);
+        List<Long> WishListIds = WishListService.getWishListIds(userId);
+        return ResponseEntity.ok(new ResWithListDTO(WishListIds));
+    }
+
+    // Thêm sản phẩm vào WishList
+    @PostMapping("/add")
+    public ResponseEntity<?> addToWishList(@RequestParam Long productId) {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(email);
+        Long userId = currentUserDB.getId();
+        WishListService.addToWishList(userId, productId);
+        return ResponseEntity.ok("Added to WishList");
+    }
+
+    // Xóa sản phẩm khỏi WishList
+    @DeleteMapping("/remove")
+    public ResponseEntity<?> removeFromWishList(@RequestParam Long productId) {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(email);
+        Long userId = currentUserDB.getId();
+        WishListService.removeFromWishList(userId, productId);
+        return ResponseEntity.ok("Removed from WishList");
+    }
+}

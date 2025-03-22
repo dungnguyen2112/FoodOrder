@@ -6,7 +6,8 @@ const RoleBaseRoute = (props) => {
     const isAdminRoute = window.location.pathname.startsWith('/admin');
 
     // Lấy user từ Redux trước, nếu không có thì lấy từ localStorage
-    const user = useSelector(state => state.account.user) || JSON.parse(localStorage.getItem("userInfo"));
+    const user = useSelector(state => state.account.user);
+    // || JSON.parse(localStorage.getItem("userInfo"));
 
     if (!user) {
         return <Navigate to="/login" replace />;

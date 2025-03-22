@@ -1,11 +1,13 @@
-import { Col, Divider, Form, Radio, Row, Checkbox, Input, message, notification } from 'antd';
-import { DeleteTwoTone, LoadingOutlined } from '@ant-design/icons';
+import { Col, Divider, Form, Radio, Row, Checkbox, Input, message, notification, Card, Badge, Button, Typography, Space, Spin } from 'antd';
+import { DeleteTwoTone, LoadingOutlined, ShoppingOutlined, CreditCardOutlined, HomeOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { doDeleteItemCartAction, doPlaceOrderAction } from '../../redux/order/orderSlice';
 import { callPlaceOrder } from '../../services/api';
+import './Payment.scss';
 
 const { TextArea } = Input;
+const { Title, Text } = Typography;
 
 const Payment = (props) => {
     const carts = useSelector(state => state.order.carts);
@@ -66,97 +68,149 @@ const Payment = (props) => {
         setIsSubmit(false);
     };
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
+
     return (
-        <Row gutter={[20, 20]}>
-            <Col md={16} xs={24}>
-                {carts?.map((book, index) => (
-                    <div className='order-book' key={`index-${index}`}>
-                        <div className='book-content'>
-                            <img src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${book?.detail?.image}`} />
-                            <div className='title'>{book?.detail?.name}</div>
-                            <div className='price'>
-                                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.detail.price)}
+        <div className="payment-container">
+            <Row gutter={[24, 24]}>
+                <Col md={16} xs={24}>
+                    <Card
+                        title={
+                            <div className="cart-header">
+                                <ShoppingOutlined className="cart-icon" />
+                                <span>Giỏ hàng của bạn</span>
+                                <Badge count={carts?.length || 0} className="cart-badge" />
                             </div>
-                        </div>
-                        <div className='action'>
-                            <div className='quantity'>Số lượng: {book?.quantity}</div>
-                            <div className='sum'>
-                                Tổng: {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(book.detail.price * book.quantity)}
+                        }
+                        className="cart-card"
+                    >
+                        {carts && carts.length > 0 ? (
+                            carts.map((item, index) => (
+                                <div className="cart-item" key={`item-${index}`}>
+                                    <div className="item-image">
+                                        <img
+                                            src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item?.detail?.image}`}
+                                            alt={item?.detail?.name}
+                                        />
+                                    </div>
+                                    <div className="item-info">
+                                        <Title level={5}>{item?.detail?.name}</Title>
+                                        <Text type="secondary">Đơn giá: {formatCurrency(item.detail.price)}</Text>
+                                        <Text strong>Số lượng: {item?.quantity}</Text>
+                                    </div>
+                                    <div className="item-actions">
+                                        <Text className="item-total">
+                                            {formatCurrency(item.detail.price * item.quantity)}
+                                        </Text>
+                                        <Button
+                                            type="text"
+                                            danger
+                                            icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                                            onClick={() => dispatch(doDeleteItemCartAction({ _id: item.id }))}
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="empty-cart">
+                                <ShoppingOutlined className="empty-icon" />
+                                <Text>Giỏ hàng trống</Text>
                             </div>
-                            <DeleteTwoTone
-                                style={{ cursor: "pointer" }}
-                                onClick={() => dispatch(doDeleteItemCartAction({ _id: book.id }))}
-                                twoToneColor="#eb2f96"
-                            />
-                        </div>
-                    </div>
-                ))}
-            </Col>
-            <Col md={8} xs={24}>
-                <div className='order-sum'>
-                    <Form form={form} onFinish={onFinish}>
-                        <Form.Item
-                            label="Tên người nhận"
-                            name="name"
-                            initialValue={user?.fullName}
-                            rules={[{ required: true, message: 'Tên người nhận không được để trống!' }]}
-                        >
-                            <Input />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Số điện thoại"
-                            name="phone"
-                            initialValue={user?.phone}
-                            rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}
-                        >
-                            <Input />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Địa chỉ"
-                            name="address"
-                            rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}
-                        >
-                            <TextArea rows={4} />
-                        </Form.Item>
-
-
-                        <Form.Item name="isDineIn" valuePropName="checked">
-                            <Checkbox onChange={handleDineInChange}>Ăn tại nhà hàng</Checkbox>
-                        </Form.Item>
-
-                        {isDineIn && (
-                            <Form.Item
-                                label="Số bàn"
-                                name="tableNumber"
-                                rules={[{ required: true, message: 'Vui lòng nhập số bàn!' }]}
-                            >
-                                <Input placeholder="Nhập số bàn" />
-                            </Form.Item>
                         )}
-                    </Form>
-                    <div className='info'>
-                        <div className='method'>
-                            <div>Hình thức thanh toán</div>
-                            <Radio checked>Thanh toán khi nhận hàng</Radio>
-                        </div>
-                    </div>
+                    </Card>
+                </Col>
+                <Col md={8} xs={24}>
+                    <Card
+                        title={
+                            <div className="order-summary-header">
+                                <CreditCardOutlined className="summary-icon" />
+                                <span>Thông tin đặt hàng</span>
+                            </div>
+                        }
+                        className="order-summary-card"
+                    >
+                        <Form
+                            form={form}
+                            onFinish={onFinish}
+                            layout="vertical"
+                            className="order-form"
+                        >
+                            <Form.Item
+                                label={<><UserOutlined /> Tên người nhận</>}
+                                name="name"
+                                initialValue={user?.fullName}
+                                rules={[{ required: true, message: 'Tên người nhận không được để trống!' }]}
+                            >
+                                <Input placeholder="Nhập tên người nhận" />
+                            </Form.Item>
 
-                    <Divider style={{ margin: "5px 0" }} />
-                    <div className='calculate'>
-                        <span>Tổng tiền</span>
-                        <span className='sum-final'>
-                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPrice || 0)}
-                        </span>
-                    </div>
-                    <Divider style={{ margin: "5px 0" }} />
-                    <button onClick={() => form.submit()} disabled={isSubmit}>
-                        {isSubmit && <LoadingOutlined />} Đặt Hàng ({carts?.length ?? 0})
-                    </button>
-                </div>
-            </Col>
-        </Row>
+                            <Form.Item
+                                label={<><PhoneOutlined /> Số điện thoại</>}
+                                name="phone"
+                                initialValue={user?.phone}
+                                rules={[{ required: true, message: 'Số điện thoại không được để trống!' }]}
+                            >
+                                <Input placeholder="Nhập số điện thoại" />
+                            </Form.Item>
+
+                            <Form.Item
+                                label={<><HomeOutlined /> Địa chỉ</>}
+                                name="address"
+                                rules={[{ required: true, message: 'Địa chỉ không được để trống!' }]}
+                            >
+                                <TextArea rows={3} placeholder="Nhập địa chỉ nhận hàng" />
+                            </Form.Item>
+
+                            <Form.Item name="isDineIn" valuePropName="checked" className="dine-in-option">
+                                <Checkbox onChange={handleDineInChange}>
+                                    <Text strong>Ăn tại nhà hàng</Text>
+                                </Checkbox>
+                            </Form.Item>
+
+                            {isDineIn && (
+                                <Form.Item
+                                    label="Số bàn"
+                                    name="tableNumber"
+                                    rules={[{ required: true, message: 'Vui lòng nhập số bàn!' }]}
+                                >
+                                    <Input placeholder="Nhập số bàn" />
+                                </Form.Item>
+                            )}
+                        </Form>
+
+                        <div className="payment-method">
+                            <Title level={5}>Hình thức thanh toán</Title>
+                            <Radio checked>
+                                <Text>Thanh toán khi nhận hàng</Text>
+                            </Radio>
+                        </div>
+
+                        <Divider className="summary-divider" />
+
+                        <div className="order-total">
+                            <Text strong>Tổng tiền:</Text>
+                            <Text className="total-amount">
+                                {formatCurrency(totalPrice || 0)}
+                            </Text>
+                        </div>
+
+                        <Button
+                            type="primary"
+                            block
+                            size="large"
+                            className="checkout-button"
+                            onClick={() => form.submit()}
+                            disabled={isSubmit || carts.length === 0}
+                        >
+                            {isSubmit ? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} /> : "Đặt hàng"}
+                            {!isSubmit && <span>({carts?.length ?? 0} món)</span>}
+                        </Button>
+                    </Card>
+                </Col>
+            </Row>
+        </div>
     );
 };
 

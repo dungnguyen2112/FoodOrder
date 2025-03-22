@@ -1,51 +1,99 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import "./menu.scss";
 import bg from "./d.jpg";
+import { callFetchCategory, callFetchCategoryPage, callFetchListFood, callFetchProductsByCategory } from "../../services/api";
 
-import { burgers } from "../Datalandingpage/burger";
-import { combo } from "../Datalandingpage/combo";
-import { others } from "../Datalandingpage/others";
-import { pizza } from "../Datalandingpage/pizza";
-import { chicken } from "../Datalandingpage/chicken";
 
 const Menu = () => {
-  const [products, setProducts] = useState(combo);
+  const [products, setProducts] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState(1);
 
-  const menu = [
-    {
-      id: 1,
-      name: "Combo",
-    },
-    {
-      id: 2,
-      name: "Burger",
-    },
-    {
-      id: 3,
-      name: "Pizza",
-    },
-    {
-      id: 4,
-      name: "Chicken",
-    },
-    {
-      id: 5,
-      name: "Drinks & others",
-    },
-  ];
+  const transformCategoryData = (categories) => {
+    return categories.map(cat => ({
+      id: cat.id,
+      name: cat.name
+    }));
+  };
 
-  const menuClickHandler = (data) => {
-    if (data.name === "Combo") {
-      setProducts(combo);
-    } else if (data.name === "Burger") {
-      setProducts(burgers);
-    } else if (data.name === "Pizza") {
-      setProducts(pizza);
-    } else if (data.name === "Chicken") {
-      setProducts(chicken);
-    } else if (data.name === "Drinks & others") {
-      setProducts(others);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchPageCategories = async () => {
+      try {
+        const res = await callFetchCategoryPage("size=6");
+        if (res?.data) {
+          setListCategory(transformCategoryData(res.data.result, true));
+          if (categories.length > 0) {
+            const defaultCategory = categories[0]; // lấy danh mục đầu tiên
+            setSelectedCategory(defaultCategory.id); // set active tab
+            fetchProducts(defaultCategory.id); // gọi API lấy sản phẩm
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching page categories:", error);
+      }
+    };
+    fetchPageCategories();
+  }, []);
+
+  // const fetchFood = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const res = await callFetchListFood("sort=sold,desc&size=4");
+  //     if (res?.data) {
+  //       setProducts(res.data.result);
+  //       setTotal(res.data.meta.total);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching food:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const menuClickHandler = (category) => {
+    setSelectedCategory(category);
+
+    // Filter products by the selected category
+    fetchProducts(category);
+  };
+
+  const fetchProducts = async (id) => {
+    try {
+      let query = `sort=sold,desc&size=4`;
+      if (id === undefined) {
+        id = selectedCategory;
+      }
+      const res = await callFetchProductsByCategory(id, query);
+      if (res && res.data) {
+        setProducts(res.data.result);
+        setTotal(res.data.total);
+      }
+      return res;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const fetchFoodByCategory = async (name) => {
+    setIsLoading(true);
+    try {
+      const res = await callFetchListFood(`category=${name}&sort=sold,desc`);
+      if (res?.data) {
+        // Filter the results to only show items from the selected category
+        const filteredProducts = res.data.result.filter(product => product.categoryName === name);
+        setProducts(filteredProducts);
+      }
+    } catch (error) {
+      console.error("Error fetching food by category:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -62,27 +110,36 @@ const Menu = () => {
               What will you eat today?
             </h1>
             <div className="foodMenuContainerList">
-              {menu.map((m) => (
+              {listCategory.map((category) => (
                 <div
-                  className="foodMenuContainerItem"
-                  key={m.id}
-                  onClick={() => menuClickHandler(m)}
+                  className={`foodMenuContainerItem ${selectedCategory === category.id ? 'active' : ''}`}
+                  key={category.id}
+                  onClick={() => menuClickHandler(category.id)}
                 >
-                  {m.name}
+                  {category.name}
                 </div>
               ))}
             </div>
-            <div className="foodMenu">
-              {products.map((p) => (
-                <div className="foodMenuDetails" key={p.id}>
-                  <div className="foodMenuImg">
-                    <img src={p.imageUrl} alt={p.name} className="bgImg" />
+
+            {isLoading ? (
+              <div className="loading">Loading...</div>
+            ) : (
+              <div className="foodMenu">
+                {products.map((product) => (
+                  <div className="foodMenuDetails" key={product.id}>
+                    <div className="foodMenuImg">
+                      <img src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${product.image}`} alt={product.name} className="bgImg" />
+                    </div>
+                    <h1>{product.name}</h1>
+                    <p>{`${product.price} đ`}</p>
                   </div>
-                  <h1>{p.name}</h1>
-                  <p>{`${p.price} $`}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
+
+            {products.length === 0 && !isLoading && (
+              <div className="noProducts">No items found in this category</div>
+            )}
           </div>
         </div>
       </div>

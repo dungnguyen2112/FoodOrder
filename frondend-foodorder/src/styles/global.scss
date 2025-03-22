@@ -1,3 +1,16 @@
+// Thêm container wrapper cho toàn trang
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    width: 90%;
+    margin: 0 auto; // Căn giữa container
+    max-width: 1800px; // Thiết lập kích thước tối đa (điều chỉnh nếu cần)
+}
+
+// Giữ nguyên code hiện tại của bạn
 .popover-carts {
     .pop-cart-body {
         .pop-cart-content {
@@ -78,4 +91,14 @@
             background: #7d7d7d;
         }
     }
+}
+
+/* CSS toàn trang hoặc riêng cho component */
+.imageslide-container,
+.imageslide-slide,
+.imageslide-caption,
+.imageslide-wrapper {
+    border: none !important;
+    box-shadow: none !important;
+    background: none !important;
 }

@@ -1,48 +1,193 @@
-import { Badge, Descriptions, Divider, Space, Table, Tag } from "antd";
+import { Badge, Card, Descriptions, Divider, Empty, Space, Table, Tag, Typography, Spin } from "antd";
+import { ShoppingCartOutlined, ClockCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { callOrderHistory } from "../../services/api";
 import { FORMAT_DATE_DISPLAY } from "../../utils/constant";
-import ReactJson from 'react-json-view'
+
+const { Title, Text } = Typography;
 
 const History = () => {
     const [orderHistory, setOrderHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
         const fetchHistory = async () => {
-            const res = await callOrderHistory();
-            if (res && res.data) {
-                setOrderHistory(res.data);
+            try {
+                setLoading(true);
+                const res = await callOrderHistory();
+                if (res && res.data) {
+                    setOrderHistory(res.data);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải lịch sử đơn hàng:", error);
+            } finally {
+                setLoading(false);
             }
-        }
+        };
+
         fetchHistory();
     }, []);
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case "PENDING":
+                return "orange";
+            case "NOT_PAID":
+                return "red";
+            default:
+                return "green";
+        }
+    };
+
+    const getStatusTag = (status) => {
+        const color = status === "COMPLET" ? "green" : status === "PAID" ? "green" : getStatusColor(status);
+        return (
+            <Tag color={color} style={{ margin: "0" }}>
+                {status}
+            </Tag>
+        );
+    };
+
+    // Cột chi tiết sản phẩm
+    const productColumns = [
+        {
+            title: 'Tên sản phẩm',
+            dataIndex: 'productName',
+            key: 'productName',
+            width: '50%',
+        },
+        {
+            title: 'Giá',
+            dataIndex: 'price',
+            key: 'price',
+            width: '30%',
+            render: (price) => formatCurrency(price),
+        },
+        {
+            title: 'Số lượng',
+            dataIndex: 'quantity',
+            key: 'quantity',
+            width: '20%',
+            align: 'center',
+        },
+    ];
+
+    // Cột đơn hàng
+    const orderColumns = [
+        {
+            title: 'Mã đơn hàng',
+            dataIndex: 'orderId',
+            key: 'orderId',
+            width: 100,
+        },
+        {
+            title: 'Tên người nhận',
+            dataIndex: 'name',
+            key: 'name',
+            width: 120,
+        },
+        {
+            title: 'Địa chỉ',
+            dataIndex: 'address',
+            key: 'address',
+            width: 150,
+            ellipsis: true,
+        },
+        {
+            title: 'Số điện thoại',
+            dataIndex: 'phone',
+            key: 'phone',
+            width: 120,
+        },
+        {
+            title: 'Số bàn',
+            dataIndex: 'tableNumber',
+            key: 'tableNumber',
+            width: 80,
+            align: 'center',
+        },
+        {
+            title: 'Tổng tiền',
+            dataIndex: 'totalPrice',
+            key: 'totalPrice',
+            width: 120,
+            render: (price) => formatCurrency(price),
+        },
+        {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            key: 'status',
+            width: 100,
+            align: 'center',
+            render: (status) => getStatusTag(status),
+        },
+        {
+            title: 'Thanh toán',
+            dataIndex: 'paymentStatus',
+            key: 'paymentstatus',
+            width: 100,
+            align: 'center',
+            render: (status) => getStatusTag(status),
+        },
+        {
+            title: 'Chi tiết sản phẩm',
+            key: 'details',
+            render: (_, order) => (
+                <Table
+                    columns={productColumns}
+                    dataSource={order.orderDetails}
+                    pagination={false}
+                    size="small"
+                    bordered
+                    summary={(pageData) => {
+                        let totalItems = 0;
+                        pageData.forEach(({ quantity }) => {
+                            totalItems += quantity;
+                        });
+                        return (
+                            <Table.Summary.Row>
+                                <Table.Summary.Cell index={0}>Tổng cộng</Table.Summary.Cell>
+                                <Table.Summary.Cell index={1}></Table.Summary.Cell>
+                                <Table.Summary.Cell index={2} align="center">{totalItems}</Table.Summary.Cell>
+                            </Table.Summary.Row>
+                        );
+                    }}
+                />
+            ),
+        },
+    ];
+
+    // Cột chính
     const columns = [
         {
             title: 'STT',
             dataIndex: 'id',
             key: 'id',
-            render: (item, record, index) => (<>{index + 1}</>)
+            width: 60,
+            render: (_, __, index) => (<>{index + 1}</>),
+            align: 'center',
         },
         {
-            title: 'Thời gian ',
+            title: 'Thời gian',
             dataIndex: 'createdAt',
-            render: (item, record, index) => {
-                return moment(item).format(FORMAT_DATE_DISPLAY)
-            }
+            key: 'createdAt',
+            width: 150,
+            render: (date) => (
+                <div>{moment(date).format(FORMAT_DATE_DISPLAY)}</div>
+            )
         },
-        // {
-        //     title: 'Tổng số tiền',
-        //     dataIndex: 'totalPrice',
-        //     render: (item, record, index) => {
-        //         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item)
-        //     }
-        // },
         {
             title: 'Trạng thái',
-            render: (_, { tags }) => (
-
-                <Tag color={"green"}>
+            key: 'status',
+            width: 120,
+            align: 'center',
+            render: () => (
+                <Tag color="green" style={{ margin: "0" }}>
                     Thành công
                 </Tag>
             )
@@ -51,110 +196,61 @@ const History = () => {
             title: 'Chi tiết',
             key: 'action',
             render: (_, record) => (
-                <div>
+                <div style={{ width: '100%' }}>
                     {record.orders && record.orders.length > 0 ? (
-                        <Table
-                            columns={[
-                                {
-                                    title: 'Mã đơn hàng',
-                                    dataIndex: 'orderId',
-                                    key: 'orderId',
-                                },
-                                {
-                                    title: 'Tên người nhận',
-                                    dataIndex: 'name',
-                                    key: 'name',
-                                },
-                                {
-                                    title: 'Địa chỉ',
-                                    dataIndex: 'address',
-                                    key: 'address',
-                                },
-                                {
-                                    title: 'Số điện thoại',
-                                    dataIndex: 'phone',
-                                    key: 'phone',
-                                },
-                                {
-                                    title: "Số bàn",
-                                    dataIndex: "tableNumber",
-                                    key: "tableNumber",
-                                },
-                                {
-                                    title: 'Tổng tiền',
-                                    dataIndex: 'totalPrice',
-                                    key: 'totalPrice',
-                                    render: (item) => (
-                                        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item)
-                                    ),
-                                },
-                                {
-                                    title: 'Trạng thái',
-                                    dataIndex: 'status',
-                                    key: 'status',
-                                    render: (status) => (
-                                        <Tag color={status === "PENDING" ? "orange" : "green"}>{status}</Tag>
-                                    ),
-                                },
-                                {
-                                    title: 'Trạng thái thanh toán',
-                                    dataIndex: 'paymentStatus',
-                                    key: 'paymentstatus',
-                                    render: (status) => (
-                                        <Tag color={status === "NOT_PAID" ? "red" : "green"}>{status}</Tag>
-                                    ),
-                                },
-                                {
-                                    title: 'Chi tiết sản phẩm',
-                                    key: 'details',
-                                    render: (_, order) => (
-                                        <Table
-                                            columns={[
-                                                {
-                                                    title: 'Tên sản phẩm',
-                                                    dataIndex: 'productName',
-                                                    key: 'productName',
-                                                },
-                                                {
-                                                    title: 'Giá',
-                                                    dataIndex: 'price',
-                                                    key: 'price',
-                                                    render: (item) => (
-                                                        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item)
-                                                    ),
-                                                },
-                                                {
-                                                    title: 'Số lượng',
-                                                    dataIndex: 'quantity',
-                                                    key: 'quantity',
-                                                },
-                                            ]}
-                                            dataSource={order.orderDetails}
-                                            pagination={false}
-                                            size="small"
-                                        />
-                                    ),
-                                },
-                            ]}
-                            dataSource={record.orders}
-                            pagination={false}
-                        />
+                        <div className="order-details">
+                            <div className="order-header" style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                                <ShoppingCartOutlined /> Chi tiết đơn hàng
+                            </div>
+                            <Table
+                                columns={orderColumns}
+                                dataSource={record.orders}
+                                pagination={false}
+                                bordered
+                                size="small"
+                                scroll={{ x: 1200 }}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'center',
+                                }}
+                            />
+                        </div>
                     ) : (
-                        <Tag color="red">Không có đơn hàng</Tag>
+                        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Không có đơn hàng" />
                     )}
                 </div>
             ),
         },
-
     ];
 
-
     return (
-        <div >
-            <div style={{ margin: "15px 0" }}>Lịch sử đặt hàng:</div>
-            <Table columns={columns} dataSource={orderHistory} pagination={false} />
+        <div style={{ padding: '0px', backgroundColor: 'rgb(239, 239, 239)', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', marginTop: '14px' }}>
+                <ShoppingCartOutlined style={{ marginRight: '8px', fontSize: '20px' }} />
+                <div style={{ fontWeight: 'bold', fontSize: '16px' }}>Lịch sử đặt hàng</div>
+            </div>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                    <Spin size="large" />
+                    <div style={{ marginTop: '20px' }}>Đang tải dữ liệu...</div>
+                </div>
+            ) : orderHistory.length > 0 ? (
+                <Table
+                    columns={columns}
+                    dataSource={orderHistory}
+                    pagination={false}
+                    rowKey="id"
+                    bordered
+                    style={{ width: '100%' }}
+                    size="middle"
+                    scroll={{ x: '100%' }}
+                />
+            ) : (
+                <Empty description="Không có lịch sử đơn hàng" />
+            )}
         </div>
-    )
-}
+    );
+};
 
 export default History;

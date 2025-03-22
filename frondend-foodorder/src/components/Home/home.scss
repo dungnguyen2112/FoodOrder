@@ -86,6 +86,12 @@
         padding: 20px 0;
     }
 
+    .ant-spin-container>div {
+        background: transparent !important;
+        /* hoặc bất kỳ màu nào bạn muốn */
+    }
+
+
     .column {
         width: calc(25% - 20px);
         /* Chia thành 4 cột, nếu muốn 5 cột thì đổi thành 20% */
@@ -123,9 +129,9 @@
 
     .wrapper {
         position: relative;
-        background: white;
         border-radius: 12px;
         overflow: hidden;
+        background: rgba(255, 255, 255, 0.9);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         padding: 10px;
         text-align: center;
@@ -194,7 +200,6 @@
 }
 
 .filter-container {
-    background: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
