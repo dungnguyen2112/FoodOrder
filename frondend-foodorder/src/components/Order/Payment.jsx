@@ -3,33 +3,48 @@ import { DeleteTwoTone, LoadingOutlined, ShoppingOutlined, CreditCardOutlined, H
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { doDeleteItemCartAction, doPlaceOrderAction } from '../../redux/order/orderSlice';
+import { clearBuyNowAction } from '../../redux/order/buyNowSlice';
 import { callPlaceOrder } from '../../services/api';
 import './Payment.scss';
+import { set } from 'lodash';
 
 const { TextArea } = Input;
 const { Title, Text } = Typography;
 
 const Payment = (props) => {
     const carts = useSelector(state => state.order.carts);
+    const buyNowItem = useSelector(state => state.buyNow.buyNowItem);
     const [totalPrice, setTotalPrice] = useState(0);
     const dispatch = useDispatch();
     const [isSubmit, setIsSubmit] = useState(false);
     const user = useSelector(state => state.account.user);
     const [form] = Form.useForm();
-
+    const [isFinish, setIsFinish] = useState(false);
     const [isDineIn, setIsDineIn] = useState(false);
     const restaurantAddress = "Nhà hàng ABC, 123 Đường XYZ, Quận 1, TP. Hồ Chí Minh";
     const restaurantTable = "Ăn tại nhà";
 
     useEffect(() => {
-        if (carts.length > 0) {
+        if (buyNowItem) {
+            setTotalPrice(buyNowItem.quantity * buyNowItem.detail.price);
             form.setFieldsValue({ address: restaurantAddress });
-            let sum = carts.reduce((acc, item) => acc + item.quantity * item.detail.price, 0);
+        } else if (carts.length > 0) {
+            const sum = carts.reduce((acc, item) => acc + item.quantity * item.detail.price, 0);
             setTotalPrice(sum);
+            form.setFieldsValue({ address: restaurantAddress });
         } else {
             setTotalPrice(0);
         }
-    }, [carts][user.royalty]);
+        localStorage.removeItem('buyNowFromDetailPage');
+        //Cleanup: Xóa buyNowItem nếu thoát ra mà không đặt hàng
+        return () => {
+            if (buyNowItem && !isSubmit && isFinish) {
+                dispatch(clearBuyNowAction());
+                console.log("Đã xóa buyNowItem vì thoát ra giữa chừng");
+            }
+        };
+
+    }, [carts, buyNowItem, form, dispatch, isSubmit]);
 
     const handleDineInChange = (e) => {
         setIsDineIn(e.target.checked);
@@ -37,12 +52,29 @@ const Payment = (props) => {
     };
 
     const onFinish = async (values) => {
+        setIsFinish(true);
         setIsSubmit(true);
-        const detailOrder = carts.map(item => ({
-            bookName: item.detail.name,
-            quantity: item.quantity,
-            id: item.id
-        }));
+        let detailOrder = [];
+
+        if (buyNowItem) {
+            detailOrder = [{
+                bookName: buyNowItem.detail.name,
+                quantity: buyNowItem.quantity,
+                id: buyNowItem.id
+            }];
+        } else if (carts.length > 0) {
+            detailOrder = carts.map(item => ({
+                bookName: item.detail.name,
+                quantity: item.quantity,
+                id: item.id
+            }));
+        }
+
+        if (detailOrder.length === 0) {
+            notification.error({ message: "Không có sản phẩm để đặt hàng!" });
+            setIsSubmit(false);
+            return;
+        }
 
         const data = {
             name: values.name,
@@ -57,7 +89,12 @@ const Payment = (props) => {
         const res = await callPlaceOrder(data);
         if (res && res.data) {
             message.success('Đặt hàng thành công!');
-            dispatch(doPlaceOrderAction());
+            if (buyNowItem) {
+                dispatch(clearBuyNowAction()); // Xóa buyNowItem sau khi đặt hàng thành công
+                props.setcurrentStepBuyNow(1);
+            } else {
+                dispatch(doPlaceOrderAction()); // Xóa giỏ hàng
+            }
             props.setCurrentStep(2);
         } else {
             notification.error({
@@ -80,13 +117,38 @@ const Payment = (props) => {
                         title={
                             <div className="cart-header">
                                 <ShoppingOutlined className="cart-icon" />
-                                <span>Giỏ hàng của bạn</span>
-                                <Badge count={carts?.length || 0} className="cart-badge" />
+                                <span>{buyNowItem ? 'Xác nhận mua ngay' : 'Giỏ hàng của bạn'}</span>
+                                <Badge count={buyNowItem ? 1 : carts?.length || 0} className="cart-badge" />
                             </div>
                         }
                         className="cart-card"
                     >
-                        {carts && carts.length > 0 ? (
+                        {buyNowItem ? (
+                            <div className="cart-item">
+                                <div className="item-image">
+                                    <img
+                                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${buyNowItem.detail.image}`}
+                                        alt={buyNowItem.detail.name}
+                                    />
+                                </div>
+                                <div className="item-info">
+                                    <Title level={5}>{buyNowItem.detail.name}</Title>
+                                    <Text type="secondary">Đơn giá: {formatCurrency(buyNowItem.detail.price)}</Text>
+                                    <Text strong>Số lượng: {buyNowItem.quantity}</Text>
+                                </div>
+                                <div className="item-actions">
+                                    <Text className="item-total">
+                                        {formatCurrency(buyNowItem.detail.price * buyNowItem.quantity)}
+                                    </Text>
+                                    <Button
+                                        type="text"
+                                        danger
+                                        icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                                        onClick={() => dispatch(clearBuyNowAction())}
+                                    />
+                                </div>
+                            </div>
+                        ) : carts.length > 0 ? (
                             carts.map((item, index) => (
                                 <div className="cart-item" key={`item-${index}`}>
                                     <div className="item-image">
@@ -108,7 +170,7 @@ const Payment = (props) => {
                                             type="text"
                                             danger
                                             icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
-                                            onClick={() => dispatch(doDeleteItemCartAction({ _id: item.id }))}
+                                            onClick={() => dispatch(doDeleteItemCartAction({ id: item.id }))}
                                         />
                                     </div>
                                 </div>
@@ -202,10 +264,10 @@ const Payment = (props) => {
                             size="large"
                             className="checkout-button"
                             onClick={() => form.submit()}
-                            disabled={isSubmit || carts.length === 0}
+                            disabled={isSubmit || (!buyNowItem && carts.length === 0)}
                         >
                             {isSubmit ? <Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} /> : "Đặt hàng"}
-                            {!isSubmit && <span>({carts?.length ?? 0} món)</span>}
+                            {!isSubmit && <span>({buyNowItem ? 1 : carts?.length ?? 0} món)</span>}
                         </Button>
                     </Card>
                 </Col>
