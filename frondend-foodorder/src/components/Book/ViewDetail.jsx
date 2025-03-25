@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { doAddBookAction } from '../../redux/order/orderSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import { addToWishlist, getWishlist, removeFromWishlist } from '../../services/api';
+import { doBuyNowAction } from '../../redux/order/buyNowSlice';
 
 const ViewDetail = (props) => {
     const { dataBook } = props;
@@ -106,8 +107,9 @@ const ViewDetail = (props) => {
     };
 
     const handleBuyNow = (quantity, book) => {
-        dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
-        navigate('/order');
+        localStorage.setItem('buyNowFromDetailPage', 'true');
+        dispatch(doBuyNowAction({ quantity, detail: book, id: book.id }));
+        navigate('/payment');
     };
     // const isInWishlist = wishlist.includes(dataBook.id);
 

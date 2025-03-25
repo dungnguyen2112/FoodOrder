@@ -146,13 +146,17 @@ const History = () => {
                     bordered
                     summary={(pageData) => {
                         let totalItems = 0;
+                        let totalPrice = 0;
                         pageData.forEach(({ quantity }) => {
                             totalItems += quantity;
+                        });
+                        order.orderDetails.forEach(({ price, quantity }) => {
+                            totalPrice += price * quantity;
                         });
                         return (
                             <Table.Summary.Row>
                                 <Table.Summary.Cell index={0}>Tổng cộng</Table.Summary.Cell>
-                                <Table.Summary.Cell index={1}></Table.Summary.Cell>
+                                <Table.Summary.Cell index={1} align="center">{formatCurrency(totalPrice)}</Table.Summary.Cell>
                                 <Table.Summary.Cell index={2} align="center">{totalItems}</Table.Summary.Cell>
                             </Table.Summary.Row>
                         );

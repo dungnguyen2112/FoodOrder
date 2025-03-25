@@ -39,6 +39,7 @@ import Menu from './landingpage/Menulandingpage/Menulandingpage';
 import HomeLandingPage from './landingpage/Homelandingpage/Homelandingpage';
 import './landingpage/App.scss';
 import CategoryPage from './pages/category';
+import { PaymentPage } from './pages/payment';
 
 
 const Layout = () => {
@@ -126,6 +127,13 @@ export default function App() {
               <OrderPage />
             </ProtectedRoute>
           ,
+        },
+        {
+          path: "payment",
+          element:
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
         },
         {
           path: "history",

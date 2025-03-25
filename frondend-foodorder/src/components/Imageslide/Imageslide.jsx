@@ -238,6 +238,7 @@ export function Imageslide({ slides = [] }) {
             ...(index === currentIndex ? styles.activeSlide : {}),
             backgroundImage: `url(${slide.url})`,
           }}
+          loading="lazy"
         />
       ))}
 
