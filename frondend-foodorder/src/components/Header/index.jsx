@@ -123,6 +123,16 @@ const Header = (props) => {
             </div>
         );
     };
+
+    const handleSearch = (e) => {
+        const searchValue = e.target.value.trim();
+        props.setSearchTerm(searchValue);
+
+        // Nếu có giá trị search, điều hướng đến trang kết quả
+        if (searchValue) {
+            navigate(`/`); // Về trang Home để hiển thị kết quả
+        }
+    };
     return (
         <>
             <div className="header-container shadow-md">
@@ -144,7 +154,13 @@ const Header = (props) => {
                                 type="text"
                                 placeholder="Bạn tìm gì hôm nay?"
                                 value={props.searchTerm}
-                                onChange={(e) => props.setSearchTerm(e.target.value)}
+                                onChange={handleSearch}
+                                onKeyPress={(e) => {
+                                    // Hỗ trợ enter để search
+                                    if (e.key === 'Enter') {
+                                        handleSearch(e);
+                                    }
+                                }}
                             />
                         </div>
                     </div>
