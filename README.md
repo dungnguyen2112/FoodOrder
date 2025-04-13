@@ -71,6 +71,7 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 | **Authentication**  | JWT, OAuth2, Google Login|
 | **API**            | RESTful API |
 | **Security**        | Spring Security (Role-based Access Control) |
+| **Cloud**        | Cloudinary |
 
 ---
 
