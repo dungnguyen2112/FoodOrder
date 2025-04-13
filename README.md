@@ -2,8 +2,9 @@
 # 🍽️ **Food Ordering System** 🚀  
 
 > **A powerful, modern, and scalable system for managing restaurant orders, customers, and payments.**  
-
 ---
+
+Link: https://foodorder-fe-three.vercel.app
 
 ## 📌 **Overview**  
 
@@ -72,6 +73,7 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 | **API**            | RESTful API |
 | **Security**        | Spring Security (Role-based Access Control) |
 | **Cloud**        | Cloudinary |
+| **Deployment**        | Railway, Vercel | 
 
 ---
 
