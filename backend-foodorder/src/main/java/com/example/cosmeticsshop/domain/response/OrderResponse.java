@@ -20,11 +20,14 @@ public class OrderResponse {
     private OrderStatus status;
     private PaymentStatus paymentStatus;
     private String tableNumber;
+    private String createdAt;
+    private String updatedAt;
     private List<OrderDetailResponse> orderDetails;
 
     public OrderResponse(Long orderId, String name, String address, String phone, double totalPrice,
             PaymentStatus paymentStatus, OrderStatus status,
             String tableNumber,
+            String createdAt, String updatedAt,
             List<OrderDetailResponse> orderDetails) {
         this.orderId = orderId;
         this.totalPrice = totalPrice;
@@ -34,6 +37,8 @@ public class OrderResponse {
         this.address = address;
         this.phone = phone;
         this.tableNumber = tableNumber;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
         this.paymentStatus = paymentStatus;
     }
 
