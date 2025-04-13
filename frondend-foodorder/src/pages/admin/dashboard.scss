@@ -1,0 +1,169 @@
+.dashboard-container {
+    padding: 20px;
+
+    .dashboard-header {
+        margin-bottom: 24px;
+
+        h3 {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+        overflow: hidden;
+
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .ant-statistic-title {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .ant-statistic-content {
+            font-size: 28px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .statistic-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+    }
+
+    .restaurant-card {
+        padding-bottom: 32px;
+        position: relative;
+
+        .card-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 8px 24px;
+            background-color: #f5f5f5;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .statistic-icon {
+            color: #ff4d4f;
+        }
+
+        &:nth-child(1) .statistic-icon {
+            color: #1890ff;
+        }
+
+        &:nth-child(2) .statistic-icon {
+            color: #52c41a;
+        }
+
+        &:nth-child(3) .statistic-icon {
+            color: #faad14;
+        }
+
+        &:nth-child(4) .statistic-icon {
+            color: #ff4d4f;
+        }
+    }
+
+    .active-card {
+        background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
+
+        .ant-statistic-title,
+        .ant-statistic-content,
+        .card-footer .ant-typography {
+            color: white;
+        }
+
+        .statistic-icon {
+            color: white;
+        }
+
+        .card-footer {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    .analytics-section {
+        margin-top: 16px;
+
+        .ant-card-head {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0;
+
+            .ant-card-head-title {
+                font-weight: 600;
+            }
+        }
+    }
+
+    .recent-order-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .order-info,
+        .order-status {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .order-status {
+            text-align: right;
+        }
+    }
+
+    .popular-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .popular-icon {
+            font-size: 18px;
+
+            &.rank-1 {
+                color: #f5222d;
+            }
+
+            &.rank-2 {
+                color: #fa8c16;
+            }
+
+            &.rank-3 {
+                color: #52c41a;
+            }
+        }
+    }
+}

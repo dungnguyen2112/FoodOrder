@@ -83,7 +83,7 @@ const CategoryModalUpdate = (props) => {
         const res = await callUploadCategoryImg(file, 'category');
         if (res && res.data) {
             setDataThumbnail([{
-                name: res.data.fileName,
+                name: res.data.display_name + "." + res.data.format,
                 uid: uuidv4()
             }])
             if (onSuccess) onSuccess('ok')

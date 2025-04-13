@@ -31,8 +31,8 @@ const BookPage = () => {
         if (raw.image) {
             images.push(
                 {
-                    original: `${import.meta.env.VITE_BACKEND_URL}/storage/food${raw.image}`,
-                    thumbnail: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${raw.image}`,
+                    original: `${import.meta.env.VITE_CLOUDINARY_URL}/food${raw.image}`,
+                    thumbnail: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${raw.image}`,
                     originalClass: "original-image",
                     thumbnailClass: "thumbnail-image"
                 },

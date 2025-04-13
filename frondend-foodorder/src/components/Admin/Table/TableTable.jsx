@@ -110,11 +110,16 @@ const TableTable = () => {
         // },
         {
             title: 'Action',
-            width: 100,
             render: (text, record, index) => {
                 return (
                     <>
-
+                        <EditTwoTone
+                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
+                            onClick={() => {
+                                setOpenModalUpdate(true);
+                                setDataUpdate(record);
+                            }}
+                        />
                         <Popconfirm
                             placement="leftTop"
                             title={"Xác nhận xóa book"}
@@ -128,13 +133,7 @@ const TableTable = () => {
                             </span>
                         </Popconfirm>
 
-                        <EditTwoTone
-                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
-                            onClick={() => {
-                                setOpenModalUpdate(true);
-                                setDataUpdate(record);
-                            }}
-                        />
+
                     </>
 
                 )

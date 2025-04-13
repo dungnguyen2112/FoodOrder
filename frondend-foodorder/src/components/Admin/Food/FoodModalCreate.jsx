@@ -110,7 +110,7 @@ const FoodModalCreate = (props) => {
         const res = await callUploadFoodImg(file, "food");
         if (res && res.data) {
             setDataThumbnail([{
-                name: res.data.fileName,
+                name: res.data.display_name + "." + res.data.format,
                 uid: uuidv4()
             }])
             if (onSuccess) onSuccess('ok')

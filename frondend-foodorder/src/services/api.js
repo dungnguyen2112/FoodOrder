@@ -75,7 +75,7 @@ export const callUploadFoodImg = async (file, folder) => {
 
     const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
 
-    const response = await fetch("http://localhost:8080/api/v1/files", {
+    const response = await fetch("http://localhost:8080/api/v1/files/upload/image", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}` // Add JWT token
@@ -133,7 +133,7 @@ export const callUploadCategoryImg = async (file, folder) => {
 
     const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
 
-    const response = await fetch("http://localhost:8080/api/v1/files", {
+    const response = await fetch("http://localhost:8080/api/v1/files/upload/image", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}` // Add JWT token
@@ -167,7 +167,7 @@ export const callUpdateAvatar = async (file, folder) => {
 
     const token = localStorage.getItem("access_token"); // Retrieve token (adjust based on your storage method)
 
-    const response = await fetch("http://localhost:8080/api/v1/files", {
+    const response = await fetch("http://localhost:8080/api/v1/files/upload/image", {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${token}` // Add JWT token
@@ -246,6 +246,10 @@ export const callResetPassword = (token, newPassword) => {
 
 export const getWishlist = () => {
     return axios.get('/api/v1/wishlist')
+}
+
+export const getProductWishlist = () => {
+    return axios.get('/api/v1/wishlist/products')
 }
 
 export const addToWishlist = (productId) => {
