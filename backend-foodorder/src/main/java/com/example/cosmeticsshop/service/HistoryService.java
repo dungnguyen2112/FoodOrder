@@ -1,6 +1,7 @@
 package com.example.cosmeticsshop.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
 import com.example.cosmeticsshop.domain.History;
@@ -10,6 +11,7 @@ import com.example.cosmeticsshop.domain.response.OrderDetailResponse;
 import com.example.cosmeticsshop.domain.response.OrderResponse;
 import com.example.cosmeticsshop.repository.HistoryRepository;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,6 +44,7 @@ public class HistoryService {
                         order.getPaymentStatus(),
                         order.getStatus(),
                         order.getTable().getTableNumber(),
+                        order.getCreatedAt().toString(), order.getUpdatedAt().toString(),
                         order.getOrderDetails().stream().map(orderDetail -> new OrderDetailResponse(
                                 orderDetail.getProduct().getName(),
                                 orderDetail.getProduct().getPrice(),
@@ -82,6 +85,7 @@ public class HistoryService {
                         order.getPaymentStatus(),
                         order.getStatus(),
                         order.getTable().getTableNumber(),
+                        order.getCreatedAt().toString(), order.getUpdatedAt().toString(),
                         order.getOrderDetails().stream().map(orderDetail -> new OrderDetailResponse(
                                 orderDetail.getProduct().getName(),
                                 orderDetail.getProduct().getPrice(),

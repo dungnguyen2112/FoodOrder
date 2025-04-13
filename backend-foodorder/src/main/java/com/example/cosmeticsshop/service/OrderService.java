@@ -107,6 +107,8 @@ public class OrderService {
                     o.setPaymentStatus(order.getPaymentStatus());
                     o.setOrderDetails(order.getOrderDetails());
                     o.setUser(order.getUser());
+                    o.setCreatedAt(order.getCreatedAt());
+                    o.setUpdatedAt(order.getUpdatedAt());
                     o.setTotalPrice(order.getTotalPrice());
                     return o;
                 })
@@ -126,6 +128,7 @@ public class OrderService {
                             order.getAddress(), order.getPhone(), order.getTotalPrice(), order.getPaymentStatus(),
                             order.getStatus(),
                             order.getTable().getTableNumber(),
+                            order.getCreatedAt().toString(), order.getUpdatedAt().toString(),
                             orderDetailResponses);
                 })
                 .collect(Collectors.toList());
@@ -365,7 +368,9 @@ public class OrderService {
         return new OrderResponse(order.getId(), order.getName(),
                 order.getAddress(), order.getPhone(), order.getTotalPrice(), order.getPaymentStatus(),
                 order.getStatus(),
-                order.getTable().getTableNumber(), orderDetailResponse);
+                order.getTable().getTableNumber(),
+                order.getCreatedAt().toString(), order.getUpdatedAt().toString(),
+                orderDetailResponse);
     }
 
     public OrderDetailResponse convertOrderDetailToResponse(OrderDetail orderDetail) {
@@ -397,6 +402,7 @@ public class OrderService {
                 updatedOrder.getPaymentStatus(),
                 updatedOrder.getStatus(),
                 updatedOrder.getTable().getTableNumber(),
+                updatedOrder.getCreatedAt().toString(), updatedOrder.getUpdatedAt().toString(),
                 orderDetailResponses);
     }
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.cosmeticsshop.domain.Product;
 import com.example.cosmeticsshop.domain.User;
+import com.example.cosmeticsshop.domain.response.ResProductDTO;
 import com.example.cosmeticsshop.domain.response.ResWithListDTO;
 import com.example.cosmeticsshop.service.UserService;
 import com.example.cosmeticsshop.service.WishListService;
@@ -40,6 +41,24 @@ public class WishListController {
         List<Product> WishList = WishListService.getWishList(userId);
         List<Long> WishListIds = WishListService.getWishListIds(userId);
         return ResponseEntity.ok(new ResWithListDTO(WishListIds));
+    }
+
+    @GetMapping("/products")
+    public ResponseEntity<ResWithListDTO> getWishListProducts() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(email);
+        Long userId = currentUserDB.getId();
+        List<ResProductDTO> WishList = WishListService.getWishList(userId).stream()
+                .map(product -> new ResProductDTO(product.getId(), product.getName(), product.getPrice(),
+                        product.getImage(), product.getDetailDesc(), product.getShortDesc(),
+                        product.getQuantity(), product.getSold(), product.getFactory(), product.getTarget(),
+                        product.getCategoryName(),
+                        product.getCreatedAt(), product.getUpdatedAt()))
+                .toList(); // Fixed missing closing parenthesis and added .toList() correctly
+        return ResponseEntity.ok(new ResWithListDTO(WishList));
     }
 
     // Thêm sản phẩm vào WishList
