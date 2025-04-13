@@ -161,7 +161,13 @@ const UserTable = () => {
             render: (text, record, index) => {
                 return (
                     <>
-
+                        <EditTwoTone
+                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
+                            onClick={() => {
+                                setOpenModalUpdate(true);
+                                setDataUpdate(record);
+                            }}
+                        />
                         <Popconfirm
                             placement="leftTop"
                             title={"Xác nhận xóa user"}
@@ -175,13 +181,7 @@ const UserTable = () => {
                             </span>
                         </Popconfirm>
 
-                        <EditTwoTone
-                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
-                            onClick={() => {
-                                setOpenModalUpdate(true);
-                                setDataUpdate(record);
-                            }}
-                        />
+
                         {/* Thêm icon ViewDetail */}
 
                         {/* <span

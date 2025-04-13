@@ -21,7 +21,7 @@ const CategoryViewDetail = (props) => {
                     uid: uuidv4(),
                     name: dataViewDetail.image,
                     status: 'done',
-                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/category/${dataViewDetail.image}`,
+                    url: `${import.meta.env.VITE_CLOUDINARY_URL}/category/${dataViewDetail.image}`,
                 }
             }
             // if (dataViewDetail.slider && dataViewDetail.slider.length > 0) {

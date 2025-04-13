@@ -32,8 +32,8 @@ const UserInfo = (props) => {
         setTotalOrder(user?.totalOrder);
     }, [user]);
     const urlAvatar = userAvatar
-        ? `${import.meta.env.VITE_BACKEND_URL}/storage/avatar/${userAvatar}`
-        : `${import.meta.env.VITE_BACKEND_URL}/storage/avatar/${user?.avatar}`;
+        ? `${import.meta.env.VITE_CLOUDINARY_URL}/avatar/${userAvatar}`
+        : `${import.meta.env.VITE_CLOUDINARY_URL}/avatar/${user?.avatar}`;
 
 
     const handleUploadAvatar = async ({ file, onSuccess, onError }) => {
@@ -46,10 +46,10 @@ const UserInfo = (props) => {
             console.log('res:', res); // 👈 Xem có gì trả về?
 
             if (res && res.data) {
-                setDataThumbnail([{ name: res.data.fileName, uid: uuidv4() }]);
-                setUserAvatar(res.data.fileName);
-                dispatch(doUploadAvatarAction(res.data.fileName));
-                console.log(res.data.fileName);
+                setDataThumbnail([{ name: res.data.display_name + "." + res.data.format, uid: uuidv4() }]);
+                setUserAvatar(res.data.display_name + "." + res.data.format);
+                dispatch(doUploadAvatarAction(res.data.display_name + "." + res.data.format));
+                console.log(res.data.display_name + "." + res.data.format);
                 if (onSuccess) onSuccess('ok');
             } else {
                 setDataThumbnail([]);

@@ -46,7 +46,7 @@ const FoodModalUpdate = (props) => {
                     uid: uuidv4(),
                     name: dataUpdate.image,
                     status: 'done',
-                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${dataUpdate.image}`,
+                    url: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${dataUpdate.image}`,
                 }
             ]
 
@@ -148,7 +148,7 @@ const FoodModalUpdate = (props) => {
         const res = await callUploadFoodImg(file, "food");
         if (res && res.data) {
             setDataThumbnail([{
-                name: res.data.fileName,
+                name: res.data.display_name + "." + res.data.format,
                 uid: uuidv4()
             }])
             if (onSuccess) onSuccess('ok')
@@ -355,7 +355,7 @@ const FoodModalUpdate = (props) => {
                                                     uid: uuidv4(),
                                                     name: dataUpdate?.image ?? "",
                                                     status: 'done',
-                                                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${dataUpdate?.image}`,
+                                                    url: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${dataUpdate?.image}`,
                                                 }
                                             ] : []
                                     }
