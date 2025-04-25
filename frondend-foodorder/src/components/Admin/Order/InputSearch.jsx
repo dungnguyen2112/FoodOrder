@@ -1,21 +1,14 @@
-import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, theme } from 'antd';
-import { Select } from 'antd';
-import { useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { Button, Col, Form, Input, Row, Typography, Space, Select } from 'antd';
+import { SearchOutlined, ShoppingCartOutlined, AppstoreOutlined, FilterOutlined, ClearOutlined } from '@ant-design/icons';
 import { callFetchCategory } from '../../../services/api';
 
+const { Title } = Typography;
+
 const InputSearch = (props) => {
-    const { token } = theme.useToken();
     const [form] = Form.useForm();
-
-    const [listCategory, setListCategory] = useState([])
-
-    const formStyle = {
-        maxWidth: 'none',
-        background: token.colorFillAlter,
-        borderRadius: token.borderRadiusLG,
-        padding: 24,
-    };
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+    const [listCategory, setListCategory] = useState([]);
 
     useEffect(() => {
         const fetchCategory = async () => {
@@ -28,92 +21,109 @@ const InputSearch = (props) => {
             }
         }
         fetchCategory();
-    }, [])
-
-    // useEffect(() => {
-    //     const fetchCategory = async () => {
-    //         const res = await callFetchCategory();
-    //         if (res && res.data) {
-    //             const d = res.data.map(item => {
-    //                 return { label: item, value: item }
-    //             })
-    //             setListCategory(d);
-    //         }
-    //     }
-    //     fetchCategory();
-    // }, [])
+    }, []);
 
     const onFinish = (values) => {
         let query = "";
-        //build query
         if (values.name) {
             query += `filter=name ~ '${values.name}'`
         }
         if (query) {
             props.handleSearch(query);
         }
+    };
 
-        //remove undefined
-        // https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object
-        // Object.keys(values).forEach(key => {
-        //     if (values[key] === undefined) {
-        //         delete values[key];
-        //     }
-        // });
-
-        // if (values && Object.keys(values).length > 0) {
-        //     // https://stackoverflow.com/questions/1714786/query-string-encoding-of-a-javascript-object
-        //     const params = new URLSearchParams(values).toString();
-        //     props.handleSearch(params);
-        // }
+    const handleReset = () => {
+        form.resetFields();
+        props.setFilter("");
     };
 
     return (
-        <Form form={form} name="advanced_search" style={formStyle} onFinish={onFinish}>
-            <Row gutter={24}>
-                <Col span={12}>
-                    <Form.Item
-                        labelCol={{ span: 24 }}
-                        name={`name`}
-                        label={`Tên category`}
-                    >
-                        <Select
-                            defaultValue={null}
-                            showSearch
-                            allowClear
-                            //  onChange={handleChange}
-                            options={listCategory}
-                        />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row>
-                <Col span={24} style={{ textAlign: 'right' }}>
-                    <Button type="primary" htmlType="submit">
-                        Search
-                    </Button>
-                    <Button
-                        style={{ margin: '0 8px' }}
-                        onClick={() => {
-                            form.resetFields();
-                            props.setFilter("");
+        <div className="admin-search-container">
+            <div className="search-header">
+                <Title level={5} style={{ margin: 0 }}>
+                    <SearchOutlined /> Tìm kiếm đơn hàng
+                </Title>
+                <Button
+                    type="link"
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    style={{ padding: 0 }}
+                >
+                    <FilterOutlined /> {showAdvancedSearch ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+                </Button>
+            </div>
+
+            <Form
+                form={form}
+                name="advanced_search"
+                onFinish={onFinish}
+                layout={showAdvancedSearch ? "vertical" : "inline"}
+                className={`search-form ${showAdvancedSearch ? 'advanced' : 'basic'}`}
+            >
+                <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                    <Col xs={24} sm={showAdvancedSearch ? 12 : 24} md={showAdvancedSearch ? 8 : 16} lg={showAdvancedSearch ? 8 : 16}>
+                        <Form.Item
+                            name="name"
+                            label={showAdvancedSearch ? "Tên khách hàng" : null}
+                        >
+                            <Input
+                                placeholder="Tìm theo tên khách hàng"
+                                prefix={<ShoppingCartOutlined style={{ color: '#ff4d4f' }} />}
+                                allowClear
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    {showAdvancedSearch && (
+                        <>
+                            <Col xs={24} sm={12} md={8} lg={8}>
+                                <Form.Item
+                                    name="address"
+                                    label="Địa chỉ"
+                                >
+                                    <Input
+                                        placeholder="Tìm theo địa chỉ"
+                                        allowClear
+                                    />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={24} sm={12} md={8} lg={8}>
+                                <Form.Item
+                                    name="phone"
+                                    label="Số điện thoại"
+                                >
+                                    <Input
+                                        placeholder="Tìm theo số điện thoại"
+                                        allowClear
+                                    />
+                                </Form.Item>
+                            </Col>
+                        </>
+                    )}
+
+                    <Col
+                        xs={24}
+                        style={{
+                            textAlign: 'right',
+                            marginTop: showAdvancedSearch ? 16 : 0
                         }}
                     >
-                        Clear
-                    </Button>
-                    {/* <a
-                        style={{ fontSize: 12 }}
-                        onClick={() => {
-                            setExpand(!expand);
-                        }}
-                    >
-                        {expand ? <UpOutlined /> : <DownOutlined />} Collapse
-                    </a> */}
-                </Col>
-            </Row>
-        </Form>
+                        <Space>
+                            <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                                Tìm kiếm
+                            </Button>
+                            <Button
+                                icon={<ClearOutlined />}
+                                onClick={handleReset}
+                            >
+                                Xóa
+                            </Button>
+                        </Space>
+                    </Col>
+                </Row>
+            </Form>
+        </div>
     );
 };
-
 
 export default InputSearch;

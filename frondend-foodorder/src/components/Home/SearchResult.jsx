@@ -205,7 +205,7 @@ const SearchResult = ({
             >
                 <div style={{ position: "relative" }}>
                     <img
-                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item.image}`}
+                        src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item.image}`}
                         alt={item.name}
                         style={{ width: "100%", height: "220px", objectFit: "cover" }}
                         loading="lazy"

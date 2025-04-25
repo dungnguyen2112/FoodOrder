@@ -122,7 +122,7 @@ const CategoryModalUpdate = (props) => {
         <>
 
             <Modal
-                title="Cập nhật người dùng"
+                title="Cập nhật danh mục"
                 open={openModalUpdate}
                 onOk={() => { form.submit() }}
                 onCancel={() => {

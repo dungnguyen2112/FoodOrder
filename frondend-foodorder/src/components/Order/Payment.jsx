@@ -127,7 +127,7 @@ const Payment = (props) => {
                             <div className="cart-item">
                                 <div className="item-image">
                                     <img
-                                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${buyNowItem.detail.image}`}
+                                        src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${buyNowItem.detail.image}`}
                                         alt={buyNowItem.detail.name}
                                     />
                                 </div>
@@ -153,7 +153,7 @@ const Payment = (props) => {
                                 <div className="cart-item" key={`item-${index}`}>
                                     <div className="item-image">
                                         <img
-                                            src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item?.detail?.image}`}
+                                            src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item?.detail?.image}`}
                                             alt={item?.detail?.name}
                                         />
                                     </div>

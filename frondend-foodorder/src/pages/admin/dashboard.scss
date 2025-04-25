@@ -1,50 +1,80 @@
 .dashboard-container {
-    padding: 20px;
+    padding: 0;
+    color: #333;
 
     .dashboard-header {
-        margin-bottom: 24px;
+        margin-bottom: 28px;
+        background: linear-gradient(120deg, #ff7875 -5%, #ff4d4f 50%, #f5222d 100%);
+        padding: 24px 32px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(255, 77, 79, 0.2);
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 35%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+        }
 
         h3 {
             margin-bottom: 8px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: white;
+            font-size: 26px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .ant-typography {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
         }
     }
 
     .dashboard-card {
         background: #fff;
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         transition: all 0.3s ease;
         height: 100%;
         overflow: hidden;
+        border: none;
 
         &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .ant-card-body {
+            padding: 24px;
         }
 
         .ant-statistic-title {
-            font-size: 15px;
+            font-size: 16px;
             color: #666;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             font-weight: 500;
         }
 
         .ant-statistic-content {
-            font-size: 28px;
+            font-size: 32px;
             color: #1a1a1a;
             font-weight: 600;
         }
 
         .statistic-icon {
             font-size: 24px;
-            margin-right: 8px;
+            margin-right: 12px;
         }
     }
 
     .restaurant-card {
-        padding-bottom: 32px;
+        padding-bottom: 42px;
         position: relative;
 
         .card-footer {
@@ -52,29 +82,36 @@
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 8px 24px;
-            background-color: #f5f5f5;
+            padding: 12px 24px;
+            background-color: #fafafa;
             border-top: 1px solid #f0f0f0;
         }
 
         .statistic-icon {
             color: #ff4d4f;
+            background-color: rgba(255, 77, 79, 0.1);
+            padding: 12px;
+            border-radius: 12px;
         }
 
         &:nth-child(1) .statistic-icon {
             color: #1890ff;
+            background-color: rgba(24, 144, 255, 0.1);
         }
 
         &:nth-child(2) .statistic-icon {
             color: #52c41a;
+            background-color: rgba(82, 196, 26, 0.1);
         }
 
         &:nth-child(3) .statistic-icon {
             color: #faad14;
+            background-color: rgba(250, 173, 20, 0.1);
         }
 
         &:nth-child(4) .statistic-icon {
             color: #ff4d4f;
+            background-color: rgba(255, 77, 79, 0.1);
         }
     }
 
@@ -89,6 +126,7 @@
 
         .statistic-icon {
             color: white;
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         .card-footer {
@@ -98,15 +136,36 @@
     }
 
     .analytics-section {
-        margin-top: 16px;
+        margin-top: 28px;
+
+        .ant-card {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            border: none;
+
+            &:hover {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            }
+        }
 
         .ant-card-head {
             border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 0;
+            padding: 16px 20px 0;
 
             .ant-card-head-title {
                 font-weight: 600;
+                font-size: 18px;
+                padding-bottom: 16px;
             }
+        }
+    }
+
+    .orders-card,
+    .popular-card {
+        height: 100%;
+
+        .ant-card-body {
+            padding: 0;
         }
     }
 
@@ -114,8 +173,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
+        padding: 16px 24px;
         border-bottom: 1px solid #f0f0f0;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #fafafa;
+        }
 
         &:last-child {
             border-bottom: none;
@@ -125,11 +189,20 @@
         .order-status {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .order-status {
             text-align: right;
+
+            .ant-typography:first-child {
+                background-color: #e6f7ff;
+                color: #1890ff;
+                padding: 4px 12px;
+                border-radius: 100px;
+                font-size: 14px;
+                font-weight: 500;
+            }
         }
     }
 
@@ -137,8 +210,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 0;
+        padding: 16px 24px;
         border-bottom: 1px solid #f0f0f0;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: #fafafa;
+        }
 
         &:last-child {
             border-bottom: none;
@@ -147,23 +225,32 @@
         .item-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .popular-icon {
-            font-size: 18px;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 10px;
 
             &.rank-1 {
                 color: #f5222d;
+                background-color: rgba(245, 34, 45, 0.1);
             }
 
             &.rank-2 {
                 color: #fa8c16;
+                background-color: rgba(250, 140, 22, 0.1);
             }
 
             &.rank-3 {
                 color: #52c41a;
+                background-color: rgba(82, 196, 26, 0.1);
             }
         }
+    }
+
+    .ant-empty {
+        margin: 32px 0;
     }
 }

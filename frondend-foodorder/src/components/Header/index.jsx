@@ -77,8 +77,8 @@ const Header = (props) => {
     }
 
     const urlAvatar = userAvatar
-        ? `${import.meta.env.VITE_BACKEND_URL}/storage/avatar/${userAvatar}`
-        : `${import.meta.env.VITE_BACKEND_URL}/storage/avatar/${user?.avatar}`;
+        ? `${import.meta.env.VITE_CLOUDINARY_URL}/avatar/${userAvatar}`
+        : `${import.meta.env.VITE_CLOUDINARY_URL}/avatar/${user?.avatar}`;
 
     const contentPopover = () => {
         return (
@@ -89,7 +89,7 @@ const Header = (props) => {
                             <div className="cart-item" key={`item-${index}`}>
                                 <img
                                     className="cart-item__image"
-                                    src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item?.detail?.image}`}
+                                    src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item?.detail?.image}`}
                                     alt={item?.detail?.name}
                                 />
                                 <div className="cart-item__details">

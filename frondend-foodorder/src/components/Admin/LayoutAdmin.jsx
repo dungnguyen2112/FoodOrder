@@ -9,8 +9,13 @@ import {
     MenuFoldOutlined,
     MenuUnfoldOutlined,
     DownOutlined,
+    TableOutlined,
+    ShopOutlined,
+    LogoutOutlined,
+    HomeOutlined,
+    SettingOutlined
 } from '@ant-design/icons';
-import { Layout, Menu, Dropdown, Space, message, Avatar } from 'antd';
+import { Layout, Menu, Dropdown, Space, message, Avatar, Badge, Tooltip, Divider } from 'antd';
 import { Outlet, useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
 import './layout.scss';
@@ -20,8 +25,6 @@ import { doLogoutAction } from '../../redux/account/accountSlice';
 import ManageAccount from '../Account/ManageAccount';
 
 const { Content, Footer, Sider } = Layout;
-
-
 
 const LayoutAdmin = () => {
     const [collapsed, setCollapsed] = useState(false);
@@ -35,9 +38,7 @@ const LayoutAdmin = () => {
 
     const handleLogout = async () => {
         const res = await callLogout();
-        console.log(res);
         if (res && res && +res.statusCode === 200) {
-            alert('Đăng xuất thành công');
             dispatch(doLogoutAction());
             message.success('Đăng xuất thành công');
             navigate('/')
@@ -51,67 +52,67 @@ const LayoutAdmin = () => {
             icon: <AppstoreOutlined />
         },
         {
-            label: <span>Manage Users</span>,
-            // key: 'user',
+            label: <span>Quản lý người dùng</span>,
+            key: 'user-management',
             icon: <UserOutlined />,
             children: [
                 {
-                    label: <Link to='/admin/user'>CRUD</Link>,
+                    label: <Link to='/admin/user'>Danh sách người dùng</Link>,
                     key: 'crud',
                     icon: <TeamOutlined />,
-                },
-                // {
-                //     label: 'Files1',
-                //     key: 'file1',
-                //     icon: <TeamOutlined />,
-                // }
+                }
             ]
         },
         {
-            label: <Link to='/admin/book'>Manage Foods</Link>,
+            label: <Link to='/admin/book'>Quản lý món ăn</Link>,
             key: 'book',
             icon: <ExceptionOutlined />
         },
         {
-            label: <Link to='/admin/category'>Manage Categories</Link>,
+            label: <Link to='/admin/category'>Quản lý danh mục</Link>,
             key: 'category',
-            icon: <ExceptionOutlined />
+            icon: <ShopOutlined />
         },
         {
-            label: <Link to='/admin/order'>Manage Orders</Link>,
+            label: <Link to='/admin/order'>Quản lý đơn hàng</Link>,
             key: 'order',
             icon: <DollarCircleOutlined />
         },
         {
-            label: <Link to='/admin/table'>Manage Tables</Link>,
+            label: <Link to='/admin/table'>Quản lý bàn ăn</Link>,
             key: 'table',
-            icon: <DollarCircleOutlined />
+            icon: <TableOutlined />
         },
-
     ];
+
     const itemsDropdown = [
         {
-            label: <label
-                style={{ cursor: 'pointer' }}
-                onClick={() => setShowManageAccount(true)}
-            >Quản lý tài khoản</label>,
+            label: <div className="dropdown-item">
+                <SettingOutlined /> Quản lý tài khoản
+            </div>,
             key: 'account',
+            onClick: () => setShowManageAccount(true)
         },
         {
-            label: <Link to={'/'}>Trang chủ</Link>,
+            label: <div className="dropdown-item">
+                <HomeOutlined /> Trang chủ
+            </div>,
             key: 'home',
+            onClick: () => navigate('/')
         },
         {
-            label: <label
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleLogout()}
-            >Đăng xuất</label>,
-            key: 'logout',
+            type: 'divider',
         },
-
+        {
+            label: <div className="dropdown-item logout-item">
+                <LogoutOutlined /> Đăng xuất
+            </div>,
+            key: 'logout',
+            onClick: () => handleLogout()
+        },
     ];
 
-    const urlAvatar = `${import.meta.env.VITE_BACKEND_URL}/storage/avatar/${user?.avatar}`;
+    const urlAvatar = `${import.meta.env.VITE_CLOUDINARY_URL}/avatar/${user?.avatar}`;
 
     return (
         <>
@@ -123,9 +124,11 @@ const LayoutAdmin = () => {
                     theme='light'
                     collapsible
                     collapsed={collapsed}
-                    onCollapse={(value) => setCollapsed(value)}>
-                    <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-                        Admin
+                    onCollapse={(value) => setCollapsed(value)}
+                    width={260}
+                >
+                    <div className="admin-logo">
+                        {collapsed ? 'FO' : 'Food Order Admin'}
                     </div>
                     <Menu
                         defaultSelectedKeys={[activeMenu]}
@@ -144,17 +147,20 @@ const LayoutAdmin = () => {
                         </span>
                         <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
                             <Space style={{ cursor: "pointer" }}>
-                                <Avatar src={urlAvatar} />
-                                {user?.fullName}
+                                <Badge dot={true} offset={[-4, 4]}>
+                                    <Avatar src={urlAvatar} size="large" />
+                                </Badge>
+                                {!collapsed && <span style={{ fontWeight: '500' }}>{user?.fullName}</span>}
+                                <DownOutlined style={{ fontSize: '12px' }} />
                             </Space>
                         </Dropdown>
                     </div>
-                    <Content style={{ padding: '15px' }}>
+                    <Content>
                         <Outlet />
                     </Content>
-                    {/* <Footer style={{ padding: 0 }}>
-                    React Test Fresher &copy; FoodOrder - Made with <HeartTwoTone />
-                </Footer> */}
+                    <Footer>
+                        Food Order Admin Dashboard &copy; {new Date().getFullYear()} - Made with <HeartTwoTone twoToneColor="#ff4d4f" />
+                    </Footer>
                 </Layout>
             </Layout>
             <ManageAccount

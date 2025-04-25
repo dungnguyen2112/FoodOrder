@@ -166,7 +166,7 @@ const CategoryDetail = () => {
                         </p>
                         <div style={{ position: "relative", overflow: "hidden", borderRadius: "16px", boxShadow: "0 10px 25px rgba(0,0,0,0.3)" }}>
                             <img
-                                src={`${import.meta.env.VITE_BACKEND_URL}/storage/category/${category.image}`}
+                                src={`${import.meta.env.VITE_CLOUDINARY_URL}/category/${category.image}`}
                                 alt={category.name}
                                 style={{
                                     width: "100%",
@@ -249,7 +249,7 @@ const CategoryDetail = () => {
                                     >
                                         <div style={{ position: "relative" }}>
                                             <img
-                                                src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item.image}`}
+                                                src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item.image}`}
                                                 alt={item.name}
                                                 style={{
                                                     width: "100%",

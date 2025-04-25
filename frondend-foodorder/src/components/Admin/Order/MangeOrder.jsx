@@ -1,15 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Row, Col, Popconfirm, Button, message, notification, Select } from 'antd';
+import { Table, Row, Col, Popconfirm, Button, message, notification, Select, Space, Typography, Tag } from 'antd';
 import { callDeleteOrder, callFetchListOrder, callUpdateOrder, callUpdatePayment } from '../../../services/api';
-import { CloudUploadOutlined, DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DeleteTwoTone, ExportOutlined, ReloadOutlined, ShoppingCartOutlined, EyeOutlined, CheckCircleOutlined, ClockCircleOutlined, SyncOutlined, CloseCircleOutlined, DollarCircleOutlined, CreditCardOutlined } from '@ant-design/icons';
 import OrderViewDetail from './OrderViewDetail';
 import moment from 'moment/moment';
 import { FORMAT_DATE_DISPLAY } from '../../../utils/constant';
 import queryString from 'query-string';
-import { render } from 'react-dom';
+import InputSearch from './InputSearch';
+import * as XLSX from 'xlsx';
+import '../admin.scss';
 
+const { Title, Text } = Typography;
 
-// https://stackblitz.com/run?file=demo.tsx
+// Status configurations
+const ORDER_STATUS = {
+    PENDING: {
+        color: '#faad14',
+        label: 'Đang chờ',
+        icon: <ClockCircleOutlined />
+    },
+    PREPARING: {
+        color: '#1677ff',
+        label: 'Đang chuẩn bị',
+        icon: <SyncOutlined />
+    },
+    COMPLETED: {
+        color: '#52c41a',
+        label: 'Hoàn thành',
+        icon: <CheckCircleOutlined />
+    },
+    CANCELLED: {
+        color: '#ff4d4f',
+        label: 'Đã hủy',
+        icon: <CloseCircleOutlined />
+    }
+};
+
+const PAYMENT_STATUS = {
+    NOT_PAID: {
+        color: '#ff4d4f',
+        label: 'Chưa thanh toán',
+        icon: <DollarCircleOutlined />
+    },
+    PAID: {
+        color: '#52c41a',
+        label: 'Đã thanh toán',
+        icon: <CreditCardOutlined />
+    }
+};
+
 const MangeOrder = () => {
     const [listOrder, setListOrder] = useState([]);
     const [current, setCurrent] = useState(1);
@@ -46,24 +85,30 @@ const MangeOrder = () => {
     }
 
     const handleUpdateStatus = async (orderId, newStatus) => {
-        const res = await callUpdateOrder(orderId, newStatus); // Ensure correct API format
+        const res = await callUpdateOrder(orderId, newStatus);
         if (res && res.data) {
             message.success('Cập nhật trạng thái thành công!');
-            fetchOrder(); // Refresh data
+            fetchOrder();
         } else {
-            notification.error({ message: 'Lỗi khi cập nhật trạng thái', description: res.message });
+            notification.error({
+                message: 'Lỗi khi cập nhật trạng thái',
+                description: res.message,
+                placement: 'top'
+            });
         }
     };
 
     const handleUpdatePaymentStatus = async (orderId, newPaymentStatus) => {
-        console.log(orderId, newPaymentStatus);
-        const res = await callUpdatePayment(orderId, newPaymentStatus); // Ensure correct API format
-        console.log(res);
+        const res = await callUpdatePayment(orderId, newPaymentStatus);
         if (res && res.data) {
-            message.success('Cập nhật trạng thái thành công!');
-            fetchOrder(); // Refresh data
+            message.success('Cập nhật trạng thái thanh toán thành công!');
+            fetchOrder();
         } else {
-            notification.error({ message: 'Lỗi khi cập nhật trạng thái', description: res.message });
+            notification.error({
+                message: 'Lỗi khi cập nhật trạng thái thanh toán',
+                description: res.message,
+                placement: 'top'
+            });
         }
     };
 
@@ -71,129 +116,172 @@ const MangeOrder = () => {
     const handleDeleteOrder = async (id) => {
         const res = await callDeleteOrder(id);
         if (res.statusCode === 200) {
-            message.success('Xóa book thành công');
+            message.success('Xóa đơn hàng thành công');
             fetchOrder();
         } else {
             notification.error({
                 message: 'Có lỗi xảy ra',
-                description: res.message
+                description: res.message,
+                placement: 'top'
             });
         }
     };
 
     const columns = [
         {
-            title: 'Id',
+            title: 'ID',
             dataIndex: 'orderId',
+            width: '8%',
             render: (text, record, index) => {
                 return (
-                    <a href='#' onClick={() => {
-                        setDataViewDetail(record);
-                        setOpenViewDetail(true);
-                    }}>{record.orderId}</a>
+                    <a
+                        className="table-id-link"
+                        onClick={() => {
+                            setDataViewDetail(record);
+                            setOpenViewDetail(true);
+                        }}
+                    >
+                        #{record.orderId}
+                    </a>
                 )
             }
         },
         {
-            title: 'Price',
+            title: 'Tổng tiền',
             dataIndex: 'totalPrice',
+            width: '12%',
             render: (text, record, index) => {
                 return (
-                    <>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.totalPrice)}</>
-
+                    <Text style={{ color: '#1677ff', fontWeight: 'bold' }}>
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(record.totalPrice)}
+                    </Text>
                 )
             },
             sorter: true
         },
         {
-            title: 'Name',
+            title: 'Khách hàng',
             dataIndex: 'name',
+            width: '15%',
+            render: (text) => <Text strong>{text}</Text>,
             sorter: true
         },
         {
-            title: 'Address',
+            title: 'Địa chỉ',
             dataIndex: 'address',
+            width: '15%',
             sorter: true,
         },
         {
             title: 'Số điện thoại',
             dataIndex: 'phone',
+            width: '10%',
             sorter: true
         },
         {
             title: 'Số bàn',
             dataIndex: 'tableNumber',
-            sorter: true
+            width: '8%',
+            sorter: true,
+            render: (text) => <Tag color="blue" style={{ borderRadius: '20px', padding: '2px 12px' }}>{text}</Tag>
         },
         {
-            title: 'Ngày cập nhật',
+            title: 'Ngày đặt',
             dataIndex: 'updatedAt',
+            width: '10%',
             sorter: true,
             render: (text, record, index) => {
                 return (
                     <>{moment(record.updatedAt).format(FORMAT_DATE_DISPLAY)}</>
                 )
             }
-
         },
         {
-            title: 'Status',
+            title: 'Trạng thái',
             dataIndex: 'status',
+            width: '12%',
             sorter: true,
             render: (text, record) => (
                 <Select
                     value={record.status}
-                    style={{ width: 120 }}
+                    style={{
+                        width: 160,
+                        borderColor: ORDER_STATUS[record.status]?.color || '#d9d9d9'
+                    }}
                     onChange={(value) => handleUpdateStatus(record.orderId, value)}
-                    options={[
-                        { value: 'PENDING', label: 'Pending' },
-                        { value: 'PREPARING', label: 'Preparing' },
-                        { value: 'COMPLETED', label: 'Completed' },
-                        { value: 'CANCELLED', label: 'Cancelled' },
-                    ]}
+                    options={Object.keys(ORDER_STATUS).map(key => ({
+                        value: key,
+                        label: (
+                            <Tag color={ORDER_STATUS[key].color} className="status-tag">
+                                {ORDER_STATUS[key].icon} {ORDER_STATUS[key].label}
+                            </Tag>
+                        )
+                    }))}
+                    className="status-select"
+                    dropdownClassName="status-dropdown"
+                    suffixIcon={null}
                 />
             ),
         },
         {
-            title: 'PaymentStatus',
+            title: 'Thanh toán',
             dataIndex: 'paymentStatus',
+            width: '12%',
             sorter: true,
             render: (text, record) => (
                 <Select
                     value={record.paymentStatus}
-                    style={{ width: 120 }}
+                    style={{
+                        width: 160,
+                        borderColor: PAYMENT_STATUS[record.paymentStatus]?.color || '#d9d9d9'
+                    }}
                     onChange={(value) => handleUpdatePaymentStatus(record.orderId, value)}
-                    options={[
-                        { value: 'NOT_PAID', label: 'Not Paid' },
-                        { value: 'PAID', label: 'Paid' },
-                    ]}
+                    options={Object.keys(PAYMENT_STATUS).map(key => ({
+                        value: key,
+                        label: (
+                            <Tag color={PAYMENT_STATUS[key].color} className="status-tag">
+                                {PAYMENT_STATUS[key].icon} {PAYMENT_STATUS[key].label}
+                            </Tag>
+                        )
+                    }))}
+                    className="status-select"
+                    dropdownClassName="status-dropdown"
+                    suffixIcon={null}
                 />
             ),
         },
         {
-            title: 'Action',
-            width: 100,
+            title: 'Hành động',
+            width: '8%',
             render: (text, record, index) => {
                 return (
-                    <>
-                        <Popconfirm
-                            title="Bạn có chắc chắn muốn xóa?"
-                            onConfirm={() => {
-                                handleDeleteOrder(record.orderId)
+                    <Space size="middle" className="action-buttons">
+                        <Button
+                            className="action-button view-button"
+                            icon={<EyeOutlined />}
+                            onClick={() => {
+                                setDataViewDetail(record);
+                                setOpenViewDetail(true);
                             }}
-                            okText="Có"
-                            cancelText="Không"
-
+                        />
+                        <Popconfirm
+                            placement="topRight"
+                            title={<div style={{ fontWeight: 500 }}>Xác nhận xóa đơn hàng</div>}
+                            description={<div>Bạn có chắc chắn muốn xóa đơn hàng này?</div>}
+                            onConfirm={() => handleDeleteOrder(record.orderId)}
+                            okText="Xác nhận"
+                            cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
                         >
-                            <span style={{ cursor: "pointer", margin: "0 20px" }}>
-                                <DeleteTwoTone twoToneColor="#ff4d4f" />
-                            </span>
+                            <Button
+                                className="action-button delete-button"
+                                icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                            />
                         </Popconfirm>
-                    </>
+                    </Space>
                 )
             }
         }
-
     ];
 
     const onChange = (pagination, filters, sorter, extra) => {
@@ -221,7 +309,7 @@ const MangeOrder = () => {
 
         // Default sorting by updatedAt if no sort is provided
         if (!sortBy) {
-            sortBy = "sort=totalPrice,desc";
+            sortBy = "sort=updatedAt,desc";
         }
 
         // Construct the final query string
@@ -233,22 +321,31 @@ const MangeOrder = () => {
         setSortQuery(sortBy);
     };
 
-
-
-
-    // change button color: https://ant.design/docs/react/customize-theme#customize-design-token
     const renderHeader = () => {
         return (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Table List Order</span>
-                <span style={{ display: 'flex', gap: 15 }}>
-                    <Button type='ghost' onClick={() => {
-                        setFilter("");
-                        setSortQuery("")
-                    }}>
-                        <ReloadOutlined />
+            <div className="table-header">
+                <Title level={4} style={{ margin: 0 }}>
+                    <ShoppingCartOutlined className="title-icon" /> Quản lý đơn hàng
+                </Title>
+                <Space className="header-buttons">
+                    <Button
+                        icon={<ExportOutlined />}
+                        className="export-button"
+                        onClick={() => handleExportData()}
+                    >
+                        Xuất dữ liệu
                     </Button>
-                </span>
+
+                    <Button
+                        icon={<ReloadOutlined />}
+                        className="refresh-button"
+                        onClick={() => {
+                            setFilter("");
+                            setSortQuery("");
+                            fetchOrder();
+                        }}
+                    />
+                </Space>
             </div>
         )
     }
@@ -257,41 +354,56 @@ const MangeOrder = () => {
         setFilter(query);
     }
 
+    const handleExportData = () => {
+        if (listOrder.length > 0) {
+            const worksheet = XLSX.utils.json_to_sheet(listOrder);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+            XLSX.writeFile(workbook, "QuanLyDonHang.xlsx");
+        }
+    }
 
     return (
-        <>
-            <Row gutter={[20, 20]}>
-                <Col span={24}>
-                    <Table
-                        title={renderHeader}
-                        loading={isLoading}
-
-                        columns={columns}
-                        dataSource={listOrder}
-                        onChange={onChange}
-                        rowKey="id"
-                        pagination={
-                            {
+        <div className="admin-content-container">
+            <div className="admin-table-container">
+                <Row gutter={[20, 20]}>
+                    <Col span={24}>
+                        <InputSearch
+                            handleSearch={handleSearch}
+                            setFilter={setFilter}
+                        />
+                    </Col>
+                    <Col span={24}>
+                        <Table
+                            title={renderHeader}
+                            loading={isLoading}
+                            columns={columns}
+                            dataSource={listOrder}
+                            onChange={onChange}
+                            rowKey={"orderId"}
+                            pagination={{
                                 current: current,
                                 pageSize: pageSize,
                                 showSizeChanger: true,
                                 total: total,
-                                showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                            }
-                        }
+                                pageSizeOptions: ['5', '10', '15', '20'],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} đơn hàng`
+                            }}
+                            scroll={{ x: 1200 }}
+                            className="admin-table"
+                        />
+                    </Col>
+                </Row>
 
-                    />
-                </Col>
-            </Row>
-            <OrderViewDetail
-                openViewDetail={openViewDetail}
-                setOpenViewDetail={setOpenViewDetail}
-                dataViewDetail={dataViewDetail}
-                setDataViewDetail={setDataViewDetail}
-            />
-        </>
-    )
-}
-
+                <OrderViewDetail
+                    openViewDetail={openViewDetail}
+                    setOpenViewDetail={setOpenViewDetail}
+                    dataViewDetail={dataViewDetail}
+                    setDataViewDetail={setDataViewDetail}
+                />
+            </div>
+        </div>
+    );
+};
 
 export default MangeOrder;

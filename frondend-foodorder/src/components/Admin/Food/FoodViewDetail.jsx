@@ -1,9 +1,12 @@
-import { Badge, Descriptions, Divider, Drawer, Modal, Upload } from "antd";
+import { Badge, Descriptions, Divider, Drawer, Modal, Upload, Typography, Tag } from "antd";
 import moment from 'moment';
 import { FORMAT_DATE_DISPLAY } from "../../../utils/constant";
 //FORMAT_DATE_DISPLAY = 'DD-MM-YYYY HH:mm:ss'
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import { CoffeeOutlined, DollarOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 const FoodViewDetail = (props) => {
     const { openViewDetail, setOpenViewDetail, dataViewDetail, setDataViewDetail } = props;
@@ -20,13 +23,13 @@ const FoodViewDetail = (props) => {
 
     useEffect(() => {
         if (dataViewDetail) {
-            let imgThumbnail = {}, imgSlider = [];
+            let imgThumbnail = {};
             if (dataViewDetail.image) {
                 imgThumbnail = {
                     uid: uuidv4(),
                     name: dataViewDetail.image,
                     status: 'done',
-                    url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${dataViewDetail.image}`,
+                    url: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${dataViewDetail.image}`,
                 }
             }
             // if (dataViewDetail.slider && dataViewDetail.slider.length > 0) {
@@ -56,55 +59,121 @@ const FoodViewDetail = (props) => {
         setFileList(newFileList);
     }
 
-
     return (
         <>
             <Drawer
-                title="Chức năng xem chi tiết"
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <CoffeeOutlined style={{ fontSize: '20px', color: '#ff4d4f' }} />
+                        <span>Chi tiết món ăn</span>
+                    </div>
+                }
                 width={"50vw"}
                 onClose={onClose}
                 open={openViewDetail}
+                extra={
+                    <div className="drawer-subtitle">
+                        {dataViewDetail &&
+                            <Text type="secondary">Mã món: #{dataViewDetail.id}</Text>
+                        }
+                    </div>
+                }
+                className="admin-drawer"
             >
-                <Descriptions
-                    title="Thông tin Book"
-                    bordered
-                    column={2}
-                >
-                    <Descriptions.Item label="Id">{dataViewDetail?.id}</Descriptions.Item>
-                    <Descriptions.Item label="Tên food">{dataViewDetail?.name}</Descriptions.Item>
-                    <Descriptions.Item label="detailDesc">{dataViewDetail?.detailDesc}</Descriptions.Item>
-                    <Descriptions.Item label="shortDesc">{dataViewDetail?.shortDesc}</Descriptions.Item>
-                    <Descriptions.Item label="Giá tiền">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dataViewDetail?.price ?? 0)}</Descriptions.Item>
-                    <Descriptions.Item label="Số lượng">{dataViewDetail?.quantity ?? 0}</Descriptions.Item>
-                    <Descriptions.Item label="Đã bán">{dataViewDetail?.sold ?? 0}</Descriptions.Item>
+                {dataViewDetail && (
+                    <>
+                        <Descriptions
+                            title={<Title level={5}>Thông tin món ăn</Title>}
+                            bordered
+                            column={1}
+                            labelStyle={{ width: '200px', fontWeight: 500 }}
+                            contentStyle={{ fontWeight: 400 }}
+                            className="detail-descriptions"
+                        >
+                            <Descriptions.Item label="Tên món">
+                                <Text strong>{dataViewDetail.name}</Text>
+                            </Descriptions.Item>
 
-                    <Descriptions.Item label="Thể loại" span={2}>
-                        <Badge status="processing" text={dataViewDetail?.categoryName} />
-                    </Descriptions.Item>
+                            <Descriptions.Item label="Danh mục">
+                                <Tag color="#108ee9" style={{ borderRadius: '20px', padding: '2px 12px' }}>
+                                    {dataViewDetail.categoryName}
+                                </Tag>
+                            </Descriptions.Item>
 
-                    <Descriptions.Item label="Created At">
-                        {moment(dataViewDetail?.createdAt).format(FORMAT_DATE_DISPLAY)}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Updated At">
-                        {moment(dataViewDetail?.updatedAt).format(FORMAT_DATE_DISPLAY)}
-                    </Descriptions.Item>
-                </Descriptions>
-                <Divider orientation="left" > Ảnh Books </Divider>
-                <Upload
-                    action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                    listType="picture-card"
-                    fileList={fileList}
-                    onPreview={handlePreview}
-                    onChange={handleChange}
-                    showUploadList={
-                        { showRemoveIcon: false }
-                    }
-                >
+                            <Descriptions.Item label="Giá tiền">
+                                <Tag
+                                    icon={<DollarOutlined />}
+                                    color="#1677ff"
+                                    style={{ border: 'none', background: '#e6f4ff', color: '#1677ff', fontSize: '14px', padding: '4px 12px' }}
+                                >
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dataViewDetail.price ?? 0)}
+                                </Tag>
+                            </Descriptions.Item>
 
-                </Upload>
-                <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
-                    <img alt="example" style={{ width: '100%' }} src={previewImage} />
-                </Modal>
+                            {dataViewDetail.shortDesc && (
+                                <Descriptions.Item label="Mô tả ngắn">
+                                    {dataViewDetail.shortDesc}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.detailDesc && (
+                                <Descriptions.Item label="Mô tả chi tiết">
+                                    {dataViewDetail.detailDesc}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.quantity !== undefined && (
+                                <Descriptions.Item label="Số lượng">
+                                    {dataViewDetail.quantity}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.sold !== undefined && (
+                                <Descriptions.Item label="Đã bán">
+                                    {dataViewDetail.sold}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.createdAt && (
+                                <Descriptions.Item label="Ngày tạo">
+                                    {moment(dataViewDetail.createdAt).format(FORMAT_DATE_DISPLAY)}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.updatedAt && (
+                                <Descriptions.Item label="Cập nhật lần cuối">
+                                    {moment(dataViewDetail.updatedAt).format(FORMAT_DATE_DISPLAY)}
+                                </Descriptions.Item>
+                            )}
+                        </Descriptions>
+
+                        {fileList.length > 0 && (
+                            <>
+                                <Divider orientation="left">
+                                    <Title level={5} style={{ margin: 0 }}>Hình ảnh món ăn</Title>
+                                </Divider>
+                                <div style={{ marginTop: 20 }}>
+                                    <Upload
+                                        listType="picture-card"
+                                        fileList={fileList}
+                                        onPreview={handlePreview}
+                                        onChange={handleChange}
+                                        showUploadList={{ showRemoveIcon: false }}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <Modal
+                            open={previewOpen}
+                            title={previewTitle}
+                            footer={null}
+                            onCancel={handleCancel}
+                        >
+                            <img alt="preview" style={{ width: '100%' }} src={previewImage} />
+                        </Modal>
+                    </>
+                )}
             </Drawer>
         </>
     )

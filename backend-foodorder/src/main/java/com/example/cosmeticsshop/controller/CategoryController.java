@@ -48,18 +48,22 @@ public class CategoryController {
 
     @PostMapping("/categories")
     @ApiMessage("Create a new category")
-    public ResponseEntity<Category> createNewProduct(@Valid @RequestBody Category postManProduct)
+    public ResponseEntity<ResCategoryDTO> createNewProduct(@Valid @RequestBody Category postManProduct)
             throws IdInvalidException {
         Category category = categoryService.createCategory(postManProduct);
-        return ResponseEntity.ok(category);
+        ResCategoryDTO resCategoryDTO = categoryService.convertCategorytDto(category);
+        return ResponseEntity.ok(resCategoryDTO);
+
     }
 
     @PutMapping("/categories/{id}")
     @ApiMessage("Update a category")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @Valid @RequestBody Category postManProduct)
+    public ResponseEntity<ResCategoryDTO> updateCategory(@PathVariable Long id,
+            @Valid @RequestBody Category postManProduct)
             throws IdInvalidException {
         Category category = categoryService.updateCategory(id, postManProduct);
-        return ResponseEntity.ok(category);
+        ResCategoryDTO resCategoryDTO = categoryService.convertCategorytDto(category);
+        return ResponseEntity.ok(resCategoryDTO);
     }
 
     @DeleteMapping("/categories/{id}")
