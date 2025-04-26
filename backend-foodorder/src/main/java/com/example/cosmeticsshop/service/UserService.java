@@ -1,6 +1,7 @@
 package com.example.cosmeticsshop.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.cosmeticsshop.domain.History;
 import com.example.cosmeticsshop.domain.PasswordResetToken;
 import com.example.cosmeticsshop.domain.Role;
 import com.example.cosmeticsshop.domain.User;
@@ -19,9 +21,11 @@ import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUpdateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
+import com.example.cosmeticsshop.repository.NotificationRepository;
 import com.example.cosmeticsshop.repository.PasswordResetTokenRepository;
 import com.example.cosmeticsshop.repository.RoleRepository;
 import com.example.cosmeticsshop.repository.UserRepository;
+import com.example.cosmeticsshop.repository.WishListRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +38,22 @@ public class UserService {
     private final RoleService roleService;
     private final RoleRepository roleRepository;
     private final PasswordResetTokenRepository tokenRepository;
+    private final NotificationRepository notificationRepository;
+    private final WishListRepository wishListRepository;
 
-    public UserService(UserRepository userRepository, RoleService roleService, RoleRepository roleRepository,
-            PasswordResetTokenRepository tokenRepository) {
+    public UserService(
+            UserRepository userRepository,
+            RoleService roleService,
+            RoleRepository roleRepository,
+            PasswordResetTokenRepository tokenRepository,
+            NotificationRepository notificationRepository,
+            WishListRepository wishListRepository) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
         this.tokenRepository = tokenRepository;
+        this.notificationRepository = notificationRepository;
+        this.wishListRepository = wishListRepository;
     }
 
     public User handleCreateUser(UserCreateRequestDTO user) {
@@ -78,8 +91,41 @@ public class UserService {
         return res;
     }
 
+    @Transactional
     public void handleDeleteUser(long id) {
-        this.userRepository.deleteById(id);
+        User user = this.fetchUserById(id);
+        if (user != null) {
+            // 1. Delete password reset tokens associated with the user
+            Optional<PasswordResetToken> tokenOpt = this.tokenRepository.findByUser(user);
+            if (tokenOpt.isPresent()) {
+                this.tokenRepository.delete(tokenOpt.get());
+            }
+
+            // 2. Delete notifications where user is sender or receiver
+            this.notificationRepository.deleteAllBySender(user);
+            this.notificationRepository.deleteAllByReceiver(user);
+
+            // 3. Delete user's wishlist items
+            this.wishListRepository.deleteAllByUser(user);
+
+            // 4. Handle histories and related orders
+            if (user.getHistories() != null && !user.getHistories().isEmpty()) {
+                for (History history : user.getHistories()) {
+                    // Clear orders related to the history
+                    if (history.getOrders() != null) {
+                        history.getOrders().clear();
+                    }
+                }
+                // First detach histories from user to avoid cascading issues
+                user.setHistories(new ArrayList<>());
+                this.userRepository.save(user);
+            }
+
+            // 5. Finally delete the user
+            this.userRepository.deleteById(id);
+
+            log.info("User with ID {} has been deleted along with related records", id);
+        }
     }
 
     public User fetchUserById(long id) {
