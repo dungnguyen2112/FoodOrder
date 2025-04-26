@@ -1,13 +1,20 @@
-import { Badge, Descriptions, Divider, Drawer, Modal, Upload } from "antd";
+import { Badge, Descriptions, Divider, Drawer, Modal, Upload, Typography } from "antd";
 import moment from 'moment';
 import { FORMAT_DATE_DISPLAY } from "../../../utils/constant";
 //FORMAT_DATE_DISPLAY = 'DD-MM-YYYY HH:mm:ss'
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import { AppstoreOutlined, EyeOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 const CategoryViewDetail = (props) => {
     const { openViewDetail, setOpenViewDetail, dataViewDetail, setDataViewDetail } = props;
     const [fileList, setFileList] = useState([]);
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [previewTitle, setPreviewTitle] = useState('');
+
     const onClose = () => {
         setOpenViewDetail(false);
         setDataViewDetail(null);
@@ -15,7 +22,7 @@ const CategoryViewDetail = (props) => {
 
     useEffect(() => {
         if (dataViewDetail) {
-            let imgThumbnail = {}, imgSlider = [];
+            let imgThumbnail = {};
             if (dataViewDetail.image) {
                 imgThumbnail = {
                     uid: uuidv4(),
@@ -23,21 +30,12 @@ const CategoryViewDetail = (props) => {
                     status: 'done',
                     url: `${import.meta.env.VITE_CLOUDINARY_URL}/category/${dataViewDetail.image}`,
                 }
+                setFileList([imgThumbnail]);
+            } else {
+                setFileList([]);
             }
-            // if (dataViewDetail.slider && dataViewDetail.slider.length > 0) {
-            //     dataViewDetail.slider.map(item => {
-            //         imgSlider.push({
-            //             uid: uuidv4(),
-            //             name: item,
-            //             status: 'done',
-            //             url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${item}`,
-            //         })
-            //     })
-            // }
-
-            setFileList([imgThumbnail])
         }
-    }, [dataViewDetail])
+    }, [dataViewDetail]);
 
     const handleCancel = () => setPreviewOpen(false);
 
@@ -50,36 +48,91 @@ const CategoryViewDetail = (props) => {
     const handleChange = ({ fileList: newFileList }) => {
         setFileList(newFileList);
     }
+
     return (
         <>
             <Drawer
-                title="Chức năng xem chi tiết"
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <AppstoreOutlined style={{ fontSize: '20px', color: '#ff4d4f' }} />
+                        <span>Chi tiết danh mục</span>
+                    </div>
+                }
                 width={"50vw"}
                 onClose={onClose}
                 open={openViewDetail}
+                extra={
+                    <div className="drawer-subtitle">
+                        {dataViewDetail &&
+                            <Text type="secondary">Mã danh mục: #{dataViewDetail.id}</Text>
+                        }
+                    </div>
+                }
+                className="admin-drawer"
             >
-                <Descriptions
-                    title="Thông tin Book"
-                    bordered
-                    column={2}
-                >
-                    <Descriptions.Item label="Id">{dataViewDetail?.id}</Descriptions.Item>
-                    <Descriptions.Item label="Tên Category">{dataViewDetail?.name}</Descriptions.Item>
-                </Descriptions>
-                <Divider orientation="left" > Ảnh Category </Divider>
-                <Upload
-                    action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                    listType="picture-card"
-                    fileList={fileList}
-                    onPreview={handlePreview}
-                    onChange={handleChange}
-                    showUploadList={
-                        { showRemoveIcon: false }
-                    }
-                >
-                </Upload>
+                {dataViewDetail && (
+                    <>
+                        <Descriptions
+                            title={<Title level={5}>Thông tin danh mục</Title>}
+                            bordered
+                            column={1}
+                            labelStyle={{ width: '200px', fontWeight: 500 }}
+                            contentStyle={{ fontWeight: 400 }}
+                            className="detail-descriptions"
+                        >
+                            <Descriptions.Item label="Tên danh mục">
+                                <Text strong>{dataViewDetail.name}</Text>
+                            </Descriptions.Item>
+
+                            {dataViewDetail.description && (
+                                <Descriptions.Item label="Mô tả">
+                                    {dataViewDetail.description}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.createdAt && (
+                                <Descriptions.Item label="Ngày tạo">
+                                    {moment(dataViewDetail.createdAt).format(FORMAT_DATE_DISPLAY)}
+                                </Descriptions.Item>
+                            )}
+
+                            {dataViewDetail.updatedAt && (
+                                <Descriptions.Item label="Cập nhật lần cuối">
+                                    {moment(dataViewDetail.updatedAt).format(FORMAT_DATE_DISPLAY)}
+                                </Descriptions.Item>
+                            )}
+                        </Descriptions>
+
+                        {fileList.length > 0 && (
+                            <>
+                                <Divider orientation="left">
+                                    <Title level={5} style={{ margin: 0 }}>Hình ảnh danh mục</Title>
+                                </Divider>
+                                <div style={{ marginTop: 20 }}>
+                                    <Upload
+                                        listType="picture-card"
+                                        fileList={fileList}
+                                        onPreview={handlePreview}
+                                        onChange={handleChange}
+                                        showUploadList={{ showRemoveIcon: false }}
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        <Modal
+                            open={previewOpen}
+                            title={previewTitle}
+                            footer={null}
+                            onCancel={handleCancel}
+                        >
+                            <img alt="preview" style={{ width: '100%' }} src={previewImage} />
+                        </Modal>
+                    </>
+                )}
             </Drawer>
         </>
     )
 }
+
 export default CategoryViewDetail;

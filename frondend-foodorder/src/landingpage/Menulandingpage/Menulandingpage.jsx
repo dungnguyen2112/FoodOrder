@@ -128,7 +128,7 @@ const Menu = () => {
                 {products.map((product) => (
                   <div className="foodMenuDetails" key={product.id}>
                     <div className="foodMenuImg">
-                      <img src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${product.image}`} alt={product.name} className="bgImg" />
+                      <img src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${product.image}`} alt={product.name} className="bgImg" />
                     </div>
                     <h1>{product.name}</h1>
                     <p>{`${product.price} đ`}</p>

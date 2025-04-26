@@ -28,6 +28,8 @@ import com.example.cosmeticsshop.util.error.IdInvalidException;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -59,15 +61,22 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     @ApiMessage("Delete a user")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") long id)
+    public ResponseEntity<?> deleteUser(@PathVariable("id") long id)
             throws IdInvalidException {
         User currentUser = this.userService.fetchUserById(id);
         if (currentUser == null) {
             throw new IdInvalidException("User với id = " + id + " không tồn tại");
         }
 
-        this.userService.handleDeleteUser(id);
-        return ResponseEntity.ok(null);
+        try {
+            this.userService.handleDeleteUser(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Đã xóa thành công người dùng và các dữ liệu liên quan");
+            response.put("userId", String.valueOf(id));
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa người dùng: " + e.getMessage(), e);
+        }
     }
 
     @GetMapping("/users/{id}")

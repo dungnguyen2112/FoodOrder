@@ -1,104 +1,125 @@
 import React, { useState } from 'react';
-import { Button, Col, Form, Input, Row, theme } from 'antd';
-import { Select } from 'antd';
-import { useEffect } from "react";
-import { callFetchCategory } from '../../../services/api';
+import { Button, Col, Form, Input, Row, Select, Space, Typography } from 'antd';
+import { SearchOutlined, FilterOutlined, ClearOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 const STATUS_ENUM = {
     AVAILABLE: "AVAILABLE",
     BUSY: "BUSY"
 };
 
-const STATUS_NUMBER = {
-    AVAILABLE: 0,
-    BUSY: 1
-}
+const STATUS_LABELS = {
+    [STATUS_ENUM.AVAILABLE]: 'Trống',
+    [STATUS_ENUM.BUSY]: 'Đang phục vụ'
+};
+
 const InputSearchTable = (props) => {
-    const { token } = theme.useToken();
+    const { handleSearchTable, setFilter } = props;
     const [form] = Form.useForm();
-
-    const [listCategory, setListCategory] = useState([])
-
-    const formStyle = {
-        maxWidth: 'none',
-        background: token.colorFillAlter,
-        borderRadius: token.borderRadiusLG,
-        padding: 24,
-    };
+    const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
     const onFinish = (values) => {
         let query = "";
-        //build query
+        if (values.tableNumber) {
+            query += `filter=tableNumber ~ '${values.tableNumber}'`;
+        }
+
         if (values.status) {
-            query += `filter=status ~ '${STATUS_NUMBER[values.status]}'`
-        }
-        if (query) {
-            props.handleSearchTable(query);
+            if (query) query += " and ";
+            else query += "filter=";
+            query += `status = '${values.status}'`;
         }
 
-        //remove undefined
-        // https://stackoverflow.com/questions/25421233/javascript-removing-undefined-fields-from-an-object
-        // Object.keys(values).forEach(key => {
-        //     if (values[key] === undefined) {
-        //         delete values[key];
-        //     }
-        // });
+        handleSearchTable(query);
+    };
 
-        // if (values && Object.keys(values).length > 0) {
-        //     // https://stackoverflow.com/questions/1714786/query-string-encoding-of-a-javascript-object
-        //     const params = new URLSearchParams(values).toString();
-        //     props.handleSearch(params);
-        // }
+    const handleReset = () => {
+        form.resetFields();
+        setFilter("");
     };
 
     return (
-        <Form form={form} name="advanced_search" style={formStyle} onFinish={onFinish}>
-            <Row gutter={24}>
-                <Col span={12}>
-                    <Form.Item
-                        labelCol={{ span: 24 }}
-                        name={`status`}
-                        label={`Status`}
-                    >
-                        <Select
-                            defaultValue={null}
-                            showSearch
-                            allowClear
-                            options={[
-                                { value: STATUS_ENUM.AVAILABLE, label: "Available" },
-                                { value: STATUS_ENUM.BUSY, label: "Busy" },
-                            ]}
-                        />
-                    </Form.Item>
-                </Col>
-            </Row>
-            <Row>
-                <Col span={24} style={{ textAlign: 'right' }}>
-                    <Button type="primary" htmlType="submit">
-                        Search
-                    </Button>
-                    <Button
-                        style={{ margin: '0 8px' }}
-                        onClick={() => {
-                            form.resetFields();
-                            props.setFilter("");
-                        }}
-                    >
-                        Clear
-                    </Button>
-                    {/* <a
-                        style={{ fontSize: 12 }}
-                        onClick={() => {
-                            setExpand(!expand);
-                        }}
-                    >
-                        {expand ? <UpOutlined /> : <DownOutlined />} Collapse
-                    </a> */}
-                </Col>
-            </Row>
-        </Form>
+        <div className="table-search-container">
+            <div className="search-header">
+                <Title level={5} style={{ margin: 0 }}>
+                    <SearchOutlined /> Tìm kiếm bàn ăn
+                </Title>
+                <Button
+                    type="link"
+                    onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+                    style={{ padding: 0 }}
+                >
+                    <FilterOutlined /> {showAdvancedSearch ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
+                </Button>
+            </div>
+
+            <Form
+                form={form}
+                name="search_table"
+                onFinish={onFinish}
+                layout={showAdvancedSearch ? "vertical" : "inline"}
+                className={`search-form ${showAdvancedSearch ? 'advanced' : 'basic'}`}
+            >
+                <Row gutter={[16, 16]} style={{ width: '100%' }}>
+                    <Col xs={24} sm={showAdvancedSearch ? 12 : 16} md={showAdvancedSearch ? 8 : 16} lg={showAdvancedSearch ? 6 : 16}>
+                        <Form.Item
+                            name="tableNumber"
+                            label={showAdvancedSearch ? <Text strong>Số bàn</Text> : null}
+                        >
+                            <Input
+                                placeholder="Tìm theo số bàn"
+                                allowClear
+                                prefix={<SearchOutlined style={{ color: '#ff4d4f' }} />}
+                                style={{ borderRadius: '8px' }}
+                            />
+                        </Form.Item>
+                    </Col>
+
+                    {showAdvancedSearch && (
+                        <Col xs={24} sm={12} md={8} lg={6}>
+                            <Form.Item
+                                name="status"
+                                label={<Text strong>Trạng thái</Text>}
+                            >
+                                <Select placeholder="Chọn trạng thái" allowClear style={{ borderRadius: '8px' }}>
+                                    <Option value={STATUS_ENUM.AVAILABLE}>{STATUS_LABELS[STATUS_ENUM.AVAILABLE]}</Option>
+                                    <Option value={STATUS_ENUM.BUSY}>{STATUS_LABELS[STATUS_ENUM.BUSY]}</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    )}
+
+                    <Col xs={24} sm={showAdvancedSearch ? 24 : 8} md={showAdvancedSearch ? 8 : 8} lg={showAdvancedSearch ? 12 : 8}>
+                        <Form.Item style={{ textAlign: showAdvancedSearch ? 'right' : 'left' }}>
+                            <Space>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    icon={<SearchOutlined />}
+                                    style={{
+                                        backgroundColor: '#ff4d4f',
+                                        borderColor: '#ff4d4f',
+                                        borderRadius: '8px'
+                                    }}
+                                >
+                                    Tìm kiếm
+                                </Button>
+                                <Button
+                                    icon={<ClearOutlined />}
+                                    onClick={handleReset}
+                                    style={{ borderRadius: '8px' }}
+                                >
+                                    Xóa
+                                </Button>
+                            </Space>
+                        </Form.Item>
+                    </Col>
+                </Row>
+            </Form>
+        </div>
     );
 };
-
 
 export default InputSearchTable;

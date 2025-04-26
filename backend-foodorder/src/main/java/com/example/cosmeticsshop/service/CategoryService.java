@@ -75,6 +75,15 @@ public class CategoryService {
         return resCategoryDTO;
     }
 
+    public ResCategoryDTO convertCategorytDto(Category category) {
+        ResCategoryDTO resCategoryDTO = new ResCategoryDTO();
+        resCategoryDTO.setId(category.getId());
+        resCategoryDTO.setName(category.getName());
+        resCategoryDTO.setDescription(category.getDescription());
+        resCategoryDTO.setImage(category.getImage());
+        return resCategoryDTO;
+    }
+
     public Category createCategory(Category category) {
         return categoryRepository.save(category);
     }

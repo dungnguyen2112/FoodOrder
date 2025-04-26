@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Row, Col, Popconfirm, Button, message, notification } from 'antd';
+import { Table, Row, Col, Popconfirm, Button, message, notification, Space, Typography, Tag } from 'antd';
 import InputSearch from './InputSearch';
 import { callDeleteUser, callFetchListUser } from '../../../services/api';
-import { CloudUploadOutlined, DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined, EyeOutlined, UserOutlined } from '@ant-design/icons';
 import UserModalCreate from './UserModalCreate';
 import UserViewDetail from './UserViewDetail';
 import moment from 'moment/moment';
@@ -11,10 +11,18 @@ import * as XLSX from 'xlsx';
 import UserModalUpdate from './UserModalUpdate';
 import queryString from 'query-string';
 import { sfLike } from "spring-filter-query-builder";
+import '../admin.scss';
 
+const { Title, Text } = Typography;
 
+// Royalty level display configuration
+const ROYALTY_LEVELS = {
+    "BRONZE": { color: "#cd7f32", label: "Đồng" },
+    "SILVER": { color: "#c0c0c0", label: "Bạc" },
+    "GOLD": { color: "#ffd700", label: "Vàng" },
+    "PLATINUM": { color: "#e5e4e2", label: "Bạch kim" }
+};
 
-// https://stackblitz.com/run?file=demo.tsx
 const UserTable = () => {
     const [listUser, setListUser] = useState([]);
     const [current, setCurrent] = useState(1);
@@ -38,48 +46,6 @@ const UserTable = () => {
         fetchUser();
     }, [current, pageSize, filter, sortQuery]);
 
-    // const buildQuery = (params, sort, filter) => {
-    //     const q = {
-    //         page: params.current,
-    //         size: params.pageSize,
-    //         filter: ""
-    //     }
-
-    //     const clone = { ...params };
-    //     if (clone.name) q.filter = `${sfLike("name", clone.name)}`;
-    //     if (clone.email) {
-    //         q.filter = clone.name ?
-    //             q.filter + " and " + `${sfLike("email", clone.email)}`
-    //             : `${sfLike("email", clone.email)}`;
-    //     }
-
-    //     if (!q.filter) delete q.filter;
-    //     let temp = queryString.stringify(q);
-
-    //     let sortBy = "";
-    //     if (sort && sort.name) {
-    //         sortBy = sort.name === 'ascend' ? "sort=name,asc" : "sort=name,desc";
-    //     }
-    //     if (sort && sort.email) {
-    //         sortBy = sort.email === 'ascend' ? "sort=email,asc" : "sort=email,desc";
-    //     }
-    //     if (sort && sort.createdAt) {
-    //         sortBy = sort.createdAt === 'ascend' ? "sort=createdAt,asc" : "sort=createdAt,desc";
-    //     }
-    //     if (sort && sort.updatedAt) {
-    //         sortBy = sort.updatedAt === 'ascend' ? "sort=updatedAt,asc" : "sort=updatedAt,desc";
-    //     }
-
-    //     //mặc định sort theo updatedAt
-    //     if (Object.keys(sortBy).length === 0) {
-    //         temp = `${temp}&sort=updatedAt,desc`;
-    //     } else {
-    //         temp = `${temp}&${sortBy}`;
-    //     }
-
-    //     return temp;
-    // }
-
     const fetchUser = async () => {
         setIsLoading(true)
         let query = `page=${current}&size=${pageSize}`;
@@ -90,7 +56,6 @@ const UserTable = () => {
             query += `&${sortQuery}`;
         }
 
-
         const res = await callFetchListUser(query);
         if (res && res.data) {
             setListUser(res.data.result);
@@ -99,104 +64,124 @@ const UserTable = () => {
         setIsLoading(false)
     }
 
-
-
     const columns = [
         {
-            title: 'Id',
+            title: 'ID',
             dataIndex: 'id',
+            width: '5%',
             render: (text, record, index) => {
                 return (
-                    <a href='#' onClick={() => {
-                        setDataViewDetail(record);
-                        setOpenViewDetail(true);
-                        openViewDetail(true);
-                    }}>{record.id}</a>
+                    <a
+                        className="table-id-link"
+                        onClick={() => {
+                            setDataViewDetail(record);
+                            setOpenViewDetail(true);
+                        }}
+                    >
+                        #{record.id}
+                    </a>
                 )
             }
         },
         {
-            title: 'Tên hiển thị',
+            title: 'Tên người dùng',
             dataIndex: 'name',
-            sorter: true
+            width: '15%',
+            sorter: true,
+            render: (text) => <Text strong>{text}</Text>
         },
         {
             title: 'Email',
             dataIndex: 'email',
+            width: '18%',
             sorter: true,
         },
         {
             title: 'Số điện thoại',
             dataIndex: 'phone',
+            width: '10%',
             sorter: true
         },
         {
-            title: 'Tổng số đơn hàng đã đặt',
+            title: 'Tổng đơn đã đặt',
             dataIndex: 'totalOrder',
-            sorter: true
+            width: '10%',
+            sorter: true,
+            render: (value) => <Text style={{ color: '#1677ff' }}>{value}</Text>
         },
         {
-            title: 'Tổng số tiền đã mua',
+            title: 'Tổng chi tiêu',
             dataIndex: 'totalMoneySpent',
+            width: '12%',
             sorter: true,
+            render: (value) => (
+                <Text style={{ color: '#1677ff', fontWeight: 'bold' }}>
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0)}
+                </Text>
+            )
         },
         {
             title: 'Hạng thành viên',
             dataIndex: 'royalty',
-            sorter: true
+            width: '12%',
+            sorter: true,
+            render: (value) => {
+                const royaltyInfo = ROYALTY_LEVELS[value] || { color: "#999", label: value };
+                return (
+                    <Tag color={royaltyInfo.color} style={{ fontWeight: 'bold' }}>
+                        {royaltyInfo.label}
+                    </Tag>
+                );
+            }
         },
         {
             title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
+            width: '10%',
             sorter: true,
             render: (text, record, index) => {
                 return (
                     <>{moment(record.updatedAt).format(FORMAT_DATE_DISPLAY)}</>
                 )
             }
-
         },
         {
-            title: 'Action',
+            title: 'Hành động',
+            width: '8%',
             render: (text, record, index) => {
                 return (
-                    <>
-                        <EditTwoTone
-                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
+                    <Space size="middle" className="action-buttons">
+                        <Button
+                            className="action-button view-button"
+                            icon={<EyeOutlined />}
+                            onClick={() => {
+                                setDataViewDetail(record);
+                                setOpenViewDetail(true);
+                            }}
+                        />
+                        <Button
+                            className="action-button edit-button"
+                            icon={<EditTwoTone twoToneColor="#faad14" />}
                             onClick={() => {
                                 setOpenModalUpdate(true);
                                 setDataUpdate(record);
                             }}
                         />
                         <Popconfirm
-                            placement="leftTop"
-                            title={"Xác nhận xóa user"}
-                            description={"Bạn có chắc chắn muốn xóa user này ?"}
+                            placement="topRight"
+                            title={<div style={{ fontWeight: 500 }}>Xác nhận xóa người dùng</div>}
+                            description={<div>Bạn có chắc chắn muốn xóa người dùng <Text strong>{record.name}</Text>?</div>}
                             onConfirm={() => handleDeleteUser(record.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
                         >
-                            <span style={{ cursor: "pointer", margin: "0 20px" }}>
-                                <DeleteTwoTone twoToneColor="#ff4d4f" />
-                            </span>
+                            <Button
+                                className="action-button delete-button"
+                                icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                            />
                         </Popconfirm>
-
-
-                        {/* Thêm icon ViewDetail */}
-
-                        {/* <span
-                            style={{ cursor: "pointer", color: "#1890ff" }}
-                            onClick={() => {
-                                console.log("User data:", record);
-                                setDataViewDetail(record);
-                                setOpenViewDetail(true);
-                            }}
-                        >
-                            <EyeOutlined />
-                        </span> */}
-
-                    </>
-
+                    </Space>
                 )
             }
         }
@@ -244,142 +229,126 @@ const UserTable = () => {
         setSortQuery(sortBy);
     };
 
-
     const handleDeleteUser = async (userId) => {
-        if (userId) {
-            const res = await callDeleteUser(userId);
-            console.log("res", res);
-            if (res.statusCode === 200) {
-                message.success('Xóa user thành công');
-                fetchUser();
-            } else {
-                notification.error({
-                    message: 'Có lỗi xảy ra',
-                    description: res.message
-                });
-            }
-        }
-        else {
+        const res = await callDeleteUser(userId);
+        if (res.statusCode === 200) {
+            message.success('Xóa người dùng thành công');
+            fetchUser();
+        } else {
             notification.error({
                 message: 'Có lỗi xảy ra',
-                description: "Không có id user"
+                description: res.message,
+                placement: 'top'
             });
         }
-
     };
 
-
-    // change button color: https://ant.design/docs/react/customize-theme#customize-design-token
     const renderHeader = () => {
         return (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Table List Users</span>
-                <span style={{ display: 'flex', gap: 15 }}>
+            <div className="table-header">
+                <Title level={4} style={{ margin: 0 }}>
+                    <UserOutlined className="title-icon" /> Quản lý người dùng
+                </Title>
+                <Space className="header-buttons">
                     <Button
                         icon={<ExportOutlined />}
-                        type="primary"
+                        className="export-button"
                         onClick={() => handleExportData()}
-                    >Export</Button>
-
-                    <Button
-                        icon={<CloudUploadOutlined />}
-                        type="primary"
-                        onClick={() => setOpenModalImport(true)}
-                    >Import</Button>
+                    >
+                        Xuất dữ liệu
+                    </Button>
 
                     <Button
                         icon={<PlusOutlined />}
                         type="primary"
+                        className="add-button"
                         onClick={() => setOpenModalCreate(true)}
-                    >Thêm mới</Button>
-                    <Button type='ghost' onClick={() => {
-                        setFilter("");
-                        setSortQuery("")
-                    }}>
-                        <ReloadOutlined />
+                    >
+                        Thêm mới
                     </Button>
 
-
-                </span>
+                    <Button
+                        icon={<ReloadOutlined />}
+                        className="refresh-button"
+                        onClick={() => {
+                            setFilter("");
+                            setSortQuery("");
+                            fetchUser();
+                        }}
+                    />
+                </Space>
             </div>
         )
     }
 
     const handleSearch = (query) => {
-        setCurrent(1)
         setFilter(query);
     }
 
     const handleExportData = () => {
-        // https://stackoverflow.com/questions/70871254/how-can-i-export-a-json-object-to-excel-using-nextjs-react
         if (listUser.length > 0) {
             const worksheet = XLSX.utils.json_to_sheet(listUser);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-            XLSX.writeFile(workbook, "ExportUser.csv");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+            XLSX.writeFile(workbook, "QuanLyNguoiDung.xlsx");
         }
     }
-    return (
-        <>
-            <Row gutter={[20, 20]}>
-                <Col span={24}>
-                    <InputSearch
-                        handleSearch={handleSearch}
-                        setFilter={setFilter}
-                    />
-                </Col>
-                <Col span={24}>
-                    <Table
-                        title={renderHeader}
-                        loading={isLoading}
 
-                        columns={columns}
-                        dataSource={listUser}
-                        onChange={onChange}
-                        rowKey="_id"
-                        pagination={
-                            {
+    return (
+        <div className="admin-content-container">
+            <div className="admin-table-container">
+                <Row gutter={[20, 20]}>
+                    <Col span={24}>
+                        <InputSearch
+                            handleSearch={handleSearch}
+                            setFilter={setFilter}
+                        />
+                    </Col>
+                    <Col span={24}>
+                        <Table
+                            title={renderHeader}
+                            loading={isLoading}
+                            columns={columns}
+                            dataSource={listUser}
+                            onChange={onChange}
+                            rowKey={"id"}
+                            pagination={{
                                 current: current,
                                 pageSize: pageSize,
                                 showSizeChanger: true,
                                 total: total,
-                                showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                            }
-                        }
+                                pageSizeOptions: ['5', '10', '15', '20'],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} người dùng`
+                            }}
+                            className="admin-table"
+                            scroll={{ x: 1200 }}
+                        />
+                    </Col>
+                </Row>
 
-                    />
-                </Col>
-            </Row>
-            <UserModalCreate
-                openModalCreate={openModalCreate}
-                setOpenModalCreate={setOpenModalCreate}
-                fetchUser={fetchUser}
-            />
+                <UserModalCreate
+                    openModalCreate={openModalCreate}
+                    setOpenModalCreate={setOpenModalCreate}
+                    fetchUser={fetchUser}
+                />
 
-            <UserViewDetail
-                openViewDetail={openViewDetail}
-                setOpenViewDetail={setOpenViewDetail}
-                dataViewDetail={dataViewDetail}
-                setDataViewDetail={setDataViewDetail}
-            />
+                <UserViewDetail
+                    openViewDetail={openViewDetail}
+                    setOpenViewDetail={setOpenViewDetail}
+                    dataViewDetail={dataViewDetail}
+                    setDataViewDetail={setDataViewDetail}
+                />
 
-            {/* <UserImport
-                openModalImport={openModalImport}
-                setOpenModalImport={setOpenModalImport}
-                fetchUser={fetchUser}
-            /> */}
-
-            <UserModalUpdate
-                openModalUpdate={openModalUpdate}
-                setOpenModalUpdate={setOpenModalUpdate}
-                dataUpdate={dataUpdate}
-                setDataUpdate={setDataUpdate}
-                fetchUser={fetchUser}
-            />
-
-        </>
-    )
-}
-
+                <UserModalUpdate
+                    openModalUpdate={openModalUpdate}
+                    setOpenModalUpdate={setOpenModalUpdate}
+                    dataUpdate={dataUpdate}
+                    setDataUpdate={setDataUpdate}
+                    fetchUser={fetchUser}
+                />
+            </div>
+        </div>
+    );
+};
 
 export default UserTable;

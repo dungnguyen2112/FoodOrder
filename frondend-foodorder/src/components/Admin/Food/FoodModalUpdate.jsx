@@ -196,7 +196,7 @@ const FoodModalUpdate = (props) => {
     return (
         <>
             <Modal
-                title="Cập nhật book"
+                title="Cập nhật món ăn"
                 open={openModalUpdate}
                 onOk={() => { form.submit() }}
                 onCancel={() => {

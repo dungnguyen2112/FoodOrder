@@ -4,7 +4,9 @@ import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.cosmeticsshop.domain.Notification;
@@ -23,4 +25,11 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
 
     List<Notification> findByReceiverEqualsAndIdLessThan(User receiver, Long idIsLessThan, Pageable pageable);
 
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.sender = :sender")
+    void deleteAllBySender(@Param("sender") User sender);
+
+    @Modifying
+    @Query("DELETE FROM Notification n WHERE n.receiver = :receiver")
+    void deleteAllByReceiver(@Param("receiver") User receiver);
 }

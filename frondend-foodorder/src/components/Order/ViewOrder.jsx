@@ -105,7 +105,7 @@ const ViewOrder = (props) => {
                             <div className="cart-item">
                                 <div className="item-image">
                                     <img
-                                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${buyNowItem.detail.image}`}
+                                        src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${buyNowItem.detail.image}`}
                                         alt={buyNowItem.detail.name}
                                     />
                                 </div>
@@ -135,7 +135,7 @@ const ViewOrder = (props) => {
                                     <div className="cart-item" key={`item-${index}`}>
                                         <div className="item-image">
                                             <img
-                                                src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${book?.detail?.image}`}
+                                                src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${book?.detail?.image}`}
                                                 alt={book?.detail?.name}
                                             />
                                         </div>

@@ -1,0 +1,222 @@
+.admin-table-container {
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f0f0f0;
+
+        .header-buttons {
+            .export-button {
+                background-color: #f6ffed;
+                border-color: #b7eb8f;
+                color: #52c41a;
+                font-weight: 500;
+
+                &:hover {
+                    background-color: #d9f7be;
+                    border-color: #52c41a;
+                }
+            }
+
+            .add-button {
+                background-color: #ff4d4f;
+                border-color: #ff4d4f;
+                box-shadow: 0 2px 0 rgba(255, 77, 79, 0.1);
+
+                &:hover {
+                    background-color: #ff7875;
+                    border-color: #ff7875;
+                }
+            }
+
+            .refresh-button {
+                color: #8c8c8c;
+                border-color: #d9d9d9;
+                transition: all 0.3s;
+
+                &:hover {
+                    color: #ff4d4f;
+                    border-color: #ff4d4f;
+                    transform: rotate(45deg);
+                }
+            }
+        }
+    }
+
+    .admin-table {
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        border-radius: 12px;
+        overflow: hidden;
+
+        .ant-table-thead>tr>th {
+            background-color: #fafafa;
+            font-weight: 600;
+            padding: 16px;
+        }
+
+        .ant-table-tbody>tr>td {
+            padding: 16px;
+        }
+
+        .ant-table-tbody>tr:hover>td {
+            background-color: #f5f5f5;
+        }
+
+        .ant-pagination {
+            margin: 16px 0;
+            padding: 0 16px;
+        }
+    }
+
+    .table-id-link {
+        color: #1890ff;
+        font-weight: 500;
+        transition: all 0.3s;
+
+        &:hover {
+            color: #69c0ff;
+            text-decoration: underline;
+        }
+    }
+
+    .action-buttons {
+        .action-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s;
+            padding: 0;
+        }
+
+        .view-button {
+            background-color: #e6f7ff;
+            color: #1890ff;
+
+            &:hover {
+                background-color: #bae7ff;
+                transform: translateY(-2px);
+            }
+        }
+
+        .edit-button {
+            background-color: #fff7e6;
+            color: #faad14;
+
+            &:hover {
+                background-color: #ffe7ba;
+                transform: translateY(-2px);
+            }
+        }
+
+        .delete-button {
+            background-color: #fff1f0;
+            color: #ff4d4f;
+
+            &:hover {
+                background-color: #ffccc7;
+                transform: translateY(-2px);
+            }
+        }
+    }
+}
+
+// Style cho Select trạng thái
+.status-select {
+    .ant-select-selector {
+        border-radius: 8px !important;
+        border-width: 2px !important;
+    }
+
+    .status-tag {
+        margin-right: 0;
+        font-weight: 500;
+        padding: 0 8px;
+        border-radius: 4px;
+    }
+}
+
+.status-dropdown {
+    .ant-select-item {
+        padding: 8px 12px;
+        transition: all 0.2s;
+
+        &:hover {
+            background-color: #f5f5f5;
+        }
+    }
+}
+
+// Modal styles
+.ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+
+    .ant-modal-header {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 16px 24px;
+
+        .ant-modal-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+    }
+
+    .ant-modal-body {
+        padding: 24px;
+    }
+
+    .ant-modal-footer {
+        border-top: 1px solid #f0f0f0;
+        padding: 16px 24px;
+    }
+}
+
+// Drawer styles
+.ant-drawer {
+    .ant-drawer-header {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 16px 24px;
+
+        .ant-drawer-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #333;
+        }
+    }
+
+    .ant-drawer-body {
+        padding: 24px;
+    }
+
+    .ant-descriptions {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+        .ant-descriptions-header {
+            margin-bottom: 20px;
+
+            .ant-descriptions-title {
+                font-weight: 600;
+                font-size: 16px;
+            }
+        }
+
+        .ant-descriptions-row>th,
+        .ant-descriptions-row>td {
+            padding: 16px 24px;
+        }
+
+        .ant-descriptions-item-label {
+            background-color: #fafafa;
+            font-weight: 500;
+        }
+    }
+}

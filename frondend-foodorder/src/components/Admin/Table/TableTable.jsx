@@ -1,17 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Row, Col, Popconfirm, Button, message, notification, Select } from 'antd';
+import { Table, Row, Col, Popconfirm, Button, message, notification, Select, Space, Tag, Typography } from 'antd';
 import { callDeleteCategory, callDeleteFood, callDeleteTable, callFetchCategoryPage, callFetchListFood, callFetchTable, callUpdateStatusTable } from '../../../services/api';
-import { DeleteTwoTone, EditTwoTone, ExportOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import {
+    DeleteTwoTone,
+    EditTwoTone,
+    ExportOutlined,
+    PlusOutlined,
+    ReloadOutlined,
+    EyeOutlined,
+    InfoCircleOutlined,
+    TableOutlined,
+    CheckCircleOutlined,
+    StopOutlined
+} from '@ant-design/icons';
 import moment from 'moment/moment';
 import { FORMAT_DATE_DISPLAY } from '../../../utils/constant';
 import * as XLSX from 'xlsx';
 import TableModalCreate from './TableModalCreate';
 import queryString from 'query-string';
 import InputSearchTable from './InputSearchTable';
+import '../admin.scss';
+import './table.scss';
+
+const { Title, Text } = Typography;
 
 const STATUS_ENUM = {
     AVAILABLE: "AVAILABLE",
     BUSY: "BUSY"
+};
+
+const STATUS_COLORS = {
+    [STATUS_ENUM.AVAILABLE]: '#52c41a',
+    [STATUS_ENUM.BUSY]: '#ff4d4f'
+};
+
+const STATUS_LABELS = {
+    [STATUS_ENUM.AVAILABLE]: 'Trống',
+    [STATUS_ENUM.BUSY]: 'Đang phục vụ'
+};
+
+const STATUS_ICONS = {
+    [STATUS_ENUM.AVAILABLE]: <CheckCircleOutlined />,
+    [STATUS_ENUM.BUSY]: <StopOutlined />
 };
 
 const TableTable = () => {
@@ -54,88 +84,119 @@ const TableTable = () => {
     }
 
     const handleUpdateStatus = async (id, newStatus) => {
-        const res = await callUpdateStatusTable(id, newStatus); // Ensure correct API format
+        const res = await callUpdateStatusTable(id, newStatus);
         if (res && res.data) {
             message.success('Cập nhật trạng thái thành công!');
-            fetchBook(); // Refresh data
+            fetchBook();
         } else {
-            notification.error({ message: 'Lỗi khi cập nhật trạng thái', description: res.message });
+            notification.error({
+                message: 'Lỗi khi cập nhật trạng thái',
+                description: res.message,
+                placement: 'top'
+            });
         }
     };
 
     const columns = [
         {
-            title: 'Id',
+            title: 'ID',
             dataIndex: 'id',
-            render: (text, record, index) => {
+            width: '10%',
+            render: (text, record) => {
                 return (
-                    <a href='#' onClick={() => {
-                        setDataViewDetail(record);
-                        setOpenViewDetail(true);
-                    }}>{record.id}</a>
+                    <a
+                        className="table-id-link"
+                        onClick={() => {
+                            setDataViewDetail(record);
+                            setOpenViewDetail(true);
+                        }}
+                    >
+                        #{record.id}
+                    </a>
                 )
             }
         },
         {
             title: 'Số bàn',
             dataIndex: 'tableNumber',
-            sorter: true
+            sorter: true,
+            width: '20%',
+            render: (text) => <Text strong>{text}</Text>
         },
         {
-            title: 'Status',
+            title: 'Trạng thái',
             dataIndex: 'status',
             sorter: true,
-            render: (text, record) => (
+            width: '30%',
+            render: (status, record) => (
                 <Select
-                    defaultValue={record.status}
-                    style={{ width: 120 }}
+                    value={status}
+                    style={{
+                        width: 160,
+                        borderColor: STATUS_COLORS[status]
+                    }}
                     onChange={(value) => handleUpdateStatus(record.id, value)}
                     options={[
-                        { value: STATUS_ENUM.AVAILABLE, label: "Available" },
-                        { value: STATUS_ENUM.BUSY, label: "Busy" },
+                        {
+                            value: STATUS_ENUM.AVAILABLE,
+                            label: (
+                                <Tag color={STATUS_COLORS[STATUS_ENUM.AVAILABLE]} className="status-tag">
+                                    {STATUS_ICONS[STATUS_ENUM.AVAILABLE]} {STATUS_LABELS[STATUS_ENUM.AVAILABLE]}
+                                </Tag>
+                            )
+                        },
+                        {
+                            value: STATUS_ENUM.BUSY,
+                            label: (
+                                <Tag color={STATUS_COLORS[STATUS_ENUM.BUSY]} className="status-tag">
+                                    {STATUS_ICONS[STATUS_ENUM.BUSY]} {STATUS_LABELS[STATUS_ENUM.BUSY]}
+                                </Tag>
+                            )
+                        },
                     ]}
+                    className="status-select"
+                    dropdownClassName="status-dropdown"
+                    suffixIcon={null}
                 />
             ),
         },
-        // {
-        //     title: 'Ngày cập nhật',
-        //     dataIndex: 'updatedAt',
-        //     sorter: true,
-        //     render: (text, record, index) => {
-        //         return (
-        //             <>{moment(record.updatedAt).format(FORMAT_DATE_DISPLAY)}</>
-        //         )
-        //     }
-
-        // },
         {
-            title: 'Action',
-            render: (text, record, index) => {
+            title: 'Hành động',
+            width: '20%',
+            render: (_, record) => {
                 return (
-                    <>
-                        <EditTwoTone
-                            twoToneColor="#f57800" style={{ cursor: "pointer" }}
+                    <Space size="middle" className="action-buttons">
+                        <Button
+                            className="action-button view-button"
+                            icon={<EyeOutlined />}
+                            onClick={() => {
+                                setDataViewDetail(record);
+                                setOpenViewDetail(true);
+                            }}
+                        />
+                        <Button
+                            className="action-button edit-button"
+                            icon={<EditTwoTone twoToneColor="#faad14" />}
                             onClick={() => {
                                 setOpenModalUpdate(true);
                                 setDataUpdate(record);
                             }}
                         />
                         <Popconfirm
-                            placement="leftTop"
-                            title={"Xác nhận xóa book"}
-                            description={"Bạn có chắc chắn muốn xóa book này ?"}
+                            placement="topRight"
+                            title={<div style={{ fontWeight: 500 }}>Xác nhận xóa bàn</div>}
+                            description={<div>Bạn có chắc chắn muốn xóa bàn số <Text strong>{record.tableNumber}</Text>?</div>}
                             onConfirm={() => handleDeleteTable(record.id)}
                             okText="Xác nhận"
                             cancelText="Hủy"
+                            okButtonProps={{ danger: true }}
                         >
-                            <span style={{ cursor: "pointer", margin: "0 20px" }}>
-                                <DeleteTwoTone twoToneColor="#ff4d4f" />
-                            </span>
+                            <Button
+                                className="action-button delete-button"
+                                icon={<DeleteTwoTone twoToneColor="#ff4d4f" />}
+                            />
                         </Popconfirm>
-
-
-                    </>
-
+                    </Space>
                 )
             }
         }
@@ -181,43 +242,52 @@ const TableTable = () => {
     const handleDeleteTable = async (id) => {
         const res = await callDeleteTable(id);
         if (res.statusCode === 200) {
-            message.success('Xóa book thành công');
+            message.success('Xóa bàn thành công');
             fetchBook();
         } else {
             notification.error({
                 message: 'Có lỗi xảy ra',
-                description: res.message
+                description: res.message,
+                placement: 'top'
             });
         }
     };
 
-
     // change button color: https://ant.design/docs/react/customize-theme#customize-design-token
     const renderHeader = () => {
         return (
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Table List Tables</span>
-                <span style={{ display: 'flex', gap: 15 }}>
+            <div className="table-header">
+                <Title level={4} style={{ margin: 0 }}>
+                    <TableOutlined className="title-icon" /> Quản lý bàn ăn
+                </Title>
+                <Space className="header-buttons">
                     <Button
                         icon={<ExportOutlined />}
-                        type="primary"
+                        className="export-button"
                         onClick={() => handleExportData()}
-                    >Export</Button>
+                    >
+                        Xuất dữ liệu
+                    </Button>
 
                     <Button
                         icon={<PlusOutlined />}
                         type="primary"
+                        className="add-button"
                         onClick={() => setOpenModalCreate(true)}
-                    >Thêm mới</Button>
-                    <Button type='ghost' onClick={() => {
-                        setFilter("");
-                        setSortQuery("")
-                    }}>
-                        <ReloadOutlined />
+                    >
+                        Thêm mới
                     </Button>
 
-
-                </span>
+                    <Button
+                        icon={<ReloadOutlined />}
+                        className="refresh-button"
+                        onClick={() => {
+                            setFilter("");
+                            setSortQuery("");
+                            fetchBook();
+                        }}
+                    />
+                </Space>
             </div>
         )
     }
@@ -227,54 +297,54 @@ const TableTable = () => {
     }
 
     const handleExportData = () => {
-        // https://stackoverflow.com/questions/70871254/how-can-i-export-a-json-object-to-excel-using-nextjs-react
         if (listBook.length > 0) {
             const worksheet = XLSX.utils.json_to_sheet(listBook);
             const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-            XLSX.writeFile(workbook, "ExportBook.csv");
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Tables");
+            XLSX.writeFile(workbook, "QuanLyBan.xlsx");
         }
     }
-    return (
-        <>
-            <Row gutter={[20, 20]}>
-                <Col span={24}>
-                    <InputSearchTable
-                        handleSearchTable={handleSearchTable}
-                        setFilter={setFilter}
-                    />
-                </Col>
-                <Col span={24}>
-                    <Table
-                        title={renderHeader}
-                        loading={isLoading}
 
-                        columns={columns}
-                        dataSource={listBook}
-                        onChange={onChange}
-                        rowKey="id"
-                        pagination={
-                            {
+    return (
+        <div className="admin-content-container">
+            <div className="admin-table-container">
+                <Row gutter={[20, 20]}>
+                    <Col span={24}>
+                        <InputSearchTable
+                            handleSearchTable={handleSearchTable}
+                            setFilter={setFilter}
+                        />
+                    </Col>
+                    <Col span={24}>
+                        <Table
+                            title={renderHeader}
+                            loading={isLoading}
+                            columns={columns}
+                            dataSource={listBook}
+                            onChange={onChange}
+                            rowKey={"id"}
+                            pagination={{
                                 current: current,
                                 pageSize: pageSize,
                                 showSizeChanger: true,
                                 total: total,
-                                showTotal: (total, range) => { return (<div> {range[0]}-{range[1]} trên {total} rows</div>) }
-                            }
-                        }
+                                pageSizeOptions: ['5', '10', '15', '20'],
+                                showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} bàn`
+                            }}
+                            className="admin-table"
+                        />
+                    </Col>
+                </Row>
 
-                    />
-                </Col>
-            </Row>
-            <TableModalCreate
-                openModalCreate={openModalCreate}
-                setOpenModalCreate={setOpenModalCreate}
-                fetchBook={fetchBook}
-            />
+                <TableModalCreate
+                    openModalCreate={openModalCreate}
+                    setOpenModalCreate={setOpenModalCreate}
+                    fetchBook={fetchBook}
+                />
 
-        </>
-    )
-}
-
+            </div>
+        </div>
+    );
+};
 
 export default TableTable;

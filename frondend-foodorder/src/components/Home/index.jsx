@@ -1,5 +1,5 @@
-import { FilterTwoTone, ReloadOutlined, HomeOutlined, UserOutlined, PlusCircleOutlined, HeartOutlined, ShoppingCartOutlined, FireOutlined, HeartFilled } from '@ant-design/icons';
-import { Row, Col, Form, Checkbox, Divider, InputNumber, Button, Rate, Tabs, Pagination, Spin, Empty, Breadcrumb, Tooltip, Badge } from 'antd';
+import { FilterTwoTone, ReloadOutlined, HomeOutlined, UserOutlined, PlusCircleOutlined, HeartOutlined, ShoppingCartOutlined, FireOutlined, HeartFilled, RobotOutlined, SendOutlined, CloseOutlined } from '@ant-design/icons';
+import { Row, Col, Form, Checkbox, Divider, InputNumber, Button, Rate, Tabs, Pagination, Spin, Empty, Breadcrumb, Tooltip, Badge, Input } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { addToWishlist, callFetchCategory, callFetchCategoryPage, callFetchListFood, getWishlist, removeFromWishlist } from '../../services/api';
@@ -15,9 +15,215 @@ import { use } from 'react';
 import { message } from 'antd';
 import debounce from 'lodash/debounce';
 import SearchResult from './SearchResult';
+import axios from 'axios';
 
+// Add Chatbot component
+const Chatbot = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [input, setInput] = useState("");
+    const [messages, setMessages] = useState([
+        { text: 'Xin chào! Tôi có thể giúp gì cho bạn?', sender: 'bot' }
+    ]);
+    const [isLoading, setIsLoading] = useState(false);
+    const messagesEndRef = React.useRef(null);
 
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
 
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleSendMessage = async () => {
+        if (!input.trim()) return;
+
+        // Add user message to chat
+        const userMessage = { text: input, sender: 'user' };
+        setMessages([...messages, userMessage]);
+        setInput('');
+        setIsLoading(true);
+
+        try {
+            // Using direct axios call with full URL like the example
+            const response = await axios.post("http://localhost:8080/api/v1/chat",
+                { prompt: input },
+                { headers: { "Content-Type": "application/json" } }
+            );
+
+            // Add bot response
+            const botMessage = { text: response.data, sender: 'bot' };
+            setMessages(prev => [...prev, botMessage]);
+        } catch (error) {
+            console.error('Error fetching response:', error);
+            setMessages(prev => [...prev, {
+                text: 'Xin lỗi, có lỗi xảy ra khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.',
+                sender: 'bot'
+            }]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSendMessage();
+        }
+    };
+
+    return (
+        <>
+            {/* Chatbot Icon */}
+            <div
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ff4d4f',
+                    color: 'white',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    zIndex: 1000,
+                    transition: 'all 0.3s ease',
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                }}
+            >
+                <RobotOutlined style={{ fontSize: '28px' }} />
+            </div>
+
+            {/* Chat Interface */}
+            {isOpen && (
+                <div style={{
+                    position: 'fixed',
+                    bottom: '90px',
+                    right: '20px',
+                    width: '350px',
+                    height: '500px',
+                    borderRadius: '12px',
+                    backgroundColor: 'white',
+                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden'
+                }}>
+                    {/* Chat Header */}
+                    <div style={{
+                        padding: '15px',
+                        backgroundColor: '#ff4d4f',
+                        color: 'white',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        borderTopLeftRadius: '12px',
+                        borderTopRightRadius: '12px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <RobotOutlined style={{ fontSize: '20px' }} />
+                            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>Trợ lý ảo</span>
+                        </div>
+                        <CloseOutlined
+                            onClick={() => setIsOpen(false)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                    </div>
+
+                    {/* Chat Messages */}
+                    <div style={{
+                        flex: 1,
+                        padding: '15px',
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                        backgroundColor: '#f7f7f7'
+                    }}>
+                        {messages.map((msg, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                                    backgroundColor: msg.sender === 'user' ? '#ff4d4f' : 'white',
+                                    color: msg.sender === 'user' ? 'white' : 'black',
+                                    padding: '10px 15px',
+                                    borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                                    maxWidth: '75%',
+                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
+                                    wordBreak: 'break-word'
+                                }}
+                            >
+                                {msg.text}
+                            </div>
+                        ))}
+                        {isLoading && (
+                            <div style={{
+                                alignSelf: 'flex-start',
+                                backgroundColor: 'white',
+                                padding: '10px 15px',
+                                borderRadius: '18px 18px 18px 4px',
+                                maxWidth: '75%',
+                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)'
+                            }}>
+                                <Spin size="small" /> Đang nhập...
+                            </div>
+                        )}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Chat Input */}
+                    <div style={{
+                        padding: '15px',
+                        borderTop: '1px solid #e8e8e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        backgroundColor: 'white'
+                    }}>
+                        <Input
+                            placeholder="Nhập tin nhắn..."
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            style={{ flex: 1, borderRadius: '20px', padding: '10px 15px' }}
+                            disabled={isLoading}
+                        />
+                        <Button
+                            type="primary"
+                            icon={<SendOutlined />}
+                            onClick={handleSendMessage}
+                            style={{
+                                backgroundColor: '#ff4d4f',
+                                borderColor: '#ff4d4f',
+                                borderRadius: '50%',
+                                width: '40px',
+                                height: '40px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                padding: 0
+                            }}
+                            disabled={isLoading || !input.trim()}
+                        />
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useOutletContext();
@@ -257,8 +463,6 @@ const Home = () => {
         { key: "sort=price,desc", label: "Giá Cao Đến Thấp", children: <></> }
     ];
 
-    // Remember to return your component JSX here
-    // The return statement was missing in the original code
     // Định nghĩa styles để tái sử dụng
     const styles = {
         container: {
@@ -348,7 +552,7 @@ const Home = () => {
             }}
         >
             <img
-                src={`${import.meta.env.VITE_BACKEND_URL}/storage/category/${category.image}`}
+                src={`${import.meta.env.VITE_CLOUDINARY_URL}/category/${category.image}`}
                 alt={category.label}
                 style={styles.categoryImg}
                 loading="lazy"
@@ -407,7 +611,7 @@ const Home = () => {
             >
                 <div style={{ position: "relative" }}>
                     <img
-                        src={`${import.meta.env.VITE_BACKEND_URL}/storage/food/${item.image}`}
+                        src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item.image}`}
                         alt={item.name}
                         style={{ width: "100%", height: "220px", objectFit: "cover" }}
                         loading="lazy"
@@ -550,7 +754,7 @@ const Home = () => {
                                     slides={
                                         sliderBooks.length > 0
                                             ? sliderBooks.map((book) => ({
-                                                url: `${import.meta.env.VITE_BACKEND_URL}/storage/food/${book.image}`,
+                                                url: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${book.image}`,
                                                 title: book.name,
                                             }))
                                             : []
@@ -756,6 +960,9 @@ const Home = () => {
                         onFinish={onFinish}
                     />
                 </div>
+
+                {/* Add Chatbot Component */}
+                <Chatbot />
             </div>
         )
     );
