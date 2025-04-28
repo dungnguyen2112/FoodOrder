@@ -66,7 +66,7 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 
 | **Technology**       | **Description**  |
 |----------------------|----------------|
-| **Backend**         | Spring Boot, Spring Security, Spring Data JPA, Spring Mail, Maven, Swagger |
+| **Backend**         | Spring Boot, Spring Security, Spring Data JPA, Spring Mail, Maven, Swagger, ChatGPTChatBot |
 | **Frontend**        | React 18, React Router 6, Redux Tookit, Vite |
 | **Database**        | MySQL |
 | **Authentication**  | JWT, OAuth2, Google Login|
