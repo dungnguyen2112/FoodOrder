@@ -1,4 +1,4 @@
-![FoodOrder - Google Chrome 5_3_2025 4_18_27 PM](https://github.com/user-attachments/assets/5570c5c1-105a-49a9-b8fb-2ec41a176b48)
+
 # 🍽️ **Food Ordering System** 🚀  
 
 > **A powerful, modern, and scalable system for managing restaurant orders, customers, and payments.**  
