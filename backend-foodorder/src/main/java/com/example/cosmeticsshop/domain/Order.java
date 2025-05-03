@@ -70,6 +70,13 @@ public class Order implements Serializable {
 
     private double totalPrice;
 
+    private String paymentRef;
+
+    private String paymentMethod;
+
+    @Column(length = 1000)
+    private String paymentUrl;
+
     public String getTotalAmount() {
         double total = 0;
         for (OrderDetail orderDetail : orderDetails) {

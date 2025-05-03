@@ -35,9 +35,8 @@ const CategoryModalUpdate = (props) => {
         const res = await callUpdateCategory(id, name, description, image);
         console.log(res)
         if (res && res.data) {
-            message.success('Cập nhật user thành công');
+            message.success('Cập nhật category thành công');
             setOpenModalUpdate(false);
-            await props.fetchUser()
         } else {
             notification.error({
                 message: 'Đã có lỗi xảy ra',

@@ -265,4 +265,24 @@ export const removeFromWishlist = (productId) => {
     });
 };
 
+export const callCreateVNPayment = (amount, orderId) => {
+    console.log("Creating VNPay payment with amount:", amount, "orderId:", orderId);
+    return axios.get(`/api/v1/payment/vnpay/create-payment?amount=${amount}&orderId=${orderId}`)
+        .then(response => {
+            // Log phản hồi đầy đủ
+            console.log("Full VNPay API response:", response);
+
+            // Trả về dữ liệu như nhận được, để component xử lý
+            return response.data;
+        })
+        .catch(error => {
+            console.error("Error calling VNPay API:", error);
+            throw error;
+        });
+}
+
+export const callFetchVerifyPayment = (url) => {
+    return axios.get(url);
+}
+
 

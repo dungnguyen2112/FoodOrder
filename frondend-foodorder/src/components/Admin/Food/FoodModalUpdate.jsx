@@ -5,7 +5,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 import { v4 as uuidv4 } from 'uuid';
 
 const FoodModalUpdate = (props) => {
-    const { openModalUpdate, setOpenModalUpdate, dataUpdate, setDataUpdate } = props;
+    const { openModalUpdate, setOpenModalUpdate, dataUpdate, setDataUpdate, fetchBook } = props;
     const [isSubmit, setIsSubmit] = useState(false);
 
     const [listCategory, setListCategory] = useState([])
@@ -81,27 +81,20 @@ const FoodModalUpdate = (props) => {
             return;
         }
 
-        // if (dataSlider.length === 0) {
-        //     notification.error({
-        //         message: 'Lỗi validate',
-        //         description: 'Vui lòng upload ảnh slider'
-        //     })
-        //     return;
-        // }
-
-
         const { id, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc } = values;
         const image = dataThumbnail[0].name;
 
         setIsSubmit(true)
         const res = await callUpdateFood(id, image, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc);
         if (res && res.data) {
-            message.success('Cập nhật book thành công');
+            message.success('Cập nhật món ăn thành công');
             form.resetFields();
             setDataThumbnail([]);
             setInitForm(null);
             setOpenModalUpdate(false);
-            await props.fetchBook()
+            if (fetchBook) {
+                await fetchBook();
+            }
         } else {
             notification.error({
                 message: 'Đã có lỗi xảy ra',

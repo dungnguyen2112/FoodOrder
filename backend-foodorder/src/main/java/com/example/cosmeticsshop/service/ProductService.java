@@ -137,6 +137,8 @@ public class ProductService {
         resProductDTO.setCategoryName(product.getCategory().getName());
         resProductDTO.setFactory(product.getFactory());
         resProductDTO.setTarget(product.getTarget());
+        resProductDTO.setCreatedAt(product.getCreatedAt());
+        resProductDTO.setUpdatedAt(product.getUpdatedAt());
         return resProductDTO;
     }
 
@@ -154,6 +156,7 @@ public class ProductService {
             currentProduct.setImage(product.getImage());
             currentProduct.setFactory(product.getFactory());
             currentProduct.setTarget(product.getTarget());
+            currentProduct.setUpdatedAt(Instant.now());
             // update
             ResProductDTO resProductDTO = this.convertToResProductDTO(this.productRepository.save(currentProduct));
             return resProductDTO;

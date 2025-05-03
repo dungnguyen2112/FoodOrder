@@ -15,4 +15,5 @@ public class OrderRequest {
     private double totalPrice;
     private String tableNumber;
     private List<OrderDetailRequest> detail;
+    private String paymentMethod;
 }
