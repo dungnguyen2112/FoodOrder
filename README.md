@@ -1,4 +1,4 @@
-
+![FoodOrder - Google Chrome 5_3_2025 4_18_27 PM](https://github.com/user-attachments/assets/5570c5c1-105a-49a9-b8fb-2ec41a176b48)
 # 🍽️ **Food Ordering System** 🚀  
 
 > **A powerful, modern, and scalable system for managing restaurant orders, customers, and payments.**  
@@ -66,7 +66,7 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 
 | **Technology**       | **Description**  |
 |----------------------|----------------|
-| **Backend**         | Spring Boot, Spring Security, Spring Data JPA, Spring Mail, Maven, Swagger, ChatGPTChatBot |
+| **Backend**         | Spring Boot, Spring Security, Spring Data JPA, Spring Mail, Maven, Swagger, ChatGPTChatBot, VNPAY Sandbox |
 | **Frontend**        | React 18, React Router 6, Redux Tookit, Vite |
 | **Database**        | MySQL |
 | **Authentication**  | JWT, OAuth2, Google Login|
@@ -106,7 +106,11 @@ The **Food Ordering System** is a complete digital solution designed to **stream
 ![FoodOrder - Google Chrome 3_22_2025 9_42_22 PM](https://github.com/user-attachments/assets/490eaa1a-d845-4af7-8baf-f02027bd9f55)
 ![FoodOrder - Google Chrome 3_22_2025 9_42_31 PM](https://github.com/user-attachments/assets/e5c01476-a6c9-4efd-be85-483c6ad72446)
 ![FoodOrder - Google Chrome 3_22_2025 9_43_55 PM](https://github.com/user-attachments/assets/b1202d86-ccc7-4c7e-a24a-af946ead1a06)
-![FoodOrder - Google Chrome 3_22_2025 9_44_01 PM](https://github.com/user-attachments/assets/88dae16d-1773-4e76-a2c9-838b01b63e61)
+![FoodOrder - Google Chrome 5_3_2025 4_16_01 PM](https://github.com/user-attachments/assets/c5158d3f-6323-4458-b23f-0f7ebda5031b)
+![FoodOrder - Google Chrome 5_3_2025 4_17_22 PM](https://github.com/user-attachments/assets/903d5751-6733-46b9-846f-d8917e942f41)
+![FoodOrder - Google Chrome 5_3_2025 4_17_30 PM](https://github.com/user-attachments/assets/fa206e32-ff42-4f5d-9025-32c2e5d38e50)
+![FoodOrder - Google Chrome 5_3_2025 4_18_09 PM](https://github.com/user-attachments/assets/5328af13-5be3-404e-b0c1-98b46dfffba3)
+![FoodOrder - Google Chrome 5_3_2025 4_18_27 PM](https://github.com/user-attachments/assets/9f802cad-8f86-469d-ac1d-60897c308806)
 ![FoodOrder - Google Chrome 3_22_2025 9_42_37 PM](https://github.com/user-attachments/assets/f8784725-8517-48c0-ad28-f8d76a574573)
 ![FoodOrder - Google Chrome 4_26_2025 11_17_32 PM](https://github.com/user-attachments/assets/80f60e42-4280-47df-aa9f-9e4c07dd9981)
 ![FoodOrder - Google Chrome 4_26_2025 11_17_42 PM](https://github.com/user-attachments/assets/de633fd6-42db-4824-a0b9-8ea904b29614)
