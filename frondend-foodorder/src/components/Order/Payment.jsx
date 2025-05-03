@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useState } from 'react';
 import { doDeleteItemCartAction, doPlaceOrderAction } from '../../redux/order/orderSlice';
 import { clearBuyNowAction } from '../../redux/order/buyNowSlice';
-import { callPlaceOrder } from '../../services/api';
+import { callPlaceOrder, callCreateVNPayment } from '../../services/api';
 import './Payment.scss';
 import { set } from 'lodash';
 
@@ -21,6 +21,7 @@ const Payment = (props) => {
     const [form] = Form.useForm();
     const [isFinish, setIsFinish] = useState(false);
     const [isDineIn, setIsDineIn] = useState(false);
+    const [paymentMethod, setPaymentMethod] = useState('COD');
     const restaurantAddress = "Nhà hàng ABC, 123 Đường XYZ, Quận 1, TP. Hồ Chí Minh";
     const restaurantTable = "Ăn tại nhà";
 
@@ -83,30 +84,121 @@ const Payment = (props) => {
             totalPrice: totalPrice,
             detail: detailOrder,
             isDineIn: isDineIn,
-            tableNumber: isDineIn ? values.tableNumber : restaurantTable
+            tableNumber: isDineIn ? values.tableNumber : restaurantTable,
+            paymentMethod: paymentMethod
         };
 
-        const res = await callPlaceOrder(data);
-        if (res && res.data) {
-            message.success('Đặt hàng thành công!');
-            if (buyNowItem) {
-                dispatch(clearBuyNowAction()); // Xóa buyNowItem sau khi đặt hàng thành công
-                props.setcurrentStepBuyNow(1);
+        try {
+            const res = await callPlaceOrder(data);
+            if (res && res.data) {
+                console.log("Order response:", res.data);
+
+                // If VNPay payment method is selected, redirect to VNPay payment page
+                if (paymentMethod === 'VNPAY') {
+                    try {
+                        // Lấy ID đơn hàng từ phản hồi
+                        const orderId = res.data.orderId;
+
+                        if (!orderId) {
+                            console.error("Order ID not found in response:", res.data);
+                            notification.error({
+                                message: "Lỗi tạo thanh toán VNPay",
+                                description: "Không thể lấy mã đơn hàng"
+                            });
+                            setIsSubmit(false);
+                            return;
+                        }
+
+                        // Đảm bảo totalPrice là số hợp lệ
+                        const amount = parseFloat(totalPrice);
+                        if (isNaN(amount) || amount <= 0) {
+                            console.error("Invalid amount:", totalPrice);
+                            notification.error({
+                                message: "Lỗi tạo thanh toán VNPay",
+                                description: "Số tiền không hợp lệ"
+                            });
+                            setIsSubmit(false);
+                            return;
+                        }
+
+                        console.log("Calling VNPay payment with order ID:", orderId, "amount:", amount);
+
+                        // Gọi API tạo URL thanh toán VNPay
+                        const vnpayRes = await callCreateVNPayment(amount, orderId);
+                        console.log("VNPay response:", vnpayRes);
+
+                        // Xử lý phản hồi có thể là object hoặc string
+                        let paymentUrl = null;
+                        if (vnpayRes) {
+                            if (typeof vnpayRes === 'string' && vnpayRes.startsWith('http')) {
+                                // Trường hợp 1: Phản hồi là URL string trực tiếp
+                                paymentUrl = vnpayRes;
+                            } else if (vnpayRes.paymentUrl && typeof vnpayRes.paymentUrl === 'string') {
+                                // Trường hợp 2: Phản hồi là object với thuộc tính paymentUrl
+                                paymentUrl = vnpayRes.paymentUrl;
+                            } else if (vnpayRes.data && vnpayRes.data.paymentUrl) {
+                                // Trường hợp 3: Phản hồi trong data.paymentUrl
+                                paymentUrl = vnpayRes.data.paymentUrl;
+                            }
+                        }
+
+                        console.log("Extracted payment URL:", paymentUrl);
+
+                        // Kiểm tra URL thanh toán
+                        if (paymentUrl) {
+                            console.log("Redirecting to VNPay:", paymentUrl);
+                            window.location.href = paymentUrl;
+                        } else {
+                            console.error("No valid payment URL found in response:", vnpayRes);
+                            notification.error({
+                                message: "Lỗi tạo thanh toán VNPay",
+                                description: "Không thể tạo URL thanh toán VNPay"
+                            });
+                            setIsSubmit(false);
+                        }
+                    } catch (error) {
+                        console.error("Error creating VNPay payment:", error);
+                        notification.error({
+                            message: "Lỗi tạo thanh toán VNPay",
+                            description: error.message || "Đã có lỗi xảy ra khi tạo URL thanh toán VNPay"
+                        });
+                        setIsSubmit(false);
+                    }
+                } else {
+                    // COD payment
+                    message.success('Đặt hàng thành công!');
+                    if (buyNowItem) {
+                        dispatch(clearBuyNowAction()); // Xóa buyNowItem sau khi đặt hàng thành công
+                        props.setcurrentStepBuyNow(1);
+                    } else {
+                        dispatch(doPlaceOrderAction()); // Xóa giỏ hàng
+                    }
+                    props.setCurrentStep && props.setCurrentStep(2);
+                    props.setcurrentStepBuyNow && props.setcurrentStepBuyNow(1);
+                }
             } else {
-                dispatch(doPlaceOrderAction()); // Xóa giỏ hàng
+                notification.error({
+                    message: "Đã có lỗi xảy ra",
+                    description: res.message
+                });
+                setIsSubmit(false);
             }
-            props.setCurrentStep(2);
-        } else {
+        } catch (error) {
+            console.error("Error placing order:", error);
             notification.error({
                 message: "Đã có lỗi xảy ra",
-                description: res.message
+                description: error.message || "Lỗi khi đặt hàng"
             });
+            setIsSubmit(false);
         }
-        setIsSubmit(false);
     };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    };
+
+    const handlePaymentMethodChange = (e) => {
+        setPaymentMethod(e.target.value);
     };
 
     return (
@@ -244,9 +336,19 @@ const Payment = (props) => {
 
                         <div className="payment-method">
                             <Title level={5}>Hình thức thanh toán</Title>
-                            <Radio checked>
-                                <Text>Thanh toán khi nhận hàng</Text>
-                            </Radio>
+                            <Radio.Group onChange={handlePaymentMethodChange} value={paymentMethod}>
+                                <Space direction="vertical">
+                                    <Radio value="COD">
+                                        <Text>Thanh toán khi nhận hàng (COD)</Text>
+                                    </Radio>
+                                    <Radio value="VNPAY">
+                                        <div className="vnpay-option">
+                                            <Text>Thanh toán qua VNPay</Text>
+                                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png" alt="VNPay" style={{ height: 30, marginLeft: 10 }} />
+                                        </div>
+                                    </Radio>
+                                </Space>
+                            </Radio.Group>
                         </div>
 
                         <Divider className="summary-divider" />

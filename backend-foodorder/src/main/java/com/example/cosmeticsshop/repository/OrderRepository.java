@@ -15,4 +15,5 @@ import com.example.cosmeticsshop.domain.User;
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
     List<Order> findByUser(User user);
 
+    Order findByPaymentRef(String paymentRef);
 }

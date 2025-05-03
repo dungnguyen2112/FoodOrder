@@ -40,6 +40,8 @@ import HomeLandingPage from './landingpage/Homelandingpage/Homelandingpage';
 import './landingpage/App.scss';
 import CategoryPage from './pages/category';
 import { PaymentPage } from './pages/payment';
+import PaymentFailed from './pages/payment-failed';
+import PaymentCallback from './pages/payment/callback';
 
 
 const Layout = () => {
@@ -134,6 +136,17 @@ export default function App() {
             <ProtectedRoute>
               <PaymentPage />
             </ProtectedRoute>
+        },
+        {
+          path: "payment/callback",
+          element:
+            <ProtectedRoute>
+              <PaymentCallback />
+            </ProtectedRoute>
+        },
+        {
+          path: "payment-failed",
+          element: <PaymentFailed />
         },
         {
           path: "history",
