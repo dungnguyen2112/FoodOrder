@@ -1,0 +1,32 @@
+.zalo-contact {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    padding: 0;
+
+    svg {
+        width: 48px;
+        height: 48px;
+        display: block;
+    }
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+        transform: scale(0.95);
+    }
+}

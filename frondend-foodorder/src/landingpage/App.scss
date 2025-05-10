@@ -46,22 +46,3 @@
 .bgImgFixed {
   background-attachment: fixed;
 }
-
-.Top-of-the-page {
-  position: fixed;
-  bottom: 4rem;
-  right: 4rem;
-  width: 4rem;
-  height: 4rem;
-  cursor: pointer;
-  color: var(--primary-color);
-  z-index: 10;
-
-  @include respond(phone) {
-    bottom: 8rem;
-  }
-
-  @include respond(port) {
-    bottom: 8rem;
-  }
-}

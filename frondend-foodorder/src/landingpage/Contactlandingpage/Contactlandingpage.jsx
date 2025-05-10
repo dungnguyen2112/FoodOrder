@@ -1,5 +1,6 @@
 import React from "react";
 import Form from "./Form/Formlandingpage";
+import ZaloContact from "../../components/ZaloContact";
 
 import { TiLocationOutline } from 'react-icons/ti';
 import { FaMobileAlt } from 'react-icons/fa';
@@ -49,6 +50,8 @@ const Contact = () => {
         </div>
 
         <Form />
+
+        <ZaloContact />
       </div>
     </section>
   );

@@ -15,8 +15,8 @@ export const callRegister = (username, fullName, email, password, phone, address
 };
 
 
-export const callLogin = (username, password) => {
-    return axios.post('/api/v1/auth/login', { username, password })
+export const callLogin = (username, password, pin) => {
+    return axios.post('/api/v1/auth/login', { username, password, pin })
 }
 
 export const callFetchAccount = () => {
@@ -284,5 +284,43 @@ export const callCreateVNPayment = (amount, orderId) => {
 export const callFetchVerifyPayment = (url) => {
     return axios.get(url);
 }
+
+export const callSetAdminPin = (pin) => {
+    return axios.post('/api/v1/auth/set-pin', { pin });
+}
+
+export const callVerifyGoogleWithPin = (token, pin) => {
+    return axios.post('/api/v1/auth/google-login', { token, pin });
+}
+
+export const callGetDefaultPin = () => {
+    return axios.get('/api/v1/auth/get-default-pin');
+}
+
+export const callMigratePins = () => {
+    return axios.post('/api/v1/auth/migrate-pins');
+}
+
+export const callGetTopSellingProducts = (limit = 4, excludeId = null) => {
+    let url = `/api/v1/products/top-selling?limit=${limit}`;
+    if (excludeId) {
+        url += `&excludeId=${excludeId}`;
+    }
+    return axios.get(url);
+}
+
+export const callAddProductImages = (productId, imageUrls) => {
+    return axios.post(`/api/v1/products/${productId}/images`, {
+        imageUrls: imageUrls
+    });
+};
+
+export const callRemoveAllProductImages = (productId) => {
+    return axios.delete(`/api/v1/products/${productId}/images`);
+};
+
+export const callRemoveProductImage = (imageId) => {
+    return axios.delete(`/api/v1/products/images/${imageId}`);
+};
 
 

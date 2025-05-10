@@ -21,7 +21,8 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { addToWishlist, callFetchListFood, getWishlist, removeFromWishlist } from '../../services/api';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { doAddBookAction } from '../../redux/order/orderSlice';
 
 const SearchResult = ({
     searchTerm: initialSearchTerm,
@@ -29,6 +30,7 @@ const SearchResult = ({
 }) => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const isAuthenticated = useSelector(state => state.account.isAuthenticated);
     const [searchTerm, setSearchTerm] = useState(initialSearchTerm || '');
     const [listBook, setListBook] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -144,8 +146,18 @@ const SearchResult = ({
     }, [convertSlug, navigate]);
 
     const handleAddToCart = useCallback((quantity, book) => {
-        dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
-    }, [dispatch]);
+        // Check if user is authenticated
+        const localAuth = localStorage.getItem("isAuthenticated") === "true";
+
+        if (isAuthenticated || localAuth) {
+            dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
+            message.success(`Đã thêm sản phẩm vào giỏ hàng`);
+        } else {
+            message.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+            // Optionally redirect to login page
+            // navigate('/login');
+        }
+    }, [dispatch, isAuthenticated]);
 
     useEffect(() => {
         const fetchWishlist = async () => {

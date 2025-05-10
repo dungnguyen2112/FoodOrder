@@ -3,18 +3,23 @@ package com.example.cosmeticsshop.domain.response;
 import com.example.cosmeticsshop.domain.Role;
 import com.example.cosmeticsshop.util.constant.RoyaltyEnum;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ResLoginDTO {
     @JsonProperty("access_token")
     private String accessToken;
 
     private UserLogin user;
+
+    private String message;
+
+    @Builder.Default
+    private boolean needPin = false;
 
     @Getter
     @Setter
@@ -49,5 +54,4 @@ public class ResLoginDTO {
         private String email;
         private String name;
     }
-
 }

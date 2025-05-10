@@ -1,6 +1,6 @@
 import { FilterTwoTone, ReloadOutlined, HomeOutlined, UserOutlined, PlusCircleOutlined, HeartOutlined, ShoppingCartOutlined, FireOutlined, HeartFilled, RobotOutlined, SendOutlined, CloseOutlined } from '@ant-design/icons';
 import { Row, Col, Form, Checkbox, Divider, InputNumber, Button, Rate, Tabs, Pagination, Spin, Empty, Breadcrumb, Tooltip, Badge, Input } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { addToWishlist, callFetchCategory, callFetchCategoryPage, callFetchListFood, getWishlist, removeFromWishlist } from '../../services/api';
 import './home.scss';
@@ -11,219 +11,233 @@ import Slider from "react-slick";
 import { doAddBookAction } from '../../redux/order/orderSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import Imageslide from '../Imageslide/Imageslide';
-import { use } from 'react';
 import { message } from 'antd';
 import debounce from 'lodash/debounce';
 import SearchResult from './SearchResult';
 import axios from 'axios';
 
-// Add Chatbot component
-const Chatbot = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [input, setInput] = useState("");
-    const [messages, setMessages] = useState([
-        { text: 'Xin chào! Tôi có thể giúp gì cho bạn?', sender: 'bot' }
-    ]);
-    const [isLoading, setIsLoading] = useState(false);
-    const messagesEndRef = React.useRef(null);
+// Tách Chatbot thành component riêng
+// (Move the entire Chatbot component to src/components/Chatbot/index.jsx)
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const handleSendMessage = async () => {
-        if (!input.trim()) return;
-
-        // Add user message to chat
-        const userMessage = { text: input, sender: 'user' };
-        setMessages([...messages, userMessage]);
-        setInput('');
-        setIsLoading(true);
-
-        try {
-            // Using direct axios call with full URL like the example
-            const response = await axios.post("http://localhost:8080/api/v1/chat",
-                { prompt: input },
-                { headers: { "Content-Type": "application/json" } }
-            );
-
-            // Add bot response
-            const botMessage = { text: response.data, sender: 'bot' };
-            setMessages(prev => [...prev, botMessage]);
-        } catch (error) {
-            console.error('Error fetching response:', error);
-            setMessages(prev => [...prev, {
-                text: 'Xin lỗi, có lỗi xảy ra khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.',
-                sender: 'bot'
-            }]);
-        } finally {
-            setIsLoading(false);
+// Tách CategoryItem thành component riêng
+const CategoryItem = memo(({ category, convertSlug }) => {
+    const styles = useMemo(() => ({
+        link: {
+            flex: '1 1 150px',
+            position: 'relative',
+            borderRadius: '15px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+            textDecoration: 'none',
+            transition: 'transform 0.4s ease, box-shadow 0.4s ease',
+            maxWidth: '220px'
+        },
+        img: {
+            width: '100%',
+            height: '220px',
+            objectFit: 'cover',
+            display: 'block',
+            transition: 'transform 0.6s ease, filter 0.6s ease'
         }
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleSendMessage();
-        }
-    };
+    }), []);
 
     return (
-        <>
-            {/* Chatbot Icon */}
-            <div
-                onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    width: '60px',
-                    height: '60px',
-                    borderRadius: '50%',
-                    backgroundColor: '#ff4d4f',
-                    color: 'white',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                    zIndex: 1000,
-                    transition: 'all 0.3s ease',
-                }}
+        <Link
+            to={`/category/${convertSlug(category.label)}?id=${category.id}`}
+            style={styles.link}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.03)';
+                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.25)';
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+            }}
+        >
+            <img
+                src={`${import.meta.env.VITE_CLOUDINARY_URL}/category/${category.image}`}
+                alt={category.label}
+                style={styles.img}
+                loading="lazy"
                 onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'scale(1.1)';
-                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.2)';
+                    e.currentTarget.style.filter = 'brightness(1.1)';
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                    e.currentTarget.style.filter = 'brightness(1)';
                 }}
-            >
-                <RobotOutlined style={{ fontSize: '28px' }} />
+            />
+            <div style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                width: '100%',
+                padding: '18px 15px',
+                background: 'linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2), transparent)',
+                color: '#fff',
+                fontSize: '18px',
+                fontWeight: '600',
+                textAlign: 'center',
+                backdropFilter: 'blur(4px)',
+                transition: 'padding 0.3s ease'
+            }}>
+                {category.label}
             </div>
+        </Link>
+    );
+});
 
-            {/* Chat Interface */}
-            {isOpen && (
+// Tách ProductItem thành component riêng
+const ProductItem = memo(({ item, wishlist, handleRedirectBook, handleAddToCart, handleToggleWishlist }) => {
+    const isInWishlist = wishlist.includes(item.id);
+
+    const styles = useMemo(() => ({
+        container: {
+            backgroundColor: "rgba(255, 255, 255, 0.95)",
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
+            transition: "transform 0.3s ease, box-shadow 0.3s ease",
+            cursor: "pointer",
+            display: "flex",
+            flexDirection: "column"
+        }
+    }), []);
+
+    return (
+        <div
+            onClick={() => handleRedirectBook(item)}
+            style={styles.container}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-10px)";
+                e.currentTarget.style.boxShadow = "0 15px 30px rgba(0, 0, 0, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.1)";
+            }}
+        >
+            <div style={{ position: "relative" }}>
+                <img
+                    src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item.image}`}
+                    alt={item.name}
+                    style={{ width: "100%", height: "220px", objectFit: "cover" }}
+                    loading="lazy"
+                />
+                {item.sold > 50 && (
+                    <div style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        backgroundColor: "#ff4d4f",
+                        color: "white",
+                        padding: "3px 10px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        fontWeight: "bold",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "4px"
+                    }}>
+                        <FireOutlined /> Bán chạy
+                    </div>
+                )}
+            </div>
+            <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
+                <div style={{ marginBottom: "auto" }}>
+                    <h3 style={{
+                        fontSize: "18px",
+                        fontWeight: "600",
+                        color: "#333",
+                        marginBottom: "8px",
+                        minHeight: "48px",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
+                    }}>
+                        {item.name}
+                    </h3>
+                </div>
                 <div style={{
-                    position: 'fixed',
-                    bottom: '90px',
-                    right: '20px',
-                    width: '350px',
-                    height: '500px',
-                    borderRadius: '12px',
-                    backgroundColor: 'white',
-                    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
-                    zIndex: 1000,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden'
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: "10px"
                 }}>
-                    {/* Chat Header */}
-                    <div style={{
-                        padding: '15px',
-                        backgroundColor: '#ff4d4f',
-                        color: 'white',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        borderTopLeftRadius: '12px',
-                        borderTopRightRadius: '12px',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <RobotOutlined style={{ fontSize: '20px' }} />
-                            <span style={{ fontWeight: 'bold', fontSize: '16px' }}>Trợ lý ảo</span>
-                        </div>
-                        <CloseOutlined
-                            onClick={() => setIsOpen(false)}
-                            style={{ cursor: 'pointer' }}
-                        />
+                    <div style={{ fontSize: "18px", fontWeight: "bold", color: "#e53935" }}>
+                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item?.price ?? 0)}
                     </div>
-
-                    {/* Chat Messages */}
-                    <div style={{
-                        flex: 1,
-                        padding: '15px',
-                        overflowY: 'auto',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '10px',
-                        backgroundColor: '#f7f7f7'
-                    }}>
-                        {messages.map((msg, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                                    backgroundColor: msg.sender === 'user' ? '#ff4d4f' : 'white',
-                                    color: msg.sender === 'user' ? 'white' : 'black',
-                                    padding: '10px 15px',
-                                    borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                                    maxWidth: '75%',
-                                    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)',
-                                    wordBreak: 'break-word'
-                                }}
-                            >
-                                {msg.text}
-                            </div>
-                        ))}
-                        {isLoading && (
-                            <div style={{
-                                alignSelf: 'flex-start',
-                                backgroundColor: 'white',
-                                padding: '10px 15px',
-                                borderRadius: '18px 18px 18px 4px',
-                                maxWidth: '75%',
-                                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.1)'
-                            }}>
-                                <Spin size="small" /> Đang nhập...
-                            </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    {/* Chat Input */}
-                    <div style={{
-                        padding: '15px',
-                        borderTop: '1px solid #e8e8e8',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        backgroundColor: 'white'
-                    }}>
-                        <Input
-                            placeholder="Nhập tin nhắn..."
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            style={{ flex: 1, borderRadius: '20px', padding: '10px 15px' }}
-                            disabled={isLoading}
-                        />
-                        <Button
-                            type="primary"
-                            icon={<SendOutlined />}
-                            onClick={handleSendMessage}
-                            style={{
-                                backgroundColor: '#ff4d4f',
-                                borderColor: '#ff4d4f',
-                                borderRadius: '50%',
-                                width: '40px',
-                                height: '40px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                padding: 0
-                            }}
-                            disabled={isLoading || !input.trim()}
-                        />
+                    <div style={{ fontSize: "14px", color: "#757575", display: "flex", alignItems: "center", gap: "5px" }}>
+                        <Badge count={item.sold?.toLocaleString()
+                            ?? 0} style={{ backgroundColor: "#faad14", color: "#fff" }} showZero />
+                        <span>đã bán</span>
                     </div>
                 </div>
-            )}
-        </>
+                <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+                    <Tooltip title="Thêm vào giỏ hàng">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(1, item);
+                            }}
+                            style={{
+                                flex: 3,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "8px",
+                                backgroundColor: "#ff4d4f",
+                                color: "#fff",
+                                padding: "10px 15px",
+                                borderRadius: "8px",
+                                border: "none",
+                                cursor: "pointer",
+                                fontWeight: "500",
+                                transition: "background-color 0.3s"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d9363e"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ff4d4f"}
+                        >
+                            <ShoppingCartOutlined style={{ fontSize: "16px" }} /> Thêm vào giỏ
+                        </button>
+                    </Tooltip>
+                    <Tooltip title={isInWishlist ? "Bỏ yêu thích" : "Yêu thích"}>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleWishlist(item.id);
+                            }}
+                            style={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                backgroundColor: isInWishlist ? "#fff0f0" : "#f5f5f5",
+                                color: isInWishlist ? "#ff4d4f" : "#666",
+                                padding: "10px",
+                                borderRadius: "8px",
+                                border: "none",
+                                cursor: "pointer",
+                                transition: "all 0.3s"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isInWishlist ? "#ffe1e1" : "#e0e0e0"}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isInWishlist ? "#fff0f0" : "#f5f5f5"}
+                        >
+                            {isInWishlist ? (
+                                <HeartFilled style={{ fontSize: "18px", color: "#ff4d4f" }} />
+                            ) : (
+                                <HeartOutlined style={{ fontSize: "18px", color: "#666" }} />
+                            )}
+                        </button>
+                    </Tooltip>
+                </div>
+            </div>
+        </div>
     );
-};
+});
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useOutletContext();
@@ -244,6 +258,7 @@ const Home = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const user = useSelector(state => state.account.user);
+    const isAuthenticated = useSelector(state => state.account.isAuthenticated);
 
     // Memoized helper functions
     const transformCategoryData = useCallback((data, isPageData = false) => {
@@ -362,7 +377,6 @@ const Home = () => {
         debouncedFetchBook();
     }, [debouncedFetchBook]);
 
-
     // Fetch wishlist
     useEffect(() => {
         const fetchWishlist = async () => {
@@ -398,18 +412,28 @@ const Home = () => {
     }, [wishlist]);
 
     const handleAddToCart = useCallback((quantity, book) => {
-        dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
-    }, [dispatch]);
+        // Check if user is authenticated
+        const localAuth = localStorage.getItem("isAuthenticated") === "true";
 
-    const handleOnchangePage = useCallback((pagination) => {
-        if (pagination?.current !== current) {
-            setCurrent(pagination.current);
+        if (isAuthenticated || localAuth) {
+            dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
+            message.success(`Đã thêm sản phẩm vào giỏ hàng`);
+        } else {
+            message.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+            // Optionally redirect to login page
+            // navigate('/login');
         }
-        if (pagination?.pageSize !== pageSize) {
-            setPageSize(pagination.pageSize);
+    }, [dispatch, isAuthenticated]);
+
+    const handleOnchangePage = useCallback((page, newPageSize) => {
+        // If page size changed, reset to page 1
+        if (newPageSize !== pageSize) {
             setCurrent(1);
+            setPageSize(newPageSize);
+        } else {
+            setCurrent(page);
         }
-    }, [current, pageSize]);
+    }, [pageSize]);
 
     // Thêm state mới
     const [isFilterLoading, setIsFilterLoading] = useState(false);
@@ -455,18 +479,10 @@ const Home = () => {
         navigate(`/book/${slug}?id=${book.id}`);
     }, [convertSlug, navigate]);
 
-    // Tab items configuration
-    const items = [
-        { key: "sort=sold,desc", label: "Phổ biến", children: <></> },
-        { key: "sort=createdAt,desc", label: "Hàng Mới", children: <></> },
-        { key: "sort=price,asc", label: "Giá Thấp Đến Cao", children: <></> },
-        { key: "sort=price,desc", label: "Giá Cao Đến Thấp", children: <></> }
-    ];
-
-    // Định nghĩa styles để tái sử dụng
-    const styles = {
+    // Memoize styles
+    const styles = useMemo(() => ({
         container: {
-            background: "linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
@@ -501,23 +517,6 @@ const Home = () => {
             maxWidth: '1500px',
             margin: '40px auto'
         },
-        categoryLink: {
-            flex: '1 1 150px',
-            position: 'relative',
-            borderRadius: '15px',
-            overflow: 'hidden',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
-            textDecoration: 'none',
-            transition: 'transform 0.4s ease, box-shadow 0.4s ease',
-            maxWidth: '220px'
-        },
-        categoryImg: {
-            width: '100%',
-            height: '220px',
-            objectFit: 'cover',
-            display: 'block',
-            transition: 'transform 0.6s ease, filter 0.6s ease'
-        },
         filterContainer: {
             background: 'rgba(255, 255, 255, 0.9)',
             backdropFilter: 'blur(10px)',
@@ -535,200 +534,15 @@ const Home = () => {
             boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
             color: 'white'
         }
-    };
+    }), []);
 
-    // Component CategoryItem với memo hóa
-    const CategoryItem = React.memo(({ category, convertSlug }) => (
-        <Link
-            to={`/category/${convertSlug(category.label)}?id=${category.id}`}
-            style={styles.categoryLink}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-8px) scale(1.03)';
-                e.currentTarget.style.boxShadow = '0 15px 30px rgba(0,0,0,0.25)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-            }}
-        >
-            <img
-                src={`${import.meta.env.VITE_CLOUDINARY_URL}/category/${category.image}`}
-                alt={category.label}
-                style={styles.categoryImg}
-                loading="lazy"
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.1)';
-                    e.currentTarget.style.filter = 'brightness(1.1)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.filter = 'brightness(1)';
-                }}
-            />
-            <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                padding: '18px 15px',
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2), transparent)',
-                color: '#fff',
-                fontSize: '18px',
-                fontWeight: '600',
-                textAlign: 'center',
-                backdropFilter: 'blur(4px)',
-                transition: 'padding 0.3s ease'
-            }}>
-                {category.label}
-            </div>
-        </Link>
-    ));
-
-    // Component ProductItem với memo hóa
-    const ProductItem = React.memo(({ item, wishlist, handleRedirectBook, handleAddToCart, handleToggleWishlist }) => {
-        const isInWishlist = wishlist.includes(item.id);
-        return (
-            <div
-                onClick={() => handleRedirectBook(item)}
-                style={{
-                    backgroundColor: "rgba(255, 255, 255, 0.95)",
-                    borderRadius: "16px",
-                    overflow: "hidden",
-                    boxShadow: "0 10px 20px rgba(0, 0, 0, 0.1)",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                    cursor: "pointer",
-                    display: "flex",
-                    flexDirection: "column"
-                }}
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-10px)";
-                    e.currentTarget.style.boxShadow = "0 15px 30px rgba(0, 0, 0, 0.2)";
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 10px 20px rgba(0, 0, 0, 0.1)";
-                }}
-            >
-                <div style={{ position: "relative" }}>
-                    <img
-                        src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${item.image}`}
-                        alt={item.name}
-                        style={{ width: "100%", height: "220px", objectFit: "cover" }}
-                        loading="lazy"
-                    />
-                    {item.sold > 50 && (
-                        <div style={{
-                            position: "absolute",
-                            top: "10px",
-                            right: "10px",
-                            backgroundColor: "#ff4d4f",
-                            color: "white",
-                            padding: "3px 10px",
-                            borderRadius: "20px",
-                            fontSize: "12px",
-                            fontWeight: "bold",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px"
-                        }}>
-                            <FireOutlined /> Bán chạy
-                        </div>
-                    )}
-                </div>
-                <div style={{ padding: "20px", flex: 1, display: "flex", flexDirection: "column" }}>
-                    <div style={{ marginBottom: "auto" }}>
-                        <h3 style={{
-                            fontSize: "18px",
-                            fontWeight: "600",
-                            color: "#333",
-                            marginBottom: "8px",
-                            minHeight: "48px",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                        }}>
-                            {item.name}
-                        </h3>
-                    </div>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginTop: "10px"
-                    }}>
-                        <div style={{ fontSize: "18px", fontWeight: "bold", color: "#e53935" }}>
-                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item?.price ?? 0)}
-                        </div>
-                        <div style={{ fontSize: "14px", color: "#757575", display: "flex", alignItems: "center", gap: "5px" }}>
-                            <Badge count={item.sold?.toLocaleString()
-                                ?? 0} style={{ backgroundColor: "#faad14", color: "#fff" }} showZero />
-                            <span>đã bán</span>
-                        </div>
-                    </div>
-                    <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
-                        <Tooltip title="Thêm vào giỏ hàng">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAddToCart(1, item);
-                                }}
-                                style={{
-                                    flex: 3,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    gap: "8px",
-                                    backgroundColor: "#ff4d4f",
-                                    color: "#fff",
-                                    padding: "10px 15px",
-                                    borderRadius: "8px",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    fontWeight: "500",
-                                    transition: "background-color 0.3s"
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d9363e"}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#ff4d4f"}
-                            >
-                                <ShoppingCartOutlined style={{ fontSize: "16px" }} /> Thêm vào giỏ
-                            </button>
-                        </Tooltip>
-                        <Tooltip title={isInWishlist ? "Bỏ yêu thích" : "Yêu thích"}>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleWishlist(item.id);
-                                }}
-                                style={{
-                                    flex: 1,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    backgroundColor: isInWishlist ? "#fff0f0" : "#f5f5f5",
-                                    color: isInWishlist ? "#ff4d4f" : "#666",
-                                    padding: "10px",
-                                    borderRadius: "8px",
-                                    border: "none",
-                                    cursor: "pointer",
-                                    transition: "all 0.3s"
-                                }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isInWishlist ? "#ffe1e1" : "#e0e0e0"}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isInWishlist ? "#fff0f0" : "#f5f5f5"}
-                            >
-                                {isInWishlist ? (
-                                    <HeartFilled style={{ fontSize: "18px", color: "#ff4d4f" }} />
-                                ) : (
-                                    <HeartOutlined style={{ fontSize: "18px", color: "#666" }} />
-                                )}
-                            </button>
-                        </Tooltip>
-                    </div>
-                </div>
-            </div>
-        );
-    });
+    // Memoize tab items
+    const items = useMemo(() => [
+        { key: "sort=sold,desc", label: "Phổ biến", children: <></> },
+        { key: "sort=createdAt,desc", label: "Hàng Mới", children: <></> },
+        { key: "sort=price,asc", label: "Giá Thấp Đến Cao", children: <></> },
+        { key: "sort=price,desc", label: "Giá Cao Đến Thấp", children: <></> }
+    ], []);
 
     return (
         searchTerm ? (
@@ -960,12 +774,9 @@ const Home = () => {
                         onFinish={onFinish}
                     />
                 </div>
-
-                {/* Add Chatbot Component */}
-                <Chatbot />
             </div>
         )
     );
 }
 
-export default Home;
+export default memo(Home);

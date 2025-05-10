@@ -7,8 +7,25 @@
   left: 0;
   width: 100%;
   z-index: 100;
-  background-color: var(--background-color);
-  box-shadow: 0rem 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+  background-color: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  transition: all 0.4s ease;
+
+  // Add scrolled class effect
+  &.scrolled {
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+
+    .navbar {
+      padding: 1.2rem 1.6rem;
+
+      .logo {
+        font-size: 3.2rem;
+      }
+    }
+  }
 
   .navbar {
     margin: auto;
@@ -17,15 +34,18 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.6rem;
+    transition: all 0.4s ease;
 
     .logo {
       font-size: 3.5rem;
       font-weight: bold;
-      transition: 0.5s;
+      transition: 0.3s ease;
       color: var(--primary-color);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 
       &:hover {
-        transform: scale(1.2);
+        transform: scale(1.1);
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
       }
     }
 
@@ -37,23 +57,46 @@
       @include respond(phone) {
         display: none;
       }
+
       @include respond(port) {
         display: none;
       }
 
       .menuItem {
-        font-size: 2rem;
+        font-size: 1.8rem;
         margin-left: 1.6rem;
         padding: 0.8rem 2.4rem;
         font-weight: 600;
-        color: var(--grey);
-        transition: 0.5s ease-in-out;
+        color: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+        border-radius: 1.6rem;
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          width: 0;
+          height: 2px;
+          background: var(--primary-color);
+          transition: all 0.3s ease;
+          transform: translateX(-50%);
+        }
 
         &:hover,
         &.active {
-          color: var(--white);
-          background-color: var(--primary-color);
-          border-radius: 1.6rem;
+          color: var(--primary-color);
+          transform: translateY(-3px);
+
+          &::after {
+            width: 70%;
+          }
+        }
+
+        &:active {
+          transform: translateY(-1px);
         }
       }
     }
@@ -69,8 +112,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--white);
-    box-shadow: 0rem 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 5px 0;
 
     .mobileItems {
       display: flex;
@@ -80,9 +127,16 @@
     }
 
     .mobileItem {
-      color: var(--grey);
-      font-size: 3rem;
-      padding: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 2.8rem;
+      padding: 1.2rem;
+      transition: all 0.3s ease;
+
+      &:hover,
+      &.active {
+        color: var(--primary-color);
+        transform: translateY(-5px);
+      }
     }
   }
 
@@ -92,8 +146,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--white);
-    box-shadow: 0rem 0.125rem 0.5rem rgba(0, 0, 0, 0.15);
+    background-color: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 5px 0;
 
     .mobileItems {
       display: flex;
@@ -103,9 +161,16 @@
     }
 
     .mobileItem {
-      color: var(--grey);
-      font-size: 3rem;
-      padding: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 2.8rem;
+      padding: 1.2rem;
+      transition: all 0.3s ease;
+
+      &:hover,
+      &.active {
+        color: var(--primary-color);
+        transform: translateY(-5px);
+      }
     }
   }
 }

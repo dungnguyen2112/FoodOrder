@@ -130,6 +130,69 @@
     }
 }
 
+// PIN verification modal styling
+.pin-verification {
+    padding: 10px 0;
+
+    p {
+        margin-bottom: 20px;
+        font-size: 15px;
+        color: #555;
+    }
+
+    .ant-form-item {
+        margin-bottom: 0;
+    }
+
+    .ant-input-affix-wrapper {
+        height: 45px;
+        border-radius: 8px;
+
+        &:hover,
+        &:focus {
+            border-color: #ff6b6b;
+        }
+
+        .ant-input {
+            font-size: 16px;
+            letter-spacing: 4px;
+            text-align: center;
+        }
+    }
+}
+
+// Customize the modal
+.ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+
+    .ant-modal-header {
+        border-bottom: 1px solid #f0f0f0;
+        padding: 16px 24px;
+
+        .ant-modal-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #333;
+        }
+    }
+
+    .ant-modal-footer {
+        border-top: 1px solid #f0f0f0;
+        padding: 12px 24px;
+
+        .ant-btn-primary {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+
+            &:hover {
+                background: #ff5252;
+                border-color: #ff5252;
+            }
+        }
+    }
+}
+
 // Responsive adjustments
 @media (max-width: 576px) {
     .login-page {

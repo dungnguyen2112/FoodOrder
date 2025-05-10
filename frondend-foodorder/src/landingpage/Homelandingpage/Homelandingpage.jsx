@@ -1,19 +1,11 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import "./home.scss";
 
 const HomeLandingPage = () => {
   return (
     <section id="home" className="home">
-      <video
-        className="homeVideoIntro"
-        autoPlay
-        muted
-        loop
-      >
-        <source src="/assets/intro2.mp4" type="video/mp4" />
-        Your browser is not supported
-      </video>
       <div className="homeDetails">
         <div className="container">
           <div className="row">
@@ -21,7 +13,9 @@ const HomeLandingPage = () => {
               <h1>FoodOrder</h1>
               <p>Order your favorite food from your favorite restaurant</p>
               <div>
-                <a href="http://localhost:3000/"><button>Order Now</button></a>
+                <Link to="/">
+                  <button>Order Now</button>
+                </Link>
               </div>
             </div>
           </div>
