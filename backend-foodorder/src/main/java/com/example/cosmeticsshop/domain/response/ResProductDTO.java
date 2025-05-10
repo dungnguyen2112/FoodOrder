@@ -1,6 +1,8 @@
 package com.example.cosmeticsshop.domain.response;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.DecimalMin;
@@ -30,4 +32,16 @@ public class ResProductDTO {
     private String categoryName;
     private Instant createdAt;
     private Instant updatedAt;
+    private List<ProductImageDTO> additionalImages = new ArrayList<>();
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ProductImageDTO {
+        private long id;
+        private String imageUrl;
+        private String alt;
+        private int displayOrder;
+    }
 }

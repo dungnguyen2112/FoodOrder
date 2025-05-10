@@ -7,32 +7,29 @@
   overflow: hidden;
   z-index: 15;
 
-  .homeVideoIntro {
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-  }
-
   .homeDetails {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     .slogan {
       width: 100%;
       margin: auto;
-      padding-top: 20vh;
+      padding-top: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      text-align: center;
 
       & h1 {
         font-size: 10rem;
         letter-spacing: 2rem;
         color: var(--primary-color);
         text-transform: uppercase;
+        text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.8);
 
         @include respond(phone) {
           font-size: 6rem;
@@ -48,6 +45,7 @@
         font-size: 4rem;
         color: var(--white);
         margin-bottom: 4rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 
         @include respond(phone) {
           font-size: 1.5rem;
@@ -55,25 +53,33 @@
       }
 
       & button {
-        font-size: 4rem;
+        font-size: 3rem;
         color: var(--white);
-        background-color: transparent;
+        background-color: rgba(255, 77, 79, 0.9);
         outline: none;
         border: none;
-        border: 0.3rem solid var(--primary-color);
-        border-radius: 3rem;
-        padding: 0.8rem 2rem;
+        border-radius: 1.5rem;
+        padding: 1.5rem 4rem;
         cursor: pointer;
-        transition: 0.3s ease-in-out;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
 
         @include respond(phone) {
-          font-size: 3rem;
-          border-radius: 3rem;
-          padding: 0.6rem 1.5rem;
+          font-size: 2.5rem;
+          padding: 1.2rem 3rem;
         }
 
         &:hover {
-          background-color: var(--primary-color);
+          transform: translateY(-5px);
+          background-color: rgba(255, 77, 79, 1);
+          box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        &:active {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         }
       }
     }

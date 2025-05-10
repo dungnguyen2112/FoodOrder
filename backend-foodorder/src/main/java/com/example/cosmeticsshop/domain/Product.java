@@ -2,11 +2,14 @@ package com.example.cosmeticsshop.domain;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.data.relational.core.sql.In;
 
 import com.example.cosmeticsshop.util.SecurityUtil;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +17,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -74,6 +78,21 @@ public class Product implements Serializable {
 
     private Instant createdAt;
     private Instant updatedAt;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductImage> images = new ArrayList<>();
+
+    // Helper method to add image
+    public void addImage(String imageUrl, String alt, int displayOrder) {
+        ProductImage image = new ProductImage(imageUrl, alt, displayOrder, this);
+        images.add(image);
+    }
+
+    // Helper method to remove image
+    public void removeImage(ProductImage image) {
+        images.remove(image);
+        image.setProduct(null);
+    }
 
     public Instant getCreatedAt() {
         return createdAt;

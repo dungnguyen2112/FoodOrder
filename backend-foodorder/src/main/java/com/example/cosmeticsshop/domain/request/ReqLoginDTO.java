@@ -9,6 +9,9 @@ public class ReqLoginDTO {
     @NotBlank(message = "password không được để trống")
     private String password;
 
+    // PIN field is not marked as required since it's only needed for role_id 1
+    private String pin;
+
     public String getUsername() {
         return username;
     }
@@ -25,4 +28,11 @@ public class ReqLoginDTO {
         this.password = password;
     }
 
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
 }

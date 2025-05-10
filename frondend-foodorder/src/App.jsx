@@ -34,7 +34,6 @@ import Contact from './landingpage/Contactlandingpage/Contactlandingpage';
 import About from './landingpage/Aboutlandingpage/Aboutlandingpage';
 import HeaderLandingPage from './landingpage/Headerlandingpage/Headerlandingpage';
 import Testimonials from './landingpage/Testimonialslandingpage/Testimoniallandingpage';
-import { FaArrowAltCircleUp } from 'react-icons/fa';
 import Menu from './landingpage/Menulandingpage/Menulandingpage';
 import HomeLandingPage from './landingpage/Homelandingpage/Homelandingpage';
 import './landingpage/App.scss';
@@ -42,31 +41,37 @@ import CategoryPage from './pages/category';
 import { PaymentPage } from './pages/payment';
 import PaymentFailed from './pages/payment-failed';
 import PaymentCallback from './pages/payment/callback';
+import Chatbot from './components/Chatbot';
+import ZaloContact from './components/ZaloContact';
 
 
 const Layout = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
-    <div className='layout-app'>
+    <div className='layout-app' style={{
+      background: "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
       <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <Outlet context={[searchTerm, setSearchTerm]} />
       <Footer />
+      <Chatbot />
+      <ZaloContact />
     </div>
   )
 }
 
 const LandingPageLayout = () => {
-  const topOfThePagehander = () => {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-  };
   return (
-    <div>
-      <FaArrowAltCircleUp
-        className="Top-of-the-page"
-        onClick={topOfThePagehander}
-      />
+    <div style={{
+      background: "linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
       <HeaderLandingPage />
       <HomeLandingPage />
       <About />
@@ -74,6 +79,8 @@ const LandingPageLayout = () => {
       <Testimonials />
       <Contact />
       <FooterLandingPage />
+      <Chatbot />
+      <ZaloContact />
     </div>
   );
 };

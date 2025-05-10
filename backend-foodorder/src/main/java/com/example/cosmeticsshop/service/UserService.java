@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.cosmeticsshop.domain.History;
@@ -21,11 +22,12 @@ import com.example.cosmeticsshop.domain.response.ResCreateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUpdateUserDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
-import com.example.cosmeticsshop.repository.NotificationRepository;
+
 import com.example.cosmeticsshop.repository.PasswordResetTokenRepository;
 import com.example.cosmeticsshop.repository.RoleRepository;
 import com.example.cosmeticsshop.repository.UserRepository;
 import com.example.cosmeticsshop.repository.WishListRepository;
+import com.example.cosmeticsshop.util.constant.RoyaltyEnum;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -38,22 +40,22 @@ public class UserService {
     private final RoleService roleService;
     private final RoleRepository roleRepository;
     private final PasswordResetTokenRepository tokenRepository;
-    private final NotificationRepository notificationRepository;
     private final WishListRepository wishListRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(
             UserRepository userRepository,
             RoleService roleService,
             RoleRepository roleRepository,
             PasswordResetTokenRepository tokenRepository,
-            NotificationRepository notificationRepository,
-            WishListRepository wishListRepository) {
+            WishListRepository wishListRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.roleRepository = roleRepository;
         this.tokenRepository = tokenRepository;
-        this.notificationRepository = notificationRepository;
         this.wishListRepository = wishListRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User handleCreateUser(UserCreateRequestDTO user) {
@@ -100,10 +102,6 @@ public class UserService {
             if (tokenOpt.isPresent()) {
                 this.tokenRepository.delete(tokenOpt.get());
             }
-
-            // 2. Delete notifications where user is sender or receiver
-            this.notificationRepository.deleteAllBySender(user);
-            this.notificationRepository.deleteAllByReceiver(user);
 
             // 3. Delete user's wishlist items
             this.wishListRepository.deleteAllByUser(user);
@@ -275,6 +273,70 @@ public class UserService {
             return this.userRepository.save(newUser);
         }
         return null;
+    }
+
+    // Cập nhật phương thức updateUserPin để mã hóa PIN
+    public User updateUserPin(String pin, Long userId) {
+        User existingUser = this.userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+
+        // Only users with role_id 1 can have PINs
+        if (existingUser.getRole() != null && existingUser.getRole().getId() == 1) {
+            // Mã hóa PIN trước khi lưu vào database
+            String hashedPin = this.passwordEncoder.encode(pin);
+            existingUser.setPin(hashedPin);
+            return this.userRepository.save(existingUser);
+        } else {
+            throw new RuntimeException("Chỉ tài khoản admin (role_id = 1) mới cần PIN");
+        }
+    }
+
+    /**
+     * Kiểm tra PIN có khớp với PIN đã lưu trong database không
+     * Hỗ trợ cả PIN đã mã hóa và chưa mã hóa (trong giai đoạn chuyển tiếp)
+     */
+    public boolean verifyPin(String rawPin, String storedPin) {
+        if (rawPin == null || storedPin == null) {
+            return false;
+        }
+
+        // Trường hợp 1: PIN đã được mã hóa - sử dụng matcher của Spring Security
+        if (this.passwordEncoder.matches(rawPin, storedPin)) {
+            return true;
+        }
+
+        // Trường hợp 2: PIN chưa được mã hóa - so sánh trực tiếp (hỗ trợ cho dữ liệu
+        // cũ)
+        if (rawPin.equals(storedPin)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Create a user from a User entity (for Google login)
+    public User createUser(User user) {
+        // Set default role if not set
+        if (user.getRole() == null) {
+            Role defaultRole = roleRepository.findById(2L).orElse(null); // Assuming 2 is the default user role
+            user.setRole(defaultRole);
+        }
+
+        // Set default royalty if not set
+        if (user.getRoyalty() == null) {
+            user.setRoyalty(RoyaltyEnum.BRONZE);
+        }
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Tìm tất cả người dùng có vai trò admin (role_id = 1)
+     * 
+     * @return Danh sách các admin users
+     */
+    public List<User> findAllAdminUsers() {
+        return userRepository.findByRoleId(1L);
     }
 
 }

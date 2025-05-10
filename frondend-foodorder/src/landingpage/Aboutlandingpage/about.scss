@@ -21,6 +21,12 @@
       width: 60%;
       height: 70%;
       border-radius: 3rem;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: scale(1.02);
+      }
 
       @include respond(phone) {
         width: 100%;
@@ -31,10 +37,16 @@
     .aboutContainerDetails {
       width: 40%;
       text-align: center;
-      background-color: var(--white);
+      background-color: rgba(255, 255, 255, 0.9);
       border-radius: 3rem;
       transform: translateX(-10rem);
-      box-shadow: 0rem 0.44rem 1.81rem 0rem rgba(100, 100, 111, 0.2);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease;
+
+      &:hover {
+        transform: translateX(-10rem) translateY(-5px);
+      }
 
       @include respond(phone) {
         position: absolute;
@@ -46,6 +58,7 @@
         font-size: 3rem;
         color: var(--primary-color);
         margin: 5rem 3rem 2rem 3rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 
         @include respond(phone) {
           font-size: 2rem;
@@ -56,6 +69,7 @@
         font-size: 1.7rem;
         color: var(--grey);
         margin: 5rem 3rem 2rem 3rem;
+        line-height: 1.6;
 
         @include respond(phone) {
           font-size: 1.5rem;

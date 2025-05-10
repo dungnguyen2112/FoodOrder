@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Col, Divider, Form, Input, InputNumber, message, Modal, notification, Row, Select, Upload } from 'antd';
-import { callCreateAUser, callCreateFood, callFetchCategory, callUploadFoodImg } from '../../../services/api';
+import { callCreateAUser, callCreateFood, callFetchCategory, callUploadFoodImg, callAddProductImages } from '../../../services/api';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 const FoodModalCreate = (props) => {
@@ -16,7 +16,8 @@ const FoodModalCreate = (props) => {
 
     const [imageUrl, setImageUrl] = useState("");
 
-    const [dataThumbnail, setDataThumbnail] = useState([])
+    const [dataThumbnail, setDataThumbnail] = useState([]);
+    const [dataAdditionalImages, setDataAdditionalImages] = useState([]);
 
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
@@ -45,33 +46,38 @@ const FoodModalCreate = (props) => {
             return;
         }
 
-        // if (dataSlider.length === 0) {
-        //     notification.error({
-        //         message: 'Lỗi validate',
-        //         description: 'Vui lòng upload ảnh slider'
-        //     })
-        //     return;
-        // }
-
-
         const { name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc } = values;
         const image = dataThumbnail[0].name;
 
-        setIsSubmit(true)
-        const res = await callCreateFood(image, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc);
-        if (res && res.data) {
-            message.success('Tạo mới food thành công');
-            form.resetFields();
-            setDataThumbnail([])
-            setOpenModalCreate(false);
-            await props.fetchFood();
-        } else {
+        setIsSubmit(true);
+        try {
+            const res = await callCreateFood(image, name, price, sold, quantity, categoryName, factory, detailDesc, shortDesc);
+            if (res && res.data) {
+                // Thêm hình ảnh phụ nếu có
+                if (dataAdditionalImages.length > 0) {
+                    const imageUrls = dataAdditionalImages.map(img => img.name);
+                    await callAddProductImages(res.data.id, imageUrls);
+                }
+
+                message.success('Tạo mới food thành công');
+                form.resetFields();
+                setDataThumbnail([]);
+                setDataAdditionalImages([]);
+                setOpenModalCreate(false);
+                await props.fetchFood();
+            } else {
+                notification.error({
+                    message: 'Đã có lỗi xảy ra',
+                    description: res.message
+                });
+            }
+        } catch (error) {
             notification.error({
                 message: 'Đã có lỗi xảy ra',
-                description: res.message
-            })
+                description: error.message
+            });
         }
-        setIsSubmit(false)
+        setIsSubmit(false);
     };
 
     const getBase64 = (img, callback) => {
@@ -123,22 +129,29 @@ const FoodModalCreate = (props) => {
         }
     };
 
-    const handleUploadFileSlider = async ({ file, onSuccess, onError }) => {
-        const res = await callUploadFoodImg(file);
+    const handleUploadAdditionalImages = async ({ file, onSuccess, onError }) => {
+        const res = await callUploadFoodImg(file, "food");
         if (res && res.data) {
             //copy previous state => upload multiple images
-            setDataSlider((dataSlider) => [...dataSlider, {
-                name: res.data.image,
+            setDataAdditionalImages((prev) => [...prev, {
+                name: res.data.display_name + "." + res.data.format,
                 uid: file.uid
-            }])
-            onSuccess('ok')
+            }]);
+            if (onSuccess) onSuccess('ok');
         } else {
-            onError('Đã có lỗi khi upload file');
+            if (onError) {
+                const error = new Error(res.message);
+                onError({ event: error });
+            }
         }
     };
 
     const handleRemoveFile = (file) => {
         setDataThumbnail([])
+    }
+
+    const handleRemoveAdditionalImage = (file) => {
+        setDataAdditionalImages((prev) => prev.filter(item => item.uid !== file.uid));
     }
 
     const handlePreview = async (file) => {
@@ -164,6 +177,8 @@ const FoodModalCreate = (props) => {
                 onOk={() => { form.submit() }}
                 onCancel={() => {
                     form.resetFields();
+                    setDataThumbnail([]);
+                    setDataAdditionalImages([]);
                     setOpenModalCreate(false)
                 }}
                 okText={"Tạo mới"}
@@ -278,7 +293,7 @@ const FoodModalCreate = (props) => {
                         <Col span={12}>
                             <Form.Item
                                 labelCol={{ span: 24 }}
-                                label="Ảnh Logo"
+                                label="Ảnh Chính"
                                 name="image"
                                 rules={[{
                                     required: true,
@@ -310,21 +325,22 @@ const FoodModalCreate = (props) => {
                             </Form.Item>
 
                         </Col>
-                        {/* <Col span={12}>
+
+                        <Col span={12}>
                             <Form.Item
                                 labelCol={{ span: 24 }}
-                                label="Ảnh Slider"
-                                name="slider"
+                                label="Ảnh Phụ (không bắt buộc)"
+                                name="additionalImages"
                             >
                                 <Upload
                                     multiple
-                                    name="slider"
+                                    name="additionalImages"
                                     listType="picture-card"
                                     className="avatar-uploader"
-                                    customRequest={handleUploadFileSlider}
+                                    customRequest={handleUploadAdditionalImages}
                                     beforeUpload={beforeUpload}
-                                    onChange={(info) => handleChange(info, 'slider')}
-                                    onRemove={(file) => handleRemoveFile(file, "slider")}
+                                    onChange={handleChange}
+                                    onRemove={(file) => handleRemoveAdditionalImage(file)}
                                     onPreview={handlePreview}
                                 >
                                     <div>
@@ -333,7 +349,7 @@ const FoodModalCreate = (props) => {
                                     </div>
                                 </Upload>
                             </Form.Item>
-                        </Col> */}
+                        </Col>
                     </Row>
                 </Form>
             </Modal>

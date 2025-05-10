@@ -49,7 +49,15 @@ const FoodTable = () => {
         const res = await callFetchListFood(query);
         if (res && res.data) {
             setListBook(res.data.result);
-            setTotal(res.data.meta.total)
+            setTotal(res.data.meta.total);
+
+            // If view detail is open, update its data with the fresh data
+            if (openViewDetail && dataViewDetail) {
+                const updatedItem = res.data.result.find(item => item.id === dataViewDetail.id);
+                if (updatedItem) {
+                    setDataViewDetail(updatedItem);
+                }
+            }
         }
         setIsLoading(false)
     }
@@ -305,7 +313,7 @@ const FoodTable = () => {
                 <FoodModalCreate
                     openModalCreate={openModalCreate}
                     setOpenModalCreate={setOpenModalCreate}
-                    fetchBook={fetchFood}
+                    fetchFood={fetchFood}
                 />
 
                 <FoodViewDetail
@@ -320,7 +328,7 @@ const FoodTable = () => {
                     setOpenModalUpdate={setOpenModalUpdate}
                     dataUpdate={dataUpdate}
                     setDataUpdate={setDataUpdate}
-                    fetchBook={fetchFood}
+                    fetchFood={fetchFood}
                 />
 
             </div>

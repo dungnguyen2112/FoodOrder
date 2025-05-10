@@ -1,7 +1,7 @@
 package com.example.cosmeticsshop.service;
 
 import com.example.cosmeticsshop.domain.History;
-import com.example.cosmeticsshop.domain.Notification;
+
 import com.example.cosmeticsshop.domain.Order;
 import com.example.cosmeticsshop.domain.OrderDetail;
 import com.example.cosmeticsshop.domain.Product;
@@ -61,13 +61,11 @@ public class OrderService {
     private final ResTableRepository resTableRepository;
     private final ResTableService tableService;
     private final EmailService emailService;
-    private final NotificationService notificationService;
 
     public OrderService(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository,
             HistoryService historyService, HistoryRepository historyRepository, UserRepository userRepository,
             ProductRepository productRepository, UserService userService, OrderDetailService orderDetailService,
-            ResTableRepository resTableRepository, ResTableService tableService, EmailService emailService,
-            NotificationService notificationService) {
+            ResTableRepository resTableRepository, ResTableService tableService, EmailService emailService) {
         this.tableService = tableService;
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
@@ -79,7 +77,6 @@ public class OrderService {
         this.orderDetailService = orderDetailService;
         this.resTableRepository = resTableRepository;
         this.emailService = emailService;
-        this.notificationService = notificationService;
     }
 
     public ResultPaginationDTO fetchAllOrder(Specification<Order> spec, Pageable pageable) {

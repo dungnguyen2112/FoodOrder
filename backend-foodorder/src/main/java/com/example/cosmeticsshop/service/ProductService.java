@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,11 @@ import com.example.cosmeticsshop.domain.request.ReqProductDTO;
 import com.example.cosmeticsshop.domain.response.ResProductDTO;
 import com.example.cosmeticsshop.domain.response.ResUserDTO;
 import com.example.cosmeticsshop.domain.response.ResultPaginationDTO;
+import com.example.cosmeticsshop.domain.ProductImage;
+import com.example.cosmeticsshop.domain.response.ResProductDTO.ProductImageDTO;
 import com.example.cosmeticsshop.repository.CategoryRepository;
 import com.example.cosmeticsshop.repository.ProductRepository;
+import com.example.cosmeticsshop.repository.ProductImageRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,10 +32,13 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductImageRepository productImageRepository;
 
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository,
+            ProductImageRepository productImageRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.productImageRepository = productImageRepository;
     }
 
     public ResProductDTO handleCreateProduct(ReqProductDTO product) {
@@ -139,6 +146,19 @@ public class ProductService {
         resProductDTO.setTarget(product.getTarget());
         resProductDTO.setCreatedAt(product.getCreatedAt());
         resProductDTO.setUpdatedAt(product.getUpdatedAt());
+
+        // Chuyển đổi danh sách hình ảnh phụ
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            List<ProductImageDTO> imageDTOs = product.getImages().stream()
+                    .map(img -> new ProductImageDTO(
+                            img.getId(),
+                            img.getImageUrl(),
+                            img.getAlt(),
+                            img.getDisplayOrder()))
+                    .collect(Collectors.toList());
+            resProductDTO.setAdditionalImages(imageDTOs);
+        }
+
         return resProductDTO;
     }
 
@@ -173,4 +193,92 @@ public class ProductService {
         return this.productRepository.count();
     }
 
+    public List<ResProductDTO> getTopSellingProducts(int limit, Long excludeId) {
+        // Tăng giới hạn lên để đảm bảo có đủ sản phẩm sau khi lọc
+        int fetchLimit = excludeId != null ? limit + 5 : limit;
+
+        // Tạo PageRequest để lấy các sản phẩm được sắp xếp theo số lượng bán giảm dần
+        PageRequest pageRequest = PageRequest.of(0, fetchLimit,
+                org.springframework.data.domain.Sort.by("sold").descending());
+
+        // Lấy sản phẩm từ repository
+        Page<Product> topProductsPage = this.productRepository.findAll(pageRequest);
+        List<Product> topProducts = topProductsPage.getContent();
+
+        // Lọc sản phẩm theo excludeId nếu được cung cấp
+        if (excludeId != null) {
+            final long excludeIdValue = excludeId.longValue();
+            topProducts = topProducts.stream()
+                    .filter(product -> product.getId() != excludeIdValue)
+                    .collect(Collectors.toList());
+        }
+
+        // Nếu không đủ sản phẩm sau khi lọc, lấy thêm sản phẩm khác
+        if (topProducts.size() < limit && excludeId != null) {
+            // Tìm thêm sản phẩm không thuộc danh sách hiện tại
+            List<Long> existingIds = topProducts.stream()
+                    .map(product -> Long.valueOf(product.getId()))
+                    .collect(Collectors.toList());
+            existingIds.add(excludeId); // Thêm ID cần loại trừ
+
+            // Lấy thêm sản phẩm không thuộc danh sách hiện tại
+            Page<Product> additionalProductsPage = this.productRepository.findByIdNotIn(
+                    existingIds,
+                    PageRequest.of(0, limit - topProducts.size()));
+
+            topProducts.addAll(additionalProductsPage.getContent());
+        }
+
+        // Chuyển đổi thành DTO và giới hạn số lượng trả về
+        return topProducts.stream()
+                .limit(limit)
+                .map(this::convertToResProductDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Thêm phương thức để lưu hình ảnh phụ cho sản phẩm
+    public void addProductImages(Long productId, List<String> imageUrls) {
+        Product product = this.fetchProductById1(productId);
+        if (product != null) {
+            int order = product.getImages().size(); // Bắt đầu với số thứ tự tiếp theo
+            for (String imageUrl : imageUrls) {
+                product.addImage(imageUrl, product.getName(), order++);
+            }
+            productRepository.save(product);
+        }
+    }
+
+    // Xóa tất cả hình ảnh phụ của sản phẩm
+    public void removeAllProductImages(Long productId) {
+        productImageRepository.deleteByProductId(productId);
+    }
+
+    // Xóa một hình ảnh phụ cụ thể
+    public void removeProductImage(Long imageId) {
+        try {
+            // Trước khi xóa, kiểm tra xem hình ảnh có tồn tại không
+            Optional<ProductImage> imageOpt = productImageRepository.findById(imageId);
+            if (imageOpt.isPresent()) {
+                ProductImage image = imageOpt.get();
+                log.info("Removing product image with ID: {}, URL: {}", imageId, image.getImageUrl());
+
+                // Lấy product để có thể gọi removeImage helper method
+                Product product = image.getProduct();
+                if (product != null) {
+                    product.removeImage(image);
+                    productRepository.save(product);
+                    log.info("Successfully removed image from product relationship");
+                } else {
+                    // Nếu không tìm thấy product, chỉ xóa image trực tiếp
+                    productImageRepository.deleteById(imageId);
+                    log.info("Deleted image directly without product reference");
+                }
+            } else {
+                log.warn("Image with ID {} not found for deletion", imageId);
+            }
+        } catch (Exception e) {
+            log.error("Error deleting product image with ID: {}", imageId, e);
+            throw e;
+        }
+    }
 }

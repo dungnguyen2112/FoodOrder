@@ -37,6 +37,9 @@ public class User {
     @Column(nullable = false)
     private String passwordHash;
 
+    @Column(length = 6)
+    private String pin;
+
     private String phone;
     private String name;
     private String address;

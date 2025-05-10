@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đã nhận phản hồi của bạn</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #59CCCA;
+            margin-bottom: 20px;
+        }
+        .logo {
+            color: #59CCCA;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .content {
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+        }
+        .content h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #777;
+        }
+        .button {
+            display: inline-block;
+            background-color: #59CCCA;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .social {
+            margin-top: 15px;
+        }
+        .social a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #59CCCA;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">FoodOrder</div>
+            <p>Cảm ơn bạn đã gửi phản hồi</p>
+        </div>
+        
+        <div class="content">
+            <h2>Xin chào <span th:text="${name}">bạn</span>,</h2>
+            
+            <p>Chúng tôi đã nhận được phản hồi của bạn về dịch vụ của chúng tôi.</p>
+            
+            <p>Phản hồi của bạn rất quan trọng và giúp chúng tôi cải thiện dịch vụ mỗi ngày. Chúng tôi sẽ xem xét ý kiến của bạn một cách cẩn thận và nếu cần thiết, sẽ liên hệ lại với bạn để tìm hiểu thêm.</p>
+            
+            <p>Đây là một email tự động xác nhận đã nhận phản hồi, vui lòng không trả lời email này.</p>
+            
+            <p>Nếu bạn có câu hỏi khác hoặc ý kiến đóng góp thêm, đừng ngần ngại liên hệ với chúng tôi qua hotline: <strong>0978025217</strong></p>
+            
+            <div style="text-align: center;">
+                <a href="http://localhost:3000" class="button">Truy cập website</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 FoodOrder. Tất cả các quyền được bảo lưu.</p>
+            <p>Địa chỉ: PTIT, Hà Nội, Việt Nam</p>
+            
+            <div class="social">
+                <a href="#">Facebook</a>
+                <a href="#">Instagram</a>
+                <a href="#">Twitter</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

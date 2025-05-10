@@ -1,6 +1,5 @@
 import React from "react";
 import "./about.scss";
-import bg from "./g.jpg";
 
 const About = () => {
   return (
@@ -18,11 +17,10 @@ const About = () => {
                 About <span>Us</span>
               </h1>
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-                tincidunt, nisl non fringilla aliquet, urna est lacinia eros, id
-                varius libero odio sit amet mi. Nullam euismod, nisl nec
-                scelerisque tincidunt, nunc felis ultricies sapien, nec
-                accumsan.
+                Welcome to FoodOrder, where culinary excellence meets convenience.
+                Our platform connects you with the finest restaurants and their delectable offerings,
+                all at the touch of a button. Experience seamless ordering, swift delivery, and
+                exceptional taste with every meal.
               </p>
             </div>
           </div>

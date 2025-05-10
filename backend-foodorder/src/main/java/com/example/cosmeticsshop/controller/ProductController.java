@@ -2,7 +2,9 @@ package com.example.cosmeticsshop.controller;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.HashMap;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -191,4 +193,68 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/products/top-selling")
+    @ApiMessage("Get top selling products")
+    public ResponseEntity<List<ResProductDTO>> getTopSellingProducts(
+            @RequestParam(defaultValue = "4") int limit,
+            @RequestParam(required = false) Long excludeId) {
+        List<ResProductDTO> topProducts = this.productService.getTopSellingProducts(limit, excludeId);
+        return ResponseEntity.ok(topProducts);
+    }
+
+    @PostMapping("/products/{id}/images")
+    @ApiMessage("Add additional images to a product")
+    public ResponseEntity<ResProductDTO> addProductImages(
+            @PathVariable("id") long id,
+            @RequestBody Map<String, List<String>> payload) {
+        try {
+            List<String> imageUrls = payload.get("imageUrls");
+            if (imageUrls == null || imageUrls.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Product currentProduct = this.productService.fetchProductById1(id);
+            if (currentProduct == null) {
+                throw new IdInvalidException("Product " + id + " không tồn tại.");
+            }
+
+            this.productService.addProductImages(id, imageUrls);
+            ResProductDTO updatedProduct = this.productService.fetchProductById(id);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/products/{id}/images")
+    @ApiMessage("Remove all additional images from a product")
+    public ResponseEntity<Void> removeAllProductImages(@PathVariable("id") long id) {
+        try {
+            Product currentProduct = this.productService.fetchProductById1(id);
+            if (currentProduct == null) {
+                throw new IdInvalidException("Product " + id + " không tồn tại.");
+            }
+
+            this.productService.removeAllProductImages(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/products/images/{imageId}")
+    @ApiMessage("Remove a specific additional image")
+    public ResponseEntity<Map<String, String>> removeProductImage(@PathVariable("imageId") long imageId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            this.productService.removeProductImage(imageId);
+            response.put("status", "success");
+            response.put("message", "Image successfully deleted");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }

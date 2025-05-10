@@ -1,5 +1,6 @@
 package com.example.cosmeticsshop.controller;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -94,6 +95,44 @@ public class AuthController {
         ResLoginDTO res = new ResLoginDTO();
         User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(loginDto.getUsername());
         if (currentUserDB != null) {
+            // Check if user has role ID 1 (admin) and validate PIN
+            if (currentUserDB.getRole().getId() == 1) {
+                // If PIN is provided, validate it
+                if (loginDto.getPin() != null && !loginDto.getPin().isEmpty()) {
+                    // If PIN is incorrect, return error
+                    if (!userService.verifyPin(loginDto.getPin(), currentUserDB.getPin())) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(ResLoginDTO.builder()
+                                        .message("PIN không chính xác")
+                                        .needPin(true)
+                                        .build());
+                    }
+                    // PIN is correct, proceed with login
+                } else {
+                    // No PIN provided, just return user info with needPin flag
+                    // Do not set authentication context for security reasons
+                    SecurityContextHolder.clearContext();
+
+                    ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                            currentUserDB.getId(),
+                            currentUserDB.getEmail(),
+                            currentUserDB.getName(),
+                            currentUserDB.getAvatarUrl(),
+                            currentUserDB.getRole().getId(),
+                            currentUserDB.getRoyalty(),
+                            currentUserDB.getTotalMoneySpent(),
+                            currentUserDB.getTotalOrder(),
+                            currentUserDB.getPhone());
+
+                    return ResponseEntity.ok()
+                            .body(ResLoginDTO.builder()
+                                    .user(userLogin)
+                                    .needPin(true)
+                                    .message("Vui lòng nhập mã PIN để hoàn tất đăng nhập")
+                                    .build());
+                }
+            }
+
             ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
                     currentUserDB.getId(),
                     currentUserDB.getEmail(),
@@ -306,54 +345,97 @@ public class AuthController {
     public ResponseEntity<ResLoginDTO> googleLogin(@RequestBody GoogleLoginRequest googleLoginRequest)
             throws IdInvalidException {
         try {
-            // Xác thực Google token
             GoogleIdToken idToken = googleIdTokenVerifier.verify(googleLoginRequest.getToken());
             if (idToken == null) {
-                throw new IdInvalidException("Invalid Google token");
+                throw new IdInvalidException("Google token không hợp lệ");
             }
 
-            // Lấy thông tin từ Google payload
             GoogleIdToken.Payload payload = idToken.getPayload();
-            String email = payload.getEmail();
-            String name = (String) payload.get("name");
-            String googleId = payload.getSubject();
 
-            // Tìm hoặc tạo mới user
-            User user = userService.handleGetUserByUsernameOrEmail(email);
-            if (user == null) {
-                user = new User();
-                user.setEmail(email);
-                user.setName(name);
-                user.setGoogleId(googleId);
-                // Có thể set các giá trị mặc định khác
-                user = userService.handleCreateUser(this.convertToUserCreateRequestDTO(user));
+            String email = payload.getEmail();
+
+            User userExist = this.userService.handleGetUserByUsernameOrEmail(email);
+            if (userExist == null) {
+                // Register new user from Google account
+                String name = (String) payload.get("name");
+                String pictureUrl = (String) payload.get("picture");
+
+                User newUser = new User();
+                newUser.setEmail(email);
+                newUser.setName(name);
+                newUser.setUsername(email);
+                newUser.setPasswordHash(this.passwordEncoder.encode(UUID.randomUUID().toString()));
+                newUser.setGoogleId(payload.getSubject());
+                newUser.setAvatarUrl(pictureUrl);
+                this.userService.createUser(newUser);
+
+                userExist = newUser;
             }
 
-            // Tạo response DTO
+            // Check if user has role_id 1 (admin) and requires PIN
+            if (userExist.getRole() != null && userExist.getRole().getId() == 1) {
+                // If PIN is provided, validate it
+                if (googleLoginRequest.getPin() != null && !googleLoginRequest.getPin().isEmpty()) {
+                    // Validate PIN
+                    if (!userService.verifyPin(googleLoginRequest.getPin(), userExist.getPin())) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(ResLoginDTO.builder()
+                                        .message("PIN không chính xác")
+                                        .needPin(true)
+                                        .build());
+                    }
+                    // PIN is correct, proceed with login
+                } else {
+                    // No PIN provided, just return user info with needPin flag
+                    ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                            userExist.getId(),
+                            userExist.getEmail(),
+                            userExist.getName(),
+                            userExist.getAvatarUrl(),
+                            userExist.getRole().getId(),
+                            userExist.getRoyalty(),
+                            userExist.getTotalMoneySpent(),
+                            userExist.getTotalOrder(),
+                            userExist.getPhone());
+
+                    return ResponseEntity.ok()
+                            .body(ResLoginDTO.builder()
+                                    .user(userLogin)
+                                    .needPin(true)
+                                    .message("Vui lòng nhập mã PIN để hoàn tất đăng nhập")
+                                    .build());
+                }
+            }
+
             ResLoginDTO res = new ResLoginDTO();
-            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
-                    user.getId(),
-                    user.getEmail(),
-                    user.getName(),
-                    user.getAvatarUrl(),
-                    user.getRole().getId(),
-                    user.getRoyalty(),
-                    user.getTotalMoneySpent(),
-                    user.getTotalOrder(),
-                    user.getPhone());
-            res.setUser(userLogin);
+            User currentUserDB = this.userService.handleGetUserByUsernameOrEmail(email);
+            if (currentUserDB != null) {
+                ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                        currentUserDB.getId(),
+                        currentUserDB.getEmail(),
+                        currentUserDB.getName(),
+                        currentUserDB.getAvatarUrl(),
+                        currentUserDB.getRole().getId(),
+                        currentUserDB.getRoyalty(),
+                        currentUserDB.getTotalMoneySpent(),
+                        currentUserDB.getTotalOrder(),
+                        currentUserDB.getPhone());
+                res.setUser(userLogin);
+            }
 
-            // Tạo access token sử dụng SecurityUtil
-            String accessToken = securityUtil.createAccessToken(email, userLogin);
-            res.setAccessToken(accessToken);
+            // create access token
+            String access_token = this.securityUtil.createAccessToken(email, res.getUser());
+            res.setAccessToken(access_token);
 
-            // Tạo refresh token
-            String refreshToken = securityUtil.createRefreshToken(email, res);
-            userService.updateUserToken(refreshToken, email);
+            // create refresh token
+            String refresh_token = this.securityUtil.createRefreshToken(email, res);
 
-            // Set refresh token cookie
+            // update user
+            this.userService.updateUserToken(refresh_token, email);
+
+            // set cookies
             ResponseCookie resCookies = ResponseCookie
-                    .from("refresh_token", refreshToken)
+                    .from("refresh_token", refresh_token)
                     .httpOnly(true)
                     .secure(true)
                     .path("/")
@@ -364,14 +446,14 @@ public class AuthController {
                     .header(HttpHeaders.SET_COOKIE, resCookies.toString())
                     .body(res);
 
-        } catch (Exception e) {
-            throw new IdInvalidException("Invalid Google token");
+        } catch (Exception ex) {
+            throw new IdInvalidException("Lỗi đăng nhập với Google: " + ex.getMessage());
         }
     }
 
-    // Thêm request DTO
     public static class GoogleLoginRequest {
         private String token;
+        private String pin;
 
         public String getToken() {
             return token;
@@ -379,6 +461,14 @@ public class AuthController {
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public String getPin() {
+            return pin;
+        }
+
+        public void setPin(String pin) {
+            this.pin = pin;
         }
     }
 
@@ -444,6 +534,148 @@ public class AuthController {
         tokenRepository.delete(tokenOpt.get()); // Xóa token sau khi sử dụng
 
         return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
+    }
+
+    @PostMapping("/auth/set-pin")
+    @ApiMessage("Set or update PIN for admin users")
+    public ResponseEntity<?> setPin(@RequestBody SetPinRequest request) {
+        try {
+            // Get current user
+            String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                    ? SecurityUtil.getCurrentUserLogin().get()
+                    : "";
+
+            if (email.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Không thể xác thực người dùng");
+            }
+
+            User currentUser = userService.handleGetUserByUsernameOrEmail(email);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Không tìm thấy người dùng");
+            }
+
+            // Validate if user has role_id 1
+            if (currentUser.getRole() == null || currentUser.getRole().getId() != 1) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Chỉ tài khoản admin mới cần PIN");
+            }
+
+            // Validate PIN format
+            if (request.getPin() == null || request.getPin().length() != 6 || !request.getPin().matches("^\\d{6}$")) {
+                return ResponseEntity.badRequest()
+                        .body("PIN phải có đúng 6 chữ số");
+            }
+
+            // Update PIN
+            userService.updateUserPin(request.getPin(), currentUser.getId());
+
+            return ResponseEntity.ok("PIN đã được cập nhật thành công");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi cập nhật PIN: " + ex.getMessage());
+        }
+    }
+
+    public static class SetPinRequest {
+        private String pin;
+
+        public String getPin() {
+            return pin;
+        }
+
+        public void setPin(String pin) {
+            this.pin = pin;
+        }
+    }
+
+    @GetMapping("/auth/get-default-pin")
+    @ApiMessage("Get default PIN for admin users who don't have one")
+    public ResponseEntity<?> getDefaultPin() {
+        try {
+            // Get current user
+            String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                    ? SecurityUtil.getCurrentUserLogin().get()
+                    : "";
+
+            if (email.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Không thể xác thực người dùng");
+            }
+
+            User currentUser = userService.handleGetUserByUsernameOrEmail(email);
+            if (currentUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Không tìm thấy người dùng");
+            }
+
+            // Validate if user has role_id 1
+            if (currentUser.getRole() == null || currentUser.getRole().getId() != 1) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Chỉ tài khoản admin mới cần PIN");
+            }
+
+            // If user doesn't have a PIN yet or PIN verification fails, generate a default
+            // one
+            if (currentUser.getPin() == null || currentUser.getPin().isEmpty()) {
+                String defaultPin = "123456"; // Default PIN for admins
+                userService.updateUserPin(defaultPin, currentUser.getId());
+
+                return ResponseEntity.ok("Mã PIN mặc định đã được thiết lập: " + defaultPin);
+            }
+
+            return ResponseEntity.ok("Bạn đã có mã PIN. Vui lòng sử dụng 'Cập nhật PIN' nếu muốn đổi PIN.");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi lấy PIN mặc định: " + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/auth/migrate-pins")
+    @ApiMessage("Migrate all unencrypted PINs to encrypted version")
+    public ResponseEntity<?> migratePins() {
+        try {
+            // Get current user to verify admin status
+            String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                    ? SecurityUtil.getCurrentUserLogin().get()
+                    : "";
+
+            if (email.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Không thể xác thực người dùng");
+            }
+
+            User currentUser = userService.handleGetUserByUsernameOrEmail(email);
+            if (currentUser == null || currentUser.getRole() == null || currentUser.getRole().getId() != 1) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Chỉ tài khoản admin mới có quyền thực hiện thao tác này");
+            }
+
+            // Find all admin users
+            List<User> adminUsers = userService.findAllAdminUsers();
+            int updatedCount = 0;
+
+            for (User user : adminUsers) {
+                // Check if PIN seems to be unencrypted (plain "123456" or other short string)
+                if (user.getPin() != null &&
+                        (user.getPin().equals("123456") ||
+                                (user.getPin().length() < 20 && !user.getPin().startsWith("$2a$")))) {
+
+                    // Store the original PIN
+                    String originalPin = user.getPin();
+
+                    // Update PIN with encrypted version
+                    userService.updateUserPin(originalPin, user.getId());
+                    updatedCount++;
+                }
+            }
+
+            return ResponseEntity.ok(String.format("Đã mã hóa %d PIN trong database", updatedCount));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi khi mã hóa PINs: " + ex.getMessage());
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-import { Badge, Descriptions, Divider, Drawer, Modal, Upload, Typography, Tag } from "antd";
+import { Badge, Descriptions, Divider, Drawer, Modal, Upload, Typography, Tag, Button, Image, Skeleton } from "antd";
 import moment from 'moment';
 import { FORMAT_DATE_DISPLAY } from "../../../utils/constant";
 //FORMAT_DATE_DISPLAY = 'DD-MM-YYYY HH:mm:ss'
@@ -10,54 +10,35 @@ const { Title, Text } = Typography;
 
 const FoodViewDetail = (props) => {
     const { openViewDetail, setOpenViewDetail, dataViewDetail, setDataViewDetail } = props;
+    const [visible, setVisible] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [displayData, setDisplayData] = useState(null);
+
     const onClose = () => {
         setOpenViewDetail(false);
         setDataViewDetail(null);
-    }
-
-    const [previewOpen, setPreviewOpen] = useState(false);
-    const [previewImage, setPreviewImage] = useState('');
-    const [previewTitle, setPreviewTitle] = useState('');
-
-    const [fileList, setFileList] = useState([]);
-
-    useEffect(() => {
-        if (dataViewDetail) {
-            let imgThumbnail = {};
-            if (dataViewDetail.image) {
-                imgThumbnail = {
-                    uid: uuidv4(),
-                    name: dataViewDetail.image,
-                    status: 'done',
-                    url: `${import.meta.env.VITE_CLOUDINARY_URL}/food/${dataViewDetail.image}`,
-                }
-            }
-            // if (dataViewDetail.slider && dataViewDetail.slider.length > 0) {
-            //     dataViewDetail.slider.map(item => {
-            //         imgSlider.push({
-            //             uid: uuidv4(),
-            //             name: item,
-            //             status: 'done',
-            //             url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${item}`,
-            //         })
-            //     })
-            // }
-
-            setFileList([imgThumbnail])
-        }
-    }, [dataViewDetail])
-
-    const handleCancel = () => setPreviewOpen(false);
-
-    const handlePreview = async (file) => {
-        setPreviewImage(file.url);
-        setPreviewOpen(true);
-        setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf('/') + 1));
     };
 
-    const handleChange = ({ fileList: newFileList }) => {
-        setFileList(newFileList);
-    }
+    // Update displayData whenever dataViewDetail changes
+    useEffect(() => {
+        if (dataViewDetail) {
+            setDisplayData(dataViewDetail);
+        }
+    }, [dataViewDetail]);
+
+    // Reset modal state when component unmounts or drawer closes
+    useEffect(() => {
+        if (!openViewDetail) {
+            setVisible(false);
+            setPreviewImage('');
+        }
+    }, [openViewDetail]);
+
+    const handlePreview = (image) => {
+        // Set image and open modal in one synchronous operation
+        setPreviewImage(image);
+        setVisible(true);
+    };
 
     return (
         <>
@@ -73,14 +54,14 @@ const FoodViewDetail = (props) => {
                 open={openViewDetail}
                 extra={
                     <div className="drawer-subtitle">
-                        {dataViewDetail &&
-                            <Text type="secondary">Mã món: #{dataViewDetail.id}</Text>
+                        {displayData &&
+                            <Text type="secondary">Mã món: #{displayData.id}</Text>
                         }
                     </div>
                 }
                 className="admin-drawer"
             >
-                {dataViewDetail && (
+                {displayData && (
                     <>
                         <Descriptions
                             title={<Title level={5}>Thông tin món ăn</Title>}
@@ -91,12 +72,12 @@ const FoodViewDetail = (props) => {
                             className="detail-descriptions"
                         >
                             <Descriptions.Item label="Tên món">
-                                <Text strong>{dataViewDetail.name}</Text>
+                                <Text strong>{displayData.name}</Text>
                             </Descriptions.Item>
 
                             <Descriptions.Item label="Danh mục">
                                 <Tag color="#108ee9" style={{ borderRadius: '20px', padding: '2px 12px' }}>
-                                    {dataViewDetail.categoryName}
+                                    {displayData.categoryName}
                                 </Tag>
                             </Descriptions.Item>
 
@@ -106,75 +87,103 @@ const FoodViewDetail = (props) => {
                                     color="#1677ff"
                                     style={{ border: 'none', background: '#e6f4ff', color: '#1677ff', fontSize: '14px', padding: '4px 12px' }}
                                 >
-                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dataViewDetail.price ?? 0)}
+                                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(displayData.price ?? 0)}
                                 </Tag>
                             </Descriptions.Item>
 
-                            {dataViewDetail.shortDesc && (
+                            {displayData.shortDesc && (
                                 <Descriptions.Item label="Mô tả ngắn">
-                                    {dataViewDetail.shortDesc}
+                                    {displayData.shortDesc}
                                 </Descriptions.Item>
                             )}
 
-                            {dataViewDetail.detailDesc && (
+                            {displayData.detailDesc && (
                                 <Descriptions.Item label="Mô tả chi tiết">
-                                    {dataViewDetail.detailDesc}
+                                    {displayData.detailDesc}
                                 </Descriptions.Item>
                             )}
 
-                            {dataViewDetail.quantity !== undefined && (
+                            {displayData.quantity !== undefined && (
                                 <Descriptions.Item label="Số lượng">
-                                    {dataViewDetail.quantity}
+                                    {displayData.quantity}
                                 </Descriptions.Item>
                             )}
 
-                            {dataViewDetail.sold !== undefined && (
+                            {displayData.sold !== undefined && (
                                 <Descriptions.Item label="Đã bán">
-                                    {dataViewDetail.sold}
+                                    {displayData.sold}
                                 </Descriptions.Item>
                             )}
 
-                            {dataViewDetail.createdAt && (
+                            {displayData.createdAt && (
                                 <Descriptions.Item label="Ngày tạo">
-                                    {moment(dataViewDetail.createdAt).format(FORMAT_DATE_DISPLAY)}
+                                    {moment(displayData.createdAt).format(FORMAT_DATE_DISPLAY)}
                                 </Descriptions.Item>
                             )}
 
-                            {dataViewDetail.updatedAt && (
+                            {displayData.updatedAt && (
                                 <Descriptions.Item label="Cập nhật lần cuối">
-                                    {moment(dataViewDetail.updatedAt).format(FORMAT_DATE_DISPLAY)}
+                                    {moment(displayData.updatedAt).format(FORMAT_DATE_DISPLAY)}
                                 </Descriptions.Item>
                             )}
                         </Descriptions>
 
-                        {fileList.length > 0 && (
+                        <Divider orientation="left">Hình ảnh chính</Divider>
+                        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+                            <Image
+                                width={150}
+                                src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${displayData.image}`}
+                                preview={false}
+                                onClick={() => handlePreview(`${import.meta.env.VITE_CLOUDINARY_URL}/food/${displayData.image}`)}
+                                style={{ cursor: 'pointer' }}
+                            />
+                        </div>
+
+                        {displayData.additionalImages && displayData.additionalImages.length > 0 && (
                             <>
-                                <Divider orientation="left">
-                                    <Title level={5} style={{ margin: 0 }}>Hình ảnh món ăn</Title>
-                                </Divider>
-                                <div style={{ marginTop: 20 }}>
-                                    <Upload
-                                        listType="picture-card"
-                                        fileList={fileList}
-                                        onPreview={handlePreview}
-                                        onChange={handleChange}
-                                        showUploadList={{ showRemoveIcon: false }}
-                                    />
+                                <Divider orientation="left">Hình ảnh phụ</Divider>
+                                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+                                    {displayData.additionalImages.map(img => (
+                                        <Image
+                                            key={img.id || uuidv4()}
+                                            width={150}
+                                            src={`${import.meta.env.VITE_CLOUDINARY_URL}/food/${img.imageUrl}`}
+                                            preview={false}
+                                            onClick={() => handlePreview(`${import.meta.env.VITE_CLOUDINARY_URL}/food/${img.imageUrl}`)}
+                                            style={{ cursor: 'pointer' }}
+                                        />
+                                    ))}
                                 </div>
                             </>
                         )}
-
-                        <Modal
-                            open={previewOpen}
-                            title={previewTitle}
-                            footer={null}
-                            onCancel={handleCancel}
-                        >
-                            <img alt="preview" style={{ width: '100%' }} src={previewImage} />
-                        </Modal>
                     </>
                 )}
             </Drawer>
+
+            {/* Use separate modal for preview */}
+            {visible && (
+                <Modal
+                    open={visible}
+                    footer={null}
+                    closable={true}
+                    onCancel={() => setVisible(false)}
+                    width="auto"
+                    centered
+                    destroyOnClose={true}
+                    afterClose={() => setPreviewImage('')}
+                    bodyStyle={{ padding: 0 }}
+                >
+                    <img
+                        src={previewImage}
+                        alt="Preview"
+                        style={{
+                            maxWidth: '90vw',
+                            maxHeight: '80vh',
+                            display: 'block'
+                        }}
+                    />
+                </Modal>
+            )}
         </>
     )
 }
