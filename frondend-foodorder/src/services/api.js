@@ -323,4 +323,10 @@ export const callRemoveProductImage = (imageId) => {
     return axios.delete(`/api/v1/products/images/${imageId}`);
 };
 
+export const callUpdateProductImages = (productId, imageUrls) => {
+    return axios.put(`/api/v1/products/${productId}/images`, {
+        imageUrls: imageUrls
+    });
+};
+
 

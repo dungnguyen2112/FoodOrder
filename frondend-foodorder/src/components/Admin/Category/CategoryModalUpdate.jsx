@@ -115,11 +115,22 @@ const CategoryModalUpdate = (props) => {
 
     useEffect(() => {
         form.setFieldsValue(dataUpdate)
+
+        // Initialize the image when dataUpdate changes
+        if (dataUpdate && dataUpdate.image) {
+            setDataThumbnail([{
+                name: dataUpdate.image,
+                uid: uuidv4(),
+                status: 'done',
+                url: `${import.meta.env.VITE_CLOUDINARY_URL}/category/${dataUpdate.image}`
+            }]);
+        } else {
+            setDataThumbnail([]);
+        }
     }, [dataUpdate])
 
     return (
         <>
-
             <Modal
                 title="Cập nhật danh mục"
                 open={openModalUpdate}
@@ -127,6 +138,7 @@ const CategoryModalUpdate = (props) => {
                 onCancel={() => {
                     setOpenModalUpdate(false);
                     setDataUpdate(null);
+                    setDataThumbnail([]);
                 }}
                 okText={"Cập nhật"}
                 cancelText={"Hủy"}
@@ -192,11 +204,14 @@ const CategoryModalUpdate = (props) => {
                             onChange={handleChange}
                             onRemove={(file) => handleRemoveFile(file)}
                             onPreview={handlePreview}
+                            fileList={dataThumbnail}
                         >
-                            <div>
-                                {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
-                                <div style={{ marginTop: 8 }}>Upload</div>
-                            </div>
+                            {dataThumbnail.length >= 1 ? null : (
+                                <div>
+                                    {loadingUpload ? <LoadingOutlined /> : <PlusOutlined />}
+                                    <div style={{ marginTop: 8 }}>Upload</div>
+                                </div>
+                            )}
                         </Upload>
 
                     </Form.Item>

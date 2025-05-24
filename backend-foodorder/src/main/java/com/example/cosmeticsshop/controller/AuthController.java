@@ -37,6 +37,7 @@ import com.example.cosmeticsshop.repository.PasswordResetTokenRepository;
 import com.example.cosmeticsshop.repository.UserRepository;
 import com.example.cosmeticsshop.service.EmailService;
 import com.example.cosmeticsshop.service.UserService;
+import com.example.cosmeticsshop.service.redis.JwtRedisService;
 import com.example.cosmeticsshop.util.SecurityUtil;
 import com.example.cosmeticsshop.util.annotation.ApiMessage;
 import com.example.cosmeticsshop.util.error.IdInvalidException;
@@ -61,6 +62,7 @@ public class AuthController {
     private final EmailService emailService;
     private final PasswordResetTokenRepository tokenRepository;
     private final UserRepository userRepository;
+    private final JwtRedisService jwtRedisService;
 
     @Value("${btljava.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
@@ -68,7 +70,8 @@ public class AuthController {
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
             SecurityUtil securityUtil, UserService userService, PasswordEncoder passwordEncoder,
             GoogleIdTokenVerifier googleIdTokenVerifier, EmailService emailService,
-            PasswordResetTokenRepository tokenRepository, UserRepository userRepository) {
+            PasswordResetTokenRepository tokenRepository, UserRepository userRepository,
+            JwtRedisService jwtRedisService) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
@@ -77,6 +80,7 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
         this.googleIdTokenVerifier = googleIdTokenVerifier;
         this.emailService = emailService;
+        this.jwtRedisService = jwtRedisService;
     }
 
     @PostMapping("/auth/login")
@@ -144,6 +148,7 @@ public class AuthController {
                     currentUserDB.getTotalOrder(),
                     currentUserDB.getPhone());
             res.setUser(userLogin);
+
         }
 
         // create access token
@@ -155,7 +160,7 @@ public class AuthController {
 
         // update user
         this.userService.updateUserToken(refresh_token, loginDto.getUsername());
-
+        this.jwtRedisService.setNewRefreshToken(loginDto.getUsername(), refresh_token);
         // set cookies
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh_token", refresh_token)
@@ -235,7 +240,12 @@ public class AuthController {
             throw new IdInvalidException("Bạn không có refresh token ở cookie");
         }
         // check valid
-        Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
+        String username = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        Jwt decodedToken = this.jwtRedisService.isRefreshTokenValid(username, refresh_token)
+                ? this.securityUtil.checkValidRefreshToken(refresh_token)
+                : null;
         String email = decodedToken.getSubject();
 
         // check user by token + email
@@ -268,6 +278,7 @@ public class AuthController {
         // create refresh token
         String new_refresh_token = this.securityUtil.createRefreshToken(email, res);
 
+        this.jwtRedisService.setNewRefreshToken(email, new_refresh_token);
         // update user
         this.userService.updateUserToken(new_refresh_token, email);
 
@@ -296,6 +307,8 @@ public class AuthController {
 
         // update refresh token = null
         this.userService.updateUserToken(null, email);
+
+        this.jwtRedisService.deleteRefreshToken(email);
 
         // remove refresh token cookie
         ResponseCookie deleteSpringCookie = ResponseCookie
@@ -430,6 +443,8 @@ public class AuthController {
             // create refresh token
             String refresh_token = this.securityUtil.createRefreshToken(email, res);
 
+            String username = userExist.getUsername();
+            this.jwtRedisService.setNewRefreshToken(username, refresh_token);
             // update user
             this.userService.updateUserToken(refresh_token, email);
 
@@ -511,7 +526,7 @@ public class AuthController {
             userService.savePasswordResetToken(user, token);
 
             // Tạo link đặt lại mật khẩu
-            String resetLink = "http://localhost:3000/reset-password?token=" + token;
+            String resetLink = "https://localhost:3000/reset-password?token=" + token;
 
             // Gửi email
             emailService.sendResetPasswordEmail(email, user.getName(), resetLink);

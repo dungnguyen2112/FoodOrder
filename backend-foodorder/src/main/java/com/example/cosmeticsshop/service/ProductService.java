@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.cosmeticsshop.domain.Category;
 import com.example.cosmeticsshop.domain.Product;
@@ -236,21 +237,60 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // Thêm phương thức để lưu hình ảnh phụ cho sản phẩm
+    @Transactional
     public void addProductImages(Long productId, List<String> imageUrls) {
         Product product = this.fetchProductById1(productId);
         if (product != null) {
             int order = product.getImages().size(); // Bắt đầu với số thứ tự tiếp theo
             for (String imageUrl : imageUrls) {
-                product.addImage(imageUrl, product.getName(), order++);
+                ProductImage image = new ProductImage(imageUrl, product.getName(), order++, product);
+                product.getImages().add(image);
             }
             productRepository.save(product);
         }
     }
 
-    // Xóa tất cả hình ảnh phụ của sản phẩm
+    @Transactional
+    public void updateProductImages(Long productId, List<String> imageUrls) {
+        Product product = this.fetchProductById1(productId);
+        if (product != null) {
+            // Get existing images
+            List<ProductImage> existingImages = product.getImages();
+
+            // Update existing images with new URLs
+            for (int i = 0; i < Math.min(existingImages.size(), imageUrls.size()); i++) {
+                ProductImage existingImage = existingImages.get(i);
+                existingImage.setImageUrl(imageUrls.get(i));
+            }
+
+            // If we have more new URLs than existing images, add new ones
+            if (imageUrls.size() > existingImages.size()) {
+                for (int i = existingImages.size(); i < imageUrls.size(); i++) {
+                    ProductImage newImage = new ProductImage(imageUrls.get(i), product.getName(), i, product);
+                    existingImages.add(newImage);
+                }
+            }
+            // If we have fewer new URLs than existing images, remove the extra ones
+            else if (imageUrls.size() < existingImages.size()) {
+                existingImages.subList(imageUrls.size(), existingImages.size()).clear();
+            }
+
+            // Save the product with its updated images
+            productRepository.save(product);
+        }
+    }
+
+    @Transactional
     public void removeAllProductImages(Long productId) {
-        productImageRepository.deleteByProductId(productId);
+        Product product = this.fetchProductById1(productId);
+        if (product != null) {
+            // Clear the images collection
+            product.getImages().clear();
+            // Save the product to persist the changes
+            productRepository.save(product);
+            // Delete from repository
+            productImageRepository.deleteByProductId(productId);
+        }
     }
 
     // Xóa một hình ảnh phụ cụ thể

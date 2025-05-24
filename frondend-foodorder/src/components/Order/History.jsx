@@ -17,7 +17,16 @@ const History = () => {
                 setLoading(true);
                 const res = await callOrderHistory();
                 if (res && res.data) {
-                    setOrderHistory(res.data);
+                    // Sort histories by timestamp in descending order
+                    const sortedData = res.data
+                        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                        .map(history => ({
+                            ...history,
+                            orders: history.orders.sort((a, b) =>
+                                new Date(b.createdAt) - new Date(a.createdAt)
+                            )
+                        }));
+                    setOrderHistory(sortedData);
                 }
             } catch (error) {
                 console.error("Lỗi khi tải lịch sử đơn hàng:", error);

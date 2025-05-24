@@ -14,23 +14,46 @@ const ResetPassword = () => {
         if (!token) {
             message.error('Token không hợp lệ!');
             navigate('/login');
+        } else {
+            console.log("Token received:", token.substring(0, 10) + "...");
         }
     }, [token, navigate]);
 
     const onFinish = async (values) => {
+        console.log("Submitting with token:", token.substring(0, 10) + "...");
         setIsSubmitting(true);
-        const res = await callResetPassword(token, values.newPassword);
-        setIsSubmitting(false);
 
-        if (res) {
-            message.success('Đặt lại mật khẩu thành công! Hãy đăng nhập.');
-            navigate('/login');
-        } else {
+        try {
+            const res = await callResetPassword(token, values.newPassword);
+            console.log("API Response:", res);
+
+            if (res === 'Đặt lại mật khẩu thành công!') {
+                message.success('Đặt lại mật khẩu thành công! Hãy đăng nhập.');
+                navigate('/login');
+            } else {
+                notification.error({
+                    message: 'Lỗi',
+                    description: res?.message || 'Không thể đặt lại mật khẩu!',
+                    duration: 5,
+                });
+            }
+        } catch (error) {
+            console.error("Reset password error:", error);
+
+            const errorMsg = error.response?.data || 'Token không hợp lệ hoặc đã hết hạn!';
             notification.error({
-                message: 'Lỗi',
-                description: res.message || 'Không thể đặt lại mật khẩu!',
+                message: 'Lỗi xác thực',
+                description: errorMsg,
                 duration: 5,
             });
+
+            // Redirect to login after a delay
+            setTimeout(() => {
+                message.info('Chuyển hướng về trang đăng nhập...');
+                navigate('/login');
+            }, 3000);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -40,18 +63,43 @@ const ResetPassword = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundAttachment: 'fixed',
+            width: '100%',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
         }}>
-            <h2>Đặt lại mật khẩu</h2>
-            <Form onFinish={onFinish}>
-                <Form.Item label="Mật khẩu mới" name="newPassword" rules={[{ required: true, message: 'Nhập mật khẩu mới!' }]}>
-                    <Input.Password />
-                </Form.Item>
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" loading={isSubmitting}>
-                        Xác nhận
-                    </Button>
-                </Form.Item>
-            </Form>
+            <div className="form-container">
+                <h2>Đặt lại mật khẩu</h2>
+                <Form
+                    name="reset-password-form"
+                    onFinish={onFinish}
+                    layout="vertical"
+                    size="large"
+                >
+                    <Form.Item
+                        label="Mật khẩu mới"
+                        name="newPassword"
+                        rules={[
+                            { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+                            { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+                        ]}
+                    >
+                        <Input.Password placeholder="Nhập mật khẩu mới của bạn" />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            loading={isSubmitting}
+                            block
+                        >
+                            Xác nhận
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </div>
         </div>
     );
 };

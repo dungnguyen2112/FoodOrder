@@ -127,7 +127,7 @@ public class PaymentController {
             String calculatedHash = vnPayService.hmacSHA512(vnPayService.getSecretKey(), hashData.toString());
             if (!calculatedHash.equalsIgnoreCase(receivedHash)) {
                 // Invalid signature
-                return new RedirectView("http://localhost:3000/payment-failed?error=Invalid%20signature");
+                return new RedirectView("https://localhost:3000/payment-failed?error=Invalid%20signature");
             }
 
             // Continue processing if signature valid
@@ -157,7 +157,7 @@ public class PaymentController {
             System.out.println("===================================");
 
             // Frontend URL for redirection
-            String frontendBaseUrl = "http://localhost:3000";
+            String frontendBaseUrl = "https://localhost:3000";
             String callbackUrl = frontendBaseUrl + "/payment/callback";
 
             // Find and update order if needed
@@ -208,7 +208,7 @@ public class PaymentController {
         } catch (Exception e) {
             System.err.println("Error processing VNPay return: " + e.getMessage());
             e.printStackTrace();
-            return new RedirectView("http://localhost:3000/payment-failed?error=" + e.getMessage());
+            return new RedirectView("https://localhost:3000/payment-failed?error=" + e.getMessage());
         }
     }
 
@@ -591,11 +591,11 @@ public class PaymentController {
             }
 
             // Fallback to frontend if order not found
-            return new RedirectView("http://localhost:3000/payment-failed?error=Order not found");
+            return new RedirectView("https://localhost:3000/payment-failed?error=Order not found");
         } catch (Exception e) {
             System.err.println("Error in direct VNPay redirect: " + e.getMessage());
             e.printStackTrace();
-            return new RedirectView("http://localhost:3000/payment-failed?error=" + e.getMessage());
+            return new RedirectView("https://localhost:3000/payment-failed?error=" + e.getMessage());
         }
     }
 
@@ -626,7 +626,7 @@ public class PaymentController {
 
             if (order == null) {
                 System.err.println("Order not found for ID: " + orderId);
-                return new RedirectView("http://localhost:3000/payment-failed?error=Order%20not%20found");
+                return new RedirectView("https://localhost:3000/payment-failed?error=Order%20not%20found");
             }
 
             // Process IP address
@@ -646,7 +646,7 @@ public class PaymentController {
         } catch (Exception e) {
             System.err.println("Error in direct VNPay payment: " + e.getMessage());
             e.printStackTrace();
-            return new RedirectView("http://localhost:3000/payment-failed?error=" + e.getMessage());
+            return new RedirectView("https://localhost:3000/payment-failed?error=" + e.getMessage());
         }
     }
 

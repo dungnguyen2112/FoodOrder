@@ -68,7 +68,7 @@ const CategoryDetail = () => {
 
         if (isAuthenticated || localAuth) {
             dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
-            message.success(`Đã thêm sản phẩm vào giỏ hàng`);
+            message.success('Đã thêm vào giỏ hàng');
         } else {
             message.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
             // Optionally redirect to login page
