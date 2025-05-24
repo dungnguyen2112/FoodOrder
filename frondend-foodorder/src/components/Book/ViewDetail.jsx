@@ -1,14 +1,15 @@
-import { Row, Col, Rate, Divider, Button, Breadcrumb, Skeleton, Tag, Tooltip, Badge, message, Card } from 'antd';
+import { Row, Col, Rate, Divider, Button, Breadcrumb, Skeleton, Tag, Tooltip, Badge, message, Card, Popover } from 'antd';
 import './book.scss';
 import ImageGallery from 'react-image-gallery';
 import { useRef, useState, useEffect, useMemo } from 'react';
 import ModalGallery from './ModalGallery';
-import { MinusOutlined, PlusOutlined, HomeOutlined, ShoppingCartOutlined, ThunderboltOutlined, HeartOutlined, ShareAltOutlined, SafetyCertificateOutlined, HeartFilled, LeftOutlined, RightOutlined, FireOutlined } from '@ant-design/icons';
+import { MinusOutlined, PlusOutlined, HomeOutlined, ShoppingCartOutlined, ThunderboltOutlined, HeartOutlined, ShareAltOutlined, SafetyCertificateOutlined, HeartFilled, LeftOutlined, RightOutlined, FireOutlined, CopyOutlined, FacebookOutlined } from '@ant-design/icons';
 import { BsCartPlus } from 'react-icons/bs';
+import { FaTwitter } from 'react-icons/fa';
 import BookLoader from './BookLoader';
 import { useDispatch, useSelector } from 'react-redux';
 import { doAddBookAction } from '../../redux/order/orderSlice';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { addToWishlist, getWishlist, removeFromWishlist, callGetTopSellingProducts } from '../../services/api';
 import { doBuyNowAction } from '../../redux/order/buyNowSlice';
 
@@ -21,6 +22,7 @@ const ViewDetail = (props) => {
     const [topSellingProducts, setTopSellingProducts] = useState([]);
     const [loadingRecommended, setLoadingRecommended] = useState(true);
     const refGallery = useRef(null);
+    const location = useLocation();
     const images = useMemo(() => {
         if (!dataBook || !dataBook.image) return [];
 
@@ -191,7 +193,7 @@ const ViewDetail = (props) => {
 
         if (isAuthenticated || localAuth) {
             dispatch(doAddBookAction({ quantity, detail: book, id: book.id }));
-            message.success(`Đã thêm ${quantity} ${book.name} vào giỏ hàng`);
+            message.success('Đã thêm vào giỏ hàng');
         } else {
             message.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
             // Optionally redirect to login page
@@ -204,6 +206,74 @@ const ViewDetail = (props) => {
         dispatch(doBuyNowAction({ quantity, detail: book, id: book.id }));
         navigate('/payment');
     };
+
+    // Add social sharing functions
+    const handleCopyLink = () => {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                message.success('Đã sao chép liên kết');
+            })
+            .catch(() => {
+                message.error('Không thể sao chép liên kết');
+            });
+    };
+
+    const handleShareFacebook = () => {
+        const url = encodeURIComponent(window.location.href);
+        const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        window.open(facebookShareUrl, '_blank', 'width=600,height=400');
+    };
+
+    const handleShareTwitter = () => {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent(`Xem món "${dataBook?.name}" tại Food Order!`);
+        const twitterShareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        window.open(twitterShareUrl, '_blank', 'width=600,height=400');
+    };
+
+    const shareContent = (
+        <div style={{ width: '200px' }}>
+            <Button
+                icon={<CopyOutlined />}
+                onClick={handleCopyLink}
+                style={{
+                    width: '100%',
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start'
+                }}
+            >
+                Sao chép liên kết
+            </Button>
+            <Button
+                icon={<FacebookOutlined style={{ color: '#1877F2' }} />}
+                onClick={handleShareFacebook}
+                style={{
+                    width: '100%',
+                    marginBottom: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start'
+                }}
+            >
+                Chia sẻ Facebook
+            </Button>
+            <Button
+                icon={<FaTwitter style={{ color: '#1DA1F2' }} />}
+                onClick={handleShareTwitter}
+                style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'flex-start'
+                }}
+            >
+                Chia sẻ Twitter
+            </Button>
+        </div>
+    );
 
     return (
         <div style={{
@@ -370,7 +440,12 @@ const ViewDetail = (props) => {
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                             {/* Chia sẻ */}
-                                            <Tooltip title="Chia sẻ">
+                                            <Popover
+                                                content={shareContent}
+                                                title="Chia sẻ món ăn"
+                                                trigger="click"
+                                                placement="bottom"
+                                            >
                                                 <Button
                                                     shape="circle"
                                                     icon={<ShareAltOutlined />}
@@ -395,7 +470,7 @@ const ViewDetail = (props) => {
                                                         e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)";
                                                     }}
                                                 />
-                                            </Tooltip>
+                                            </Popover>
 
                                             {/* Yêu thích */}
                                             <Tooltip title={isInWishlist ? "Bỏ yêu thích" : "Yêu thích"}>

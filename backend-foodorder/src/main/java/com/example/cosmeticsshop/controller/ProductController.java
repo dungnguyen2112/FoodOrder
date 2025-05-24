@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -255,6 +256,44 @@ public class ProductController {
             response.put("status", "error");
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @PutMapping("/products/{id}/images")
+    @ApiMessage("Update additional images of a product")
+    public ResponseEntity<ResProductDTO> updateProductImages(
+            @PathVariable("id") long id,
+            @RequestBody Map<String, List<String>> payload) {
+        try {
+            List<String> imageUrls = payload.get("imageUrls");
+            if (imageUrls == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Product currentProduct = this.productService.fetchProductById1(id);
+            if (currentProduct == null) {
+                throw new IdInvalidException("Product " + id + " không tồn tại.");
+            }
+
+            // Remove any duplicate URLs
+            List<String> uniqueImageUrls = imageUrls.stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            // Update images using the new method
+            this.productService.updateProductImages(id, uniqueImageUrls);
+
+            // Fetch the updated product
+            ResProductDTO updatedProduct = this.productService.fetchProductById(id);
+            if (updatedProduct == null) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            return ResponseEntity.ok(updatedProduct);
+        } catch (IdInvalidException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

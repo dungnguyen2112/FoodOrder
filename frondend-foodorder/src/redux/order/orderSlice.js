@@ -32,7 +32,7 @@ export const orderSlice = createSlice({
             }
             //update redux
             state.carts = carts;
-            message.success("Sản phẩm đã được thêm vào Giỏ hàng")
+            // message.success("Sản phẩm đã được thêm vào Giỏ hàng")
         },
 
         doUpdateCartAction: (state, action) => {

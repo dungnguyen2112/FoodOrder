@@ -5,11 +5,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +27,10 @@ import org.springframework.stereotype.Service;
 
 import com.example.cosmeticsshop.domain.response.ResLoginDTO;
 import com.nimbusds.jose.util.Base64;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
 
 @Service
 public class SecurityUtil {
@@ -55,6 +61,9 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
+        // Generate a unique token ID for tracking in Redis
+        String tokenId = UUID.randomUUID().toString();
+
         // hardcode permission (for testing)
         List<String> listAuthority = new ArrayList<String>();
 
@@ -63,6 +72,7 @@ public class SecurityUtil {
 
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
+            .id(tokenId)  // Add token ID for Redis tracking
             .issuedAt(now)
             .expiresAt(validity)
             .subject(email)
@@ -80,6 +90,9 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
 
+        // Generate a unique token ID for tracking in Redis
+        String tokenId = UUID.randomUUID().toString();
+
         ResLoginDTO.UserInsideToken userToken = new ResLoginDTO.UserInsideToken();
         userToken.setId(dto.getUser().getId());
         userToken.setEmail(dto.getUser().getEmail());
@@ -87,6 +100,7 @@ public class SecurityUtil {
 
         // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
+            .id(tokenId)  // Add token ID for Redis tracking
             .issuedAt(now)
             .expiresAt(validity)
             .subject(email)
@@ -107,8 +121,8 @@ public class SecurityUtil {
     public Jwt checkValidRefreshToken(String token){
      NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
-                try {
-                     return jwtDecoder.decode(token);
+                try { 
+                    return jwtDecoder.decode(token);
                 } catch (Exception e) {
                     System.out.println(">>> Refresh Token error: " + e.getMessage());
                     throw e;
@@ -148,6 +162,52 @@ public class SecurityUtil {
         return Optional.ofNullable(securityContext.getAuthentication())
             .filter(authentication -> authentication.getCredentials() instanceof String)
             .map(authentication -> (String) authentication.getCredentials());
+    }
+
+    public String getTokenId(String token) {
+        try {
+            NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
+                    getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
+            Jwt jwt = jwtDecoder.decode(token);
+            return jwt.getId();
+        } catch (Exception e) {
+            // Log and handle error but don't throw - just return null for invalid tokens
+            System.out.println(">>> Token ID extraction error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public long getTokenExpiryTime(String token) {
+        try {
+            NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
+                    getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
+            Jwt jwt = jwtDecoder.decode(token);
+            Instant expiry = jwt.getExpiresAt();
+            if (expiry != null) {
+                return ChronoUnit.SECONDS.between(Instant.now(), expiry);
+            }
+            return 0;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            checkValidRefreshToken(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Authentication getAuthentication(String token) {
+         try{
+            Jwt jwt = checkValidRefreshToken(token);
+            return new UsernamePasswordAuthenticationToken(jwt.getSubject(), null, new ArrayList<>());
+         } catch (Exception e) {
+            return null;
+         }
     }
 
     /**

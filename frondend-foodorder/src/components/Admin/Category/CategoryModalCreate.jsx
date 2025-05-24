@@ -112,7 +112,7 @@ const CategoryModalCreate = (props) => {
         <>
 
             <Modal
-                title="Thêm mới food"
+                title="Thêm mới danh mục"
                 open={openModalCreate}
                 onOk={() => { form.submit() }}
                 onCancel={() => {
