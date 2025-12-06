@@ -4,8 +4,6 @@
 > **A powerful, modern, and scalable system for managing restaurant orders, customers, and payments.**  
 ---
 
-Link: https://foodorder-fe-three.vercel.app
-
 ## 📌 **Overview**  
 
 The **Food Ordering System** is a complete digital solution designed to **streamline the restaurant ordering process**, enhance customer experience, and **optimize business operations**.  
